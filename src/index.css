@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-display: swap;
+    font-weight: 200;
+    src: url(./assets/fonts/inter/Inter-ExtraLight.ttf);
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-display: swap;
+    font-weight: 300;
+    src: url(./assets/fonts/inter/Inter-Light.ttf);
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src: url(./assets/fonts/inter/Inter-Regular.ttf);
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-display: swap;
+    font-weight: 500;
+    src: url(./assets/fonts/inter/Inter-Medium.ttf);
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-display: swap;
+    font-weight: 600;
+    src: url(./assets/fonts/inter/Inter-SemiBold.ttf);
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-display: swap;
+    font-weight: 700;
+    src: url(./assets/fonts/inter/Inter-Bold.ttf);
+}
+
+@font-face {
+    font-family: Inter;
+    font-style: normal;
+    font-display: swap;
+    font-weight: 800;
+    src: url(./assets/fonts/inter/Inter-ExtraBold.ttf);
+}
+
+@theme {
+    --color-muted: #F7F7F8;
+    --color-cardBorder: #E6E6E9;
+    --color-primaryMain: #5263FF;
+    --color-primaryDark: #000424;
+    --color-primaryLight: rgba(255, 255, 255, 0.08);
+    --color-navbarBorder: #E4E4E4;
+    --color-revenueChip: #E8F5E9;
+    --color-success: #388E3C;
+    --color-lightGray: #C9C9CC;
+    --color-darkGray: #FFFFFF1F;
+    --shadow-card: 0px 1px 3px 0px rgba(0, 0, 0, 0.12),
+        0px 23px 44px 0px rgba(176, 183, 195, 0.14);
+    --shadow-statusChip: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    --shadow-sideBar: 0px 4px 14px 6px rgba(247, 247, 247, 0.60);
+    --color-radial-gradient: radial-gradient(35.29% 163199.99% at 50% 50%, #2f3142 0%, rgba(151, 151, 151, 0) 100%)
+}
+
+body {
+    font-family: Inter;
+    font-weight: 500;
+    font-style: normal;
+}

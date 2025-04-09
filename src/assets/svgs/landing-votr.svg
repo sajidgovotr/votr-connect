@@ -1,0 +1,63 @@
+<svg width="1440" height="1024" viewBox="0 0 1440 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_298)">
+<rect width="1440" height="1024" fill="#000424"/>
+<g opacity="0.6" filter="url(#filter0_f_6_298)">
+<ellipse cx="736.561" cy="538.047" rx="256.544" ry="195" transform="rotate(7.05842 736.561 538.047)" fill="#99A3FF"/>
+</g>
+<g filter="url(#filter1_f_6_298)">
+<circle cx="1089.21" cy="760.207" r="199.207" fill="#00C0FF" fill-opacity="0.15"/>
+</g>
+<g opacity="0.5">
+<g opacity="0.1">
+<line x1="369.268" y1="174" x2="369.268" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="448.123" y1="174" x2="448.123" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="526.979" y1="174" x2="526.979" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="605.835" y1="174" x2="605.835" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="684.691" y1="174" x2="684.691" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="763.547" y1="174" x2="763.547" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="842.402" y1="174" x2="842.402" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="921.258" y1="174" x2="921.258" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="1000.11" y1="174" x2="1000.11" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+</g>
+<g opacity="0.1">
+<line x1="1078.97" y1="174" x2="1078.97" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="1157.83" y1="174" x2="1157.83" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="1236.68" y1="174" x2="1236.68" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="1315.54" y1="174" x2="1315.54" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+<line x1="1394.39" y1="174" x2="1394.39" y2="1250.64" stroke="white" stroke-width="0.823752"/>
+</g>
+<g opacity="0.1">
+<line x1="1804.03" y1="239.599" x2="290" y2="239.598" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="791.589" x2="290" y2="791.589" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="318.454" x2="290" y2="318.454" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="870.445" x2="290" y2="870.444" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="397.31" x2="290" y2="397.31" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="949.301" x2="290" y2="949.3" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="476.166" x2="290" y2="476.166" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="555.022" x2="290" y2="555.022" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="633.877" x2="290" y2="633.877" stroke="white" stroke-width="0.823752"/>
+<line x1="1804.03" y1="712.733" x2="290" y2="712.733" stroke="white" stroke-width="0.823752"/>
+</g>
+</g>
+<rect x="306" y="575" width="1445" height="442" fill="url(#paint0_linear_6_298)"/>
+</g>
+<defs>
+<filter id="filter0_f_6_298" x="180.819" y="41.9438" width="1111.48" height="992.206" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="150" result="effect1_foregroundBlur_6_298"/>
+</filter>
+<filter id="filter1_f_6_298" x="663.088" y="334.088" width="852.239" height="852.239" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="113.456" result="effect1_foregroundBlur_6_298"/>
+</filter>
+<linearGradient id="paint0_linear_6_298" x1="1028.5" y1="575" x2="1028.5" y2="1017" gradientUnits="userSpaceOnUse">
+<stop stop-color="#000424" stop-opacity="0"/>
+<stop offset="1" stop-color="#000424"/>
+</linearGradient>
+<clipPath id="clip0_6_298">
+<rect width="1440" height="1024" fill="white"/>
+</clipPath>
+</defs>
+</svg>
