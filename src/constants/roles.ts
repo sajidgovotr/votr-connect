@@ -4,3 +4,10 @@ export enum Roles {
     IntroBroker = "IB",
     TransferAgent = "TA"
 };
+
+export const USERS = [
+    {
+        email: "admin@gmail.com",
+        password: "admin"
+    }
+]

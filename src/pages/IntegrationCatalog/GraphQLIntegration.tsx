@@ -1,12 +1,17 @@
 import { Box, Container, Typography, TextField, Grid, Button, Stepper, Step, StepLabel, Switch, FormControlLabel, Tabs, Tab, TextareaAutosize, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { ArrowBack } from '@mui/icons-material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 const steps = ['Basic Info', 'Schema Design', 'Security', 'Review'];
 
-const BasicInfo = () => (
+interface BasicInfoProps {
+    selectedEnvironment: string;
+    onEnvironmentChange: (env: string) => void;
+}
+
+const BasicInfo = ({ selectedEnvironment, onEnvironmentChange }: BasicInfoProps) => (
     <Box>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
             Configure GraphQL Integration
@@ -23,6 +28,20 @@ const BasicInfo = () => (
                     defaultValue="GraphQL Financial Data API"
                     sx={{ mb: 2 }}
                 />
+            </Grid>
+            <Grid item xs={12} md={6}>
+                <TextField
+                    fullWidth
+                    select
+                    label="Environment"
+                    value={selectedEnvironment}
+                    onChange={(e) => onEnvironmentChange(e.target.value)}
+                    required
+                >
+                    <MenuItem value="dev">Development</MenuItem>
+                    <MenuItem value="staging">Staging</MenuItem>
+                    <MenuItem value="prod">Production</MenuItem>
+                </TextField>
             </Grid>
             <Grid item xs={12}>
                 <TextField
@@ -204,7 +223,7 @@ const Security = () => (
     </Box>
 );
 
-const Review = () => (
+const Review = ({ setActiveStep, selectedEnvironment }: { setActiveStep: (step: number) => void, selectedEnvironment: string }) => (
     <Box>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
             Review and Finalize Your Integration Configuration
@@ -220,9 +239,12 @@ const Review = () => (
                 Name: GraphQL Financial Data API
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
+                Environment: {selectedEnvironment.charAt(0).toUpperCase() + selectedEnvironment.slice(1)}
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>
                 Endpoint: https://api.yourplatform.com/graphql
             </Typography>
-            <Button variant="outlined" sx={{ mt: 1 }}>Edit</Button>
+            <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setActiveStep(0)}>Edit</Button>
         </Box>
         <Box sx={{ mb: 3, p: 2, border: '1px solid #E5E7EB', borderRadius: 1, bgcolor: '#F9FAFB' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
@@ -234,7 +256,7 @@ const Review = () => (
             <Typography variant="body2" sx={{ mb: 1 }}>
                 Queries: shareholders
             </Typography>
-            <Button variant="outlined" sx={{ mt: 1 }}>Edit</Button>
+            <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setActiveStep(1)}>Edit</Button>
         </Box>
         <Box sx={{ mb: 3, p: 2, border: '1px solid #E5E7EB', borderRadius: 1, bgcolor: '#F9FAFB' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
@@ -246,27 +268,44 @@ const Review = () => (
             <Typography variant="body2" sx={{ mb: 1 }}>
                 Query Limits: Depth 5, Cost 1000, Rate 100/min
             </Typography>
-            <Button variant="outlined" sx={{ mt: 1 }}>Edit</Button>
+            <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setActiveStep(2)}>Edit</Button>
         </Box>
     </Box>
 );
 
 const GraphQLIntegration = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [activeStep, setActiveStep] = useState(0);
+    const [selectedEnvironment, setSelectedEnvironment] = useState('dev');
+
+    useEffect(() => {
+        // Get environment from URL query params
+        const params = new URLSearchParams(location.search);
+        const envFromParams = params.get('environment');
+        if (envFromParams && ['dev', 'staging', 'prod'].includes(envFromParams)) {
+            setSelectedEnvironment(envFromParams);
+        }
+    }, [location]);
 
     const renderStepContent = (step: number) => {
         switch (step) {
             case 0:
-                return <BasicInfo />;
+                return <BasicInfo
+                    selectedEnvironment={selectedEnvironment}
+                    onEnvironmentChange={setSelectedEnvironment}
+                />;
             case 1:
                 return <SchemaDesign />;
             case 2:
                 return <Security />;
             case 3:
-                return <Review />;
+                return <Review setActiveStep={setActiveStep} selectedEnvironment={selectedEnvironment} />;
             default:
-                return <BasicInfo />;
+                return <BasicInfo
+                    selectedEnvironment={selectedEnvironment}
+                    onEnvironmentChange={setSelectedEnvironment}
+                />;
         }
     };
 
@@ -296,8 +335,21 @@ const GraphQLIntegration = () => {
                 <Box sx={{ p: 4, borderRadius: 2, border: '1px solid #E5E7EB', bgcolor: '#FFFFFF', boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.05)' }}>
                     {renderStepContent(activeStep)}
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-                        <Button variant="outlined" sx={{ mr: 2 }} onClick={() => setActiveStep((prev) => Math.max(prev - 1, 0))}>Previous</Button>
-                        <Button variant="contained" color="primary" onClick={() => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1))}>Next</Button>
+                        <Button
+                            variant="outlined"
+                            sx={{ mr: 2 }}
+                            onClick={() => setActiveStep((prev) => Math.max(prev - 1, 0))}
+                            disabled={activeStep === 0}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1))}
+                        >
+                            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                        </Button>
                     </Box>
                 </Box>
             </Box>

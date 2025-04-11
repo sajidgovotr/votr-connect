@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Button, Tab, Tabs, TextField, Typography, MenuItem, Table, TableBody, TableCell, TableHead, TableRow, Chip, Avatar, Switch } from "@mui/material";
 import { useNavigate } from 'react-router';
 import NewRequestModal, { NewRequestData } from './NewRequestModal';
+import CustomButton from '../CustomButton';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -191,20 +192,14 @@ const ProductionApprovals = () => {
                             Pending Approval Requests
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 2 }}>
-                            <Button
+                            <CustomButton
                                 variant="contained"
                                 onClick={() => navigate('/production-approvals/create')}
-                                sx={{
-                                    bgcolor: '#3B82F6',
-                                    color: 'white',
-                                    textTransform: 'none',
-                                    '&:hover': {
-                                        bgcolor: '#2563EB',
-                                    },
-                                }}
-                            >
-                                Create Request
-                            </Button>
+
+                                title={'Create Request'}
+                            />
+
+
                             <TextField
                                 select
                                 size="small"
@@ -507,20 +502,12 @@ const ProductionApprovals = () => {
                             My Requests
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 2 }}>
-                            <Button
+                            <CustomButton
                                 variant="contained"
                                 onClick={() => navigate('/production-approvals/create')}
-                                sx={{
-                                    bgcolor: '#3B82F6',
-                                    color: 'white',
-                                    textTransform: 'none',
-                                    '&:hover': {
-                                        bgcolor: '#2563EB',
-                                    },
-                                }}
-                            >
-                                New Request
-                            </Button>
+                                title='New Request'
+                            />
+
                         </Box>
                     </Box>
 
@@ -701,19 +688,11 @@ const ProductionApprovals = () => {
                         </Box>
 
                         <Box sx={{ mt: 4 }}>
-                            <Button
+                            <CustomButton
                                 variant="contained"
-                                sx={{
-                                    bgcolor: '#3B82F6',
-                                    color: 'white',
-                                    textTransform: 'none',
-                                    '&:hover': {
-                                        bgcolor: '#2563EB',
-                                    },
-                                }}
-                            >
-                                Save Settings
-                            </Button>
+
+                                title='Save Settings'
+                            />
                         </Box>
                     </Box>
                 </Box>

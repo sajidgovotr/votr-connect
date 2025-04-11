@@ -112,8 +112,6 @@ const TestValidateTab = ({
         setFormData(newFormData);
     };
 
-
-
     const methodOptions = [
         { value: 'GET', label: 'GET' },
         { value: 'POST', label: 'POST' },

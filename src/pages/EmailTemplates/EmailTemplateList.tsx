@@ -37,6 +37,7 @@ const EmailTemplateList: React.FC<EmailTemplateListProps> = ({
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleChangePage = (_event: unknown, newPage: number) => {
+
         setPage(newPage);
     };
 

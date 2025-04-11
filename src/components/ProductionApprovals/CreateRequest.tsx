@@ -1,7 +1,6 @@
 import {
     Box,
     Typography,
-    TextField,
     Button,
     MenuItem,
     FormControl,
@@ -10,11 +9,14 @@ import {
     Paper,
     Divider,
     Breadcrumbs,
-    Link
+    Link,
+    SelectChangeEvent
 } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { NewRequestData } from './NewRequestModal';
+import ContainedTextInput from '../Textfields/contained';
+import CustomButton from '../CustomButton';
 
 const CreateRequest = () => {
     const navigate = useNavigate();
@@ -35,8 +37,16 @@ const CreateRequest = () => {
         navigate('/production-approvals');
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+    const handleChange = (name: string) => (value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSelectChange = (e: SelectChangeEvent<string>) => {
+        const name = e.target.name as string;
+        const value = e.target.value;
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -44,9 +54,9 @@ const CreateRequest = () => {
     };
 
     return (
-        <Box className="p-6">
+        <Box>
             {/* Breadcrumbs navigation */}
-            <Breadcrumbs sx={{ mb: 3 }}>
+            <Breadcrumbs>
                 <Link
                     color="inherit"
                     href="/production-approvals"
@@ -87,53 +97,43 @@ const CreateRequest = () => {
             }}>
                 <form onSubmit={handleSubmit}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, maxWidth: '800px' }}>
-                        <TextField
+                        <ContainedTextInput
                             required
                             fullWidth
                             label="Request Name"
                             name="name"
+                            type="text"
                             value={formData.name}
-                            onChange={handleChange}
+                            handleChangeValue={handleChange('name')}
                             placeholder="e.g., Shareholder API Production Release"
-                            variant="filled"
-                            InputLabelProps={{
-                                shrink: true,
-                                sx: { color: '#4B5563', fontWeight: 500 }
-                            }}
-                            sx={{
-                                '& .MuiFilledInput-root': {
-                                    backgroundColor: '#F9FAFB',
-                                    '&:hover': {
-                                        backgroundColor: '#F3F4F6',
-                                    },
-                                    '&.Mui-focused': {
-                                        backgroundColor: '#F3F4F6',
-                                    }
-                                }
-                            }}
+                            Addborder
                         />
 
                         <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
-                            <FormControl required variant="filled" fullWidth>
-                                <InputLabel
-                                    shrink
-                                    sx={{ color: '#4B5563', fontWeight: 500 }}
+                            <FormControl required fullWidth>
+                                <Typography
+                                    sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}
+                                    fontWeight={500}
+                                    fontSize={14}
+                                    variant="caption"
                                 >
-                                    Request Type
-                                </InputLabel>
-                                <Select
+                                    Request Type <Typography color="error">*</Typography>
+                                </Typography>
+                                <Select<string>
                                     value={formData.type}
-                                    label="Request Type"
                                     name="type"
                                     displayEmpty
-                                    onChange={(e) => handleChange(e as any)}
+                                    onChange={handleSelectChange}
                                     sx={{
-                                        backgroundColor: '#F9FAFB',
-                                        '&:hover': {
-                                            backgroundColor: '#F3F4F6',
-                                        },
-                                        '&.Mui-focused': {
-                                            backgroundColor: '#F3F4F6',
+                                        borderRadius: '10px',
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: '10px',
+                                            background: '#FFFFFF',
+                                            border: '1px solid #e6e6e9',
+                                            boxShadow: '0px 1px 2px 0px #1018280D',
+                                            '& fieldset': {
+                                                border: 'none'
+                                            }
                                         }
                                     }}
                                 >
@@ -146,26 +146,30 @@ const CreateRequest = () => {
                                 <FormHelperText>Select the type of change being requested</FormHelperText>
                             </FormControl>
 
-                            <FormControl required variant="filled" fullWidth>
-                                <InputLabel
-                                    shrink
-                                    sx={{ color: '#4B5563', fontWeight: 500 }}
+                            <FormControl required fullWidth>
+                                <Typography
+                                    sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}
+                                    fontWeight={500}
+                                    fontSize={14}
+                                    variant="caption"
                                 >
-                                    Environment
-                                </InputLabel>
-                                <Select
+                                    Environment <Typography color="error">*</Typography>
+                                </Typography>
+                                <Select<string>
                                     value={formData.environment}
-                                    label="Environment"
                                     name="environment"
                                     displayEmpty
-                                    onChange={(e) => handleChange(e as any)}
+                                    onChange={handleSelectChange}
                                     sx={{
-                                        backgroundColor: '#F9FAFB',
-                                        '&:hover': {
-                                            backgroundColor: '#F3F4F6',
-                                        },
-                                        '&.Mui-focused': {
-                                            backgroundColor: '#F3F4F6',
+                                        borderRadius: '10px',
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: '10px',
+                                            background: '#FFFFFF',
+                                            border: '1px solid #e6e6e9',
+                                            boxShadow: '0px 1px 2px 0px #1018280D',
+                                            '& fieldset': {
+                                                border: 'none'
+                                            }
                                         }
                                     }}
                                 >
@@ -177,89 +181,47 @@ const CreateRequest = () => {
                             </FormControl>
                         </Box>
 
-                        <TextField
+                        <ContainedTextInput
                             required
                             fullWidth
                             multiline
                             rows={3}
                             label="Description"
                             name="description"
+                            type="text"
                             value={formData.description}
-                            onChange={handleChange}
+                            handleChangeValue={handleChange('description')}
                             placeholder="Provide a detailed description of the changes..."
-                            variant="filled"
-                            InputLabelProps={{
-                                shrink: true,
-                                sx: { color: '#4B5563', fontWeight: 500 }
-                            }}
-                            sx={{
-                                '& .MuiFilledInput-root': {
-                                    backgroundColor: '#F9FAFB',
-                                    '&:hover': {
-                                        backgroundColor: '#F3F4F6',
-                                    },
-                                    '&.Mui-focused': {
-                                        backgroundColor: '#F3F4F6',
-                                    }
-                                }
-                            }}
+                            Addborder
                         />
 
-                        <TextField
+                        <ContainedTextInput
                             required
                             fullWidth
                             multiline
                             rows={4}
                             label="Changes"
                             name="changes"
+                            type="text"
                             value={formData.changes}
-                            onChange={handleChange}
+                            handleChangeValue={handleChange('changes')}
                             placeholder="List the specific changes being made..."
                             helperText="List one change per line"
-                            variant="filled"
-                            InputLabelProps={{
-                                shrink: true,
-                                sx: { color: '#4B5563', fontWeight: 500 }
-                            }}
-                            sx={{
-                                '& .MuiFilledInput-root': {
-                                    backgroundColor: '#F9FAFB',
-                                    '&:hover': {
-                                        backgroundColor: '#F3F4F6',
-                                    },
-                                    '&.Mui-focused': {
-                                        backgroundColor: '#F3F4F6',
-                                    }
-                                }
-                            }}
+                            Addborder
                         />
 
-                        <TextField
+                        <ContainedTextInput
                             fullWidth
                             multiline
                             rows={3}
                             label="Dependencies"
                             name="dependencies"
+                            type="text"
                             value={formData.dependencies}
-                            onChange={handleChange}
+                            handleChangeValue={handleChange('dependencies')}
                             placeholder="List any dependencies..."
                             helperText="Optional: List any service dependencies"
-                            variant="filled"
-                            InputLabelProps={{
-                                shrink: true,
-                                sx: { color: '#4B5563', fontWeight: 500 }
-                            }}
-                            sx={{
-                                '& .MuiFilledInput-root': {
-                                    backgroundColor: '#F9FAFB',
-                                    '&:hover': {
-                                        backgroundColor: '#F3F4F6',
-                                    },
-                                    '&.Mui-focused': {
-                                        backgroundColor: '#F3F4F6',
-                                    }
-                                }
-                            }}
+                            Addborder
                         />
 
                         <Divider sx={{ my: 2 }} />
@@ -278,19 +240,7 @@ const CreateRequest = () => {
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                sx={{
-                                    bgcolor: '#3B82F6',
-                                    color: 'white',
-                                    '&:hover': {
-                                        bgcolor: '#2563EB',
-                                    }
-                                }}
-                            >
-                                Submit Request
-                            </Button>
+                            <CustomButton title='submite' variant='contained' />
                         </Box>
                     </Box>
                 </form>

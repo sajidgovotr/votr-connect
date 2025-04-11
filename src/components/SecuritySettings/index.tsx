@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, TextField, Typography } from "@mui/material";
 import ToggleSwitch from '../ToggleSwitch';
+import CustomButton from '../CustomButton';
 
 const SecuritySettings = () => {
     const [currentPassword, setCurrentPassword] = useState('');
@@ -158,12 +159,10 @@ const SecuritySettings = () => {
                             }}
                         />
                     </Box>
-                    <Button
+                    <CustomButton
                         type="submit"
                         variant="contained"
                         sx={{
-                            bgcolor: '#3B82F6',
-                            '&:hover': { bgcolor: '#2563EB' },
                             textTransform: 'none',
                             width: 'fit-content',
                             px: 4,
@@ -171,9 +170,11 @@ const SecuritySettings = () => {
                             fontSize: '0.875rem',
                             fontWeight: 500
                         }}
-                    >
-                        Update Password
-                    </Button>
+
+                        title='Update Password'
+                    />
+
+
                 </Box>
             </Box>
         </Box>

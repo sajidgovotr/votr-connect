@@ -35,14 +35,17 @@ const EmailTemplateFormPage: React.FC = () => {
     const navigate = useNavigate();
     const { templateId } = useParams<{ templateId: string }>();
 
+
     const [template, setTemplate] = useState<EmailTemplate | null>(null);
 
     useEffect(() => {
         if (templateId) {
+
             const foundTemplate = mockTemplates.find(t => t.id === templateId);
             if (foundTemplate) {
                 setTemplate(foundTemplate);
             } else {
+
                 navigate('/email-templates');
             }
         }

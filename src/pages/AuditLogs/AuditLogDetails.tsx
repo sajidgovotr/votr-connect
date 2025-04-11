@@ -53,6 +53,7 @@ const AuditLogDetails = () => {
     const [tabValue, setTabValue] = useState(0);
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+
         setTabValue(newValue);
     };
 

@@ -5,14 +5,7 @@ import { IMessageContext, MessageContext } from "@/context/message-context";
 import { useDispatch } from "react-redux";
 import { useLoginMutation } from "@/services/auth";
 import { logIn } from "@/store/auth";
-
-const USERS = [
-    {
-        email: "admin@gmail.com",
-        password: "admin"
-    }
-]
-
+import { USERS } from "@/constants/roles";
 const useLogin = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
