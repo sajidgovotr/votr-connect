@@ -20,12 +20,17 @@ import AccountManagement from "@/pages/AccountManagement";
 import IntegrationCatalogPage from "@/pages/IntegrationCatalog";
 import RestApiIntegration from "@/pages/IntegrationCatalog/RestApiIntegration";
 import RestApiSandboxPage from "@/pages/RestApiSandbox";
+import LogDetailsPage from "@/pages/RestApiSandbox/LogDetails";
 import ProductionApprovalsPage from "@/pages/ProductionApprovals";
 import ApprovalDetailPage from "@/pages/ProductionApprovals/ApprovalDetail";
 import CreateRequestPage from "@/pages/ProductionApprovals/CreateRequest";
 import CreateClient from "@/pages/ClientManagement/CreateClient";
 import GraphQLIntegration from '../pages/IntegrationCatalog/GraphQLIntegration';
 import FileUploadIntegration from '../pages/IntegrationCatalog/FileUploadIntegration';
+import AuditLogs from "@/pages/AuditLogs";
+import AuditLogDetails from "@/pages/AuditLogs/AuditLogDetails";
+import EmailTemplatesPage from "@/pages/EmailTemplates/EmailTemplatesPage";
+import EmailTemplateFormPage from "@/pages/EmailTemplates/EmailTemplateFormPage";
 
 
 const Routes = () => {
@@ -111,6 +116,10 @@ const Routes = () => {
         {
           path: "",
           element: <RestApiSandboxPage />
+        },
+        {
+          path: "logs/:logId",
+          element: <LogDetailsPage />
         }
       ]
     },
@@ -151,6 +160,38 @@ const Routes = () => {
         {
           path: "",
           element: <ResetPasswordSuccess />
+        }
+      ]
+    },
+    {
+      path: "/audit-logs",
+      element: <PrivateRoute navLink="/audit-logs" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <AuditLogs />
+        },
+        {
+          path: ":logId",
+          element: <AuditLogDetails />
+        }
+      ]
+    },
+    {
+      path: "/email-templates",
+      element: <PrivateRoute navLink="/email-templates" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <EmailTemplatesPage />
+        },
+        {
+          path: "create",
+          element: <EmailTemplateFormPage />
+        },
+        {
+          path: "edit/:templateId",
+          element: <EmailTemplateFormPage />
         }
       ]
     },

@@ -1,11 +1,16 @@
 import { Box, Container, Typography, TextField, Grid, MenuItem, Button, Stepper, Step, StepLabel } from '@mui/material';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { ArrowBack } from '@mui/icons-material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const steps = ['Basic Info', 'Authentication', 'Data Schema', 'Review'];
 
-const BasicInfo = () => (
+interface BasicInfoProps {
+    selectedEnvironment: string;
+    onEnvironmentChange: (env: string) => void;
+}
+
+const BasicInfo = ({ selectedEnvironment, onEnvironmentChange }: BasicInfoProps) => (
     <Box>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
             Configure REST API Integration
@@ -22,6 +27,20 @@ const BasicInfo = () => (
                     defaultValue="Shareholder Data Sync"
                     sx={{ mb: 2 }}
                 />
+            </Grid>
+            <Grid item xs={12} md={6}>
+                <TextField
+                    fullWidth
+                    select
+                    label="Environment"
+                    value={selectedEnvironment}
+                    onChange={(e) => onEnvironmentChange(e.target.value)}
+                    required
+                >
+                    <MenuItem value="dev">Development</MenuItem>
+                    <MenuItem value="staging">Staging</MenuItem>
+                    <MenuItem value="prod">Production</MenuItem>
+                </TextField>
             </Grid>
             <Grid item xs={12} md={6}>
                 <TextField
@@ -153,13 +172,12 @@ const DataSchema = () => (
                         <strong>name</strong> (string, required): Shareholder's full name
                     </Typography>
                 </Box>
-                <Button variant="outlined" sx={{ mt: 2 }}>Edit Fields</Button>
             </Grid>
         </Grid>
     </Box>
 );
 
-const Review = () => (
+const Review = ({ setActiveStep, selectedEnvironment }: { setActiveStep: (step: number) => void, selectedEnvironment: string }) => (
     <Box>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
             Review Your Configuration
@@ -175,9 +193,12 @@ const Review = () => (
                 Name: Shareholder Data Sync
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
+                Environment: {selectedEnvironment.charAt(0).toUpperCase() + selectedEnvironment.slice(1)}
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>
                 Base URL: https://api.yourplatform.com/v1
             </Typography>
-            <Button variant="outlined" sx={{ mt: 1 }}>Edit</Button>
+            <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setActiveStep(0)}>Edit</Button>
         </Box>
         <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
@@ -189,7 +210,7 @@ const Review = () => (
             <Typography variant="body2" sx={{ mb: 1 }}>
                 Token URL: https://api.yourplatform.com/oauth/token
             </Typography>
-            <Button variant="outlined" sx={{ mt: 1 }}>Edit</Button>
+            <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setActiveStep(1)}>Edit</Button>
         </Box>
         <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
@@ -198,27 +219,44 @@ const Review = () => (
             <Typography variant="body2" sx={{ mb: 1 }}>
                 Resource: Shareholders (/shareholders)
             </Typography>
-            <Button variant="outlined" sx={{ mt: 1 }}>Edit</Button>
+            <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setActiveStep(2)}>Edit</Button>
         </Box>
     </Box>
 );
 
 const RestApiIntegration = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [activeStep, setActiveStep] = useState(0);
+    const [selectedEnvironment, setSelectedEnvironment] = useState('dev');
+
+    useEffect(() => {
+        // Get environment from URL query params
+        const params = new URLSearchParams(location.search);
+        const envFromParams = params.get('environment');
+        if (envFromParams && ['dev', 'staging', 'prod'].includes(envFromParams)) {
+            setSelectedEnvironment(envFromParams);
+        }
+    }, [location]);
 
     const renderStepContent = (step: number) => {
         switch (step) {
             case 0:
-                return <BasicInfo />;
+                return <BasicInfo
+                    selectedEnvironment={selectedEnvironment}
+                    onEnvironmentChange={setSelectedEnvironment}
+                />;
             case 1:
                 return <Authentication />;
             case 2:
                 return <DataSchema />;
             case 3:
-                return <Review />;
+                return <Review setActiveStep={setActiveStep} selectedEnvironment={selectedEnvironment} />;
             default:
-                return <BasicInfo />;
+                return <BasicInfo
+                    selectedEnvironment={selectedEnvironment}
+                    onEnvironmentChange={setSelectedEnvironment}
+                />;
         }
     };
 
@@ -248,8 +286,21 @@ const RestApiIntegration = () => {
                 <Box sx={{ p: 4, borderRadius: 2, border: '1px solid #E5E7EB', bgcolor: '#FFFFFF', boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.05)' }}>
                     {renderStepContent(activeStep)}
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-                        <Button variant="outlined" sx={{ mr: 2 }} onClick={() => setActiveStep((prev) => Math.max(prev - 1, 0))}>Previous</Button>
-                        <Button variant="contained" color="primary" onClick={() => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1))}>Next</Button>
+                        <Button
+                            variant="outlined"
+                            sx={{ mr: 2 }}
+                            onClick={() => setActiveStep((prev) => Math.max(prev - 1, 0))}
+                            disabled={activeStep === 0}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1))}
+                        >
+                            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                        </Button>
                     </Box>
                 </Box>
             </Box>

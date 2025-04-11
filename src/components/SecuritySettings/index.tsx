@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, TextField, Typography } from "@mui/material";
 import ToggleSwitch from '../ToggleSwitch';
+import CustomButton from '../CustomButton';
 
 const SecuritySettings = () => {
     const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
@@ -162,12 +163,10 @@ const SecuritySettings = () => {
                             }}
                         />
                     </Box>
-                    <Button
+                    <CustomButton
                         type="submit"
                         variant="contained"
                         sx={{
-                            bgcolor: '#3B82F6',
-                            '&:hover': { bgcolor: '#2563EB' },
                             textTransform: 'none',
                             width: 'fit-content',
                             px: 4,
@@ -175,66 +174,9 @@ const SecuritySettings = () => {
                             fontSize: '0.875rem',
                             fontWeight: 500
                         }}
-                    >
-                        Update Password
-                    </Button>
-                </Box>
+                        title='Update Password'
+                    />
 
-                <Box sx={{
-                    mt: 4,
-                    pt: 4,
-                    borderTop: '1px solid #E5E7EB'
-                }}>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mb: 2
-                    }}>
-                        <Box>
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    fontSize: '1rem',
-                                    fontWeight: 600,
-                                    color: '#111827'
-                                }}
-                            >
-                                Two-Factor Authentication
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                                <ToggleSwitch
-                                    checked={twoFactorEnabled}
-                                    onChange={(e) => setTwoFactorEnabled(e.target.checked)}
-                                />
-                                <Typography sx={{
-                                    color: '#111827',
-                                    fontSize: '0.875rem'
-                                }}>
-                                    {twoFactorEnabled ? 'Enabled' : 'Disabled'}
-                                </Typography>
-                            </Box>
-                        </Box>
-                        <Button
-                            onClick={handleConfigureTwoFactor}
-                            sx={{
-                                color: '#6B7280',
-                                bgcolor: '#F9FAFB',
-                                border: '1px solid #E5E7EB',
-                                textTransform: 'none',
-                                '&:hover': {
-                                    bgcolor: '#F3F4F6',
-                                    borderColor: '#D1D5DB'
-                                },
-                                px: 3,
-                                py: 1,
-                                fontSize: '0.875rem',
-                                fontWeight: 500
-                            }}
-                        >
-                            Configure
-                        </Button>
-                    </Box>
                 </Box>
             </Box>
         </Box>

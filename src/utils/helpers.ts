@@ -45,6 +45,24 @@ export function capitalizeFirstLetter(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+export function formatDashedString(str: string): string {
+    if (!str) return str;
+
+    // Split the string by hyphens
+    const words = str.split('-');
+
+    // Capitalize the first letter of each word
+    const capitalizedWords = words.map(word =>
+        capitalizeFirstLetter(word)
+    );
+
+    // Join the words with spaces
+    return capitalizedWords.join(' ');
+}
+
+// Usage example
+// formatDashedString("account-management") => "Account Management"
+
 export function determineTier(positions: number): string {
     if (positions <= 10000) {
         return "Tier 1 | Under 10k";
