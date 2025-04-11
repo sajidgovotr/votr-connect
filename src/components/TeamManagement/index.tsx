@@ -1,6 +1,11 @@
-import { Box, Button, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Link } from "@mui/material";
+import { Box, Button, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TextField, Stack } from "@mui/material";
 import RoleChip from "../RoleChip";
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import Modal from "../Modal";
+import { useState } from "react";
+import { CustomButton } from "@/components";
+import SelectBox from "@/components/SelectBox";
 
 interface TeamMember {
     name: string;
@@ -31,12 +36,42 @@ const roleDescriptions = [
 ];
 
 const TeamManagement = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedRole, setSelectedRole] = useState("");
+    const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+
+    const handleOpenModal = (member?: TeamMember) => {
+        if (member) {
+            setEditingMember(member);
+            setSelectedRole(member.role);
+        }
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedRole("");
+        setEditingMember(null);
+    };
+
+    const handleInviteSubmit = () => {
+        // Handle invite submission logic here
+        handleCloseModal();
+    };
+
+    const roleOptions = [
+        { value: "Admin", label: "Admin" },
+        { value: "Developer", label: "Developer" },
+        { value: "Viewer", label: "Viewer" }
+    ];
+
     return (
         <Box>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
+                    onClick={() => handleOpenModal()}
                     sx={{
                         bgcolor: '#2563EB',
                         color: 'white',
@@ -50,6 +85,56 @@ const TeamManagement = () => {
                     Add Team Member
                 </Button>
             </Box>
+
+            <Modal open={isModalOpen} onClose={handleCloseModal}>
+                <Box>
+                    <Typography variant="h6" sx={{ mb: 3 }}>
+                        {editingMember ? 'Edit Team Member' : 'Invite Team Member'}
+                    </Typography>
+                    <Stack spacing={3}>
+                        <TextField
+                            fullWidth
+                            label="Name"
+                            variant="outlined"
+                            size="small"
+                            defaultValue={editingMember?.name || ''}
+                        />
+                        <TextField
+                            fullWidth
+                            label="Email"
+                            variant="outlined"
+                            size="small"
+                            type="email"
+                            defaultValue={editingMember?.email || ''}
+                        />
+                        <SelectBox
+                            value={selectedRole}
+                            options={roleOptions}
+                            label="Role"
+                            placeholder="Select a role"
+                            size="small"
+                            handleChangeValue={(value) => setSelectedRole(value)}
+                        />
+                        <Stack direction="row" spacing={2} justifyContent="flex-end">
+                            <CustomButton
+                                title="Cancel"
+                                onClick={handleCloseModal}
+                                variant="outlined"
+                                color="inherit"
+                                sx={{
+                                    border: "1px solid #E6E6E9",
+                                    color: "black",
+                                }}
+                            />
+                            <CustomButton
+                                title={editingMember ? "Save Changes" : "Send Invite"}
+                                onClick={handleInviteSubmit}
+                                sx={{ color: "#FFFFFF" }}
+                            />
+                        </Stack>
+                    </Stack>
+                </Box>
+            </Modal>
 
             <Card>
                 <TableContainer>
@@ -107,18 +192,21 @@ const TeamManagement = () => {
                                         <RoleChip role={member.role} />
                                     </TableCell>
                                     <TableCell>
-                                        <Link
-                                            href="#"
+                                        <CustomButton
+                                            startIcon={<EditIcon />}
+                                            title="Edit"
+                                            variant="text"
+                                            onClick={() => handleOpenModal(member)}
                                             sx={{
                                                 color: '#2563EB',
-                                                textDecoration: 'none',
+                                                p: 0,
+                                                minWidth: 'auto',
                                                 '&:hover': {
+                                                    backgroundColor: 'transparent',
                                                     textDecoration: 'underline'
                                                 }
                                             }}
-                                        >
-                                            Edit
-                                        </Link>
+                                        />
                                     </TableCell>
                                 </TableRow>
                             ))}

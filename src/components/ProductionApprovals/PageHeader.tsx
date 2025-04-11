@@ -1,5 +1,6 @@
 import { Box, Typography, Button, Breadcrumbs, Link } from '@mui/material';
 import { useNavigate } from 'react-router';
+import CustomButton from '../CustomButton';
 
 interface PageHeaderProps {
     title: string;
@@ -49,20 +50,11 @@ const PageHeader = ({
                 </Typography>
 
                 {showCreateButton && (
-                    <Button
+                    <CustomButton
                         variant="contained"
                         onClick={() => navigate('/production-approvals/create')}
-                        sx={{
-                            bgcolor: '#3B82F6',
-                            color: 'white',
-                            textTransform: 'none',
-                            '&:hover': {
-                                bgcolor: '#2563EB',
-                            },
-                        }}
-                    >
-                        Create Request
-                    </Button>
+                        title='Create Request'
+                    />
                 )}
             </Box>
 

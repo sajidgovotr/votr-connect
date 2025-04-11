@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Box, Button, Card, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Card, Typography } from "@mui/material";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import WarningBanner from '../WarningBanner';
+import CustomButton from '../CustomButton';
+import SelectBox from '../SelectBox';
 
 const APIKeys = () => {
     const [environment, setEnvironment] = useState('production');
@@ -19,36 +21,42 @@ const APIKeys = () => {
         console.log('Regenerating API keys...');
     };
 
+    const environmentOptions = [
+        { value: 'production', label: 'Production' },
+        { value: 'staging', label: 'Staging' },
+        { value: 'development', label: 'Development' }
+    ];
+
+    const getWarningMessage = () => {
+        switch (environment) {
+            case 'production':
+                return 'You are viewing production API keys. Be careful when sharing these.';
+            case 'staging':
+                return 'You are viewing staging API keys.';
+            case 'development':
+                return 'You are viewing development API keys.';
+            default:
+                return '';
+        }
+    };
+
     return (
         <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h6" sx={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600 }}>
                     API Keys
                 </Typography>
-                <FormControl sx={{ minWidth: 200 }}>
-                    <InputLabel id="environment-label">Environment</InputLabel>
-                    <Select
-                        labelId="environment-label"
+                <Box sx={{ minWidth: 200 }}>
+                    <SelectBox
                         value={environment}
-                        label="Environment"
-                        onChange={(e) => setEnvironment(e.target.value)}
-                        sx={{
-                            '& .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#E5E7EB',
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#2563EB',
-                            },
-                        }}
-                    >
-                        <MenuItem value="production">Production</MenuItem>
-                        <MenuItem value="staging">Staging</MenuItem>
-                        <MenuItem value="development">Development</MenuItem>
-                    </Select>
-                </FormControl>
+                        options={environmentOptions}
+                        handleChangeValue={(value) => setEnvironment(value)}
+                        placeholder="Select Environment"
+                    />
+                </Box>
             </Box>
 
-            <WarningBanner message="You are viewing production API keys. Be careful when sharing these." />
+            <WarningBanner message={getWarningMessage()} />
 
             <Card sx={{ mt: 3 }}>
                 <Box sx={{ p: 3 }}>
@@ -83,7 +91,7 @@ const APIKeys = () => {
                             >
                                 jp_prod_client_1234567890abcdef
                             </Typography>
-                            <Button
+                            <CustomButton
                                 variant="contained"
                                 onClick={() => handleCopy('jp_prod_client_1234567890abcdef')}
                                 startIcon={<ContentCopyIcon />}
@@ -92,9 +100,9 @@ const APIKeys = () => {
                                     '&:hover': { bgcolor: '#1D4ED8' },
                                     textTransform: 'none'
                                 }}
-                            >
-                                Copy
-                            </Button>
+                                title='Copy'
+                            />
+
                         </Box>
                     </Box>
 
@@ -117,7 +125,7 @@ const APIKeys = () => {
                             >
                                 {showSecret ? 'sk_prod_secret_key_here' : '••••••••••••••••••••••••'}
                             </Typography>
-                            <Button
+                            <CustomButton
                                 variant="contained"
                                 onClick={() => setShowSecret(!showSecret)}
                                 startIcon={showSecret ? <VisibilityOffIcon /> : <VisibilityIcon />}
@@ -126,9 +134,10 @@ const APIKeys = () => {
                                     '&:hover': { bgcolor: '#1D4ED8' },
                                     textTransform: 'none'
                                 }}
-                            >
-                                {showSecret ? 'Hide' : 'Show'}
-                            </Button>
+                                title={showSecret ? 'Hide' : 'Show'}
+                            />
+
+
                         </Box>
                     </Box>
 
@@ -136,7 +145,7 @@ const APIKeys = () => {
                         <Typography sx={{ fontSize: '0.875rem', color: '#DC2626' }}>
                             Warning: Regenerating keys will invalidate existing keys immediately
                         </Typography>
-                        <Button
+                        <CustomButton
                             variant="outlined"
                             color="error"
                             onClick={handleRegenerateKeys}
@@ -149,9 +158,10 @@ const APIKeys = () => {
                                 },
                                 textTransform: 'none'
                             }}
+                            title='Regenerate API Keys'
                         >
-                            Regenerate API Keys
-                        </Button>
+
+                        </CustomButton>
                     </Box>
                 </Box>
             </Card>

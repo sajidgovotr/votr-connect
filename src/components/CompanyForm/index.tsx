@@ -1,5 +1,5 @@
 import { Box, Grid2, TextField, Button, Typography } from "@mui/material";
-import { Card } from "@/components";
+import { Card, CustomButton } from "@/components";
 
 interface CompanyFormProps {
     onSubmit: (data: any) => void;
@@ -147,7 +147,7 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                 </Grid2>
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-                    <Button
+                    <CustomButton
                         type="submit"
                         variant="contained"
                         sx={{
@@ -160,9 +160,10 @@ const CompanyForm = ({ onSubmit }: CompanyFormProps) => {
                             },
                             px: 4
                         }}
-                    >
-                        Save Changes
-                    </Button>
+                        title="Save Changes"
+                    />
+
+
                 </Box>
             </Box>
         </Card>

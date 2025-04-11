@@ -1,16 +1,12 @@
-import { Badge, Stack, Tooltip, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
-// import AccountPopover from "./account-popover";
-// import { capitalizeFirstLetter } from "../../utils/helpers";
-import HelpIcon from "@/assets/images/help-nav.png";
-import BellIcon from "@/assets/images/bell-nav.png";
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLefttIcon from '@mui/icons-material/KeyboardArrowLeft';
 
 import { useLocation } from "react-router";
 import AccountPopover from "../AccountPopover";
-import { capitalizeFirstLetter } from "@/utils/helpers";
+import { formatDashedString } from "@/utils/helpers";
 
 
 
@@ -27,7 +23,7 @@ const Navbar = (props: INavbar) => {
     // const { user } = useSelector((state: RootState) => state.auth);
     const queryParams = new URLSearchParams(location.search);
     const tabName = queryParams.get("tab");
-    const displayTitle = capitalizeFirstLetter(title);
+    const displayTitle = formatDashedString(title);
 
     return (
         <>
@@ -74,7 +70,7 @@ const Navbar = (props: INavbar) => {
                     </Typography>
                     <Box sx={{ flexGrow: 1 }} />
                     <Stack direction={"row"} alignItems={"center"} spacing={0.8}>
-                        <Tooltip title="Notifications">
+                        {/* <Tooltip title="Notifications">
                             <IconButton>
                                 <Badge
                                     color="error"
@@ -90,7 +86,7 @@ const Navbar = (props: INavbar) => {
                             <IconButton>
                                 <img src={HelpIcon} alt="help-icon" width={20} data-testid="help-icon" />
                             </IconButton>
-                        </Tooltip>
+                        </Tooltip> */}
                         <AccountPopover />
                     </Stack>
                 </Toolbar>

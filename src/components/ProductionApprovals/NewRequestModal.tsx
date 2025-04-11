@@ -13,6 +13,7 @@ import {
     Divider
 } from '@mui/material';
 import { useState } from 'react';
+import CustomButton from '../CustomButton';
 
 interface NewRequestModalProps {
     open: boolean;
@@ -270,19 +271,12 @@ const NewRequestModal = ({ open, onClose, onSubmit }: NewRequestModalProps) => {
                             >
                                 Cancel
                             </Button>
-                            <Button
+                            <CustomButton
                                 type="submit"
                                 variant="contained"
-                                sx={{
-                                    bgcolor: '#3B82F6',
-                                    color: 'white',
-                                    '&:hover': {
-                                        bgcolor: '#2563EB',
-                                    }
-                                }}
-                            >
-                                Create Request
-                            </Button>
+
+                                title='Create Request'
+                            />
                         </Box>
                     </Box>
                 </form>

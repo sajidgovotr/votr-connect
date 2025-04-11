@@ -3,7 +3,7 @@ import {
     HelpCenterIcon,
     SettingsIcon,
 } from "@/assets/images/sidebar/svg-icons";
-import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, People } from "@mui/icons-material";
+import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, People, Assessment, Email } from "@mui/icons-material";
 
 const UserItems = {
     home: [
@@ -38,12 +38,17 @@ const UserItems = {
             title: "Production Approvals"
         },
         {
-            href: '/client-management',
-            icon: <People sx={{ color: "#5263FF" }} />,
-            iconInactive: <People sx={{ color: "#8C8E9C" }} />,
-            title: "Client Management"
+            href: '/email-templates',
+            icon: <Email sx={{ color: "#5263FF" }} />,
+            iconInactive: <Email sx={{ color: "#8C8E9C" }} />,
+            title: "Email Templates"
         },
-
+        {
+            href: '/audit-logs',
+            icon: <Assessment sx={{ color: "#5263FF" }} />,
+            iconInactive: <Assessment sx={{ color: "#8C8E9C" }} />,
+            title: "Audit Logs"
+        },
     ],
     others: []
 };
