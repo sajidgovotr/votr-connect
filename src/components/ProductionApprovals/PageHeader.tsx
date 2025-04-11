@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Breadcrumbs, Link } from '@mui/material';
+import { Box, Typography, Breadcrumbs, Link } from '@mui/material';
 import { useNavigate } from 'react-router';
 
 interface PageHeaderProps {
