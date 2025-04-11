@@ -50,9 +50,7 @@ const EmailTemplatesPage: React.FC = () => {
     };
 
     const handleDeleteTemplate = (templateId: string) => {
-        if (window.confirm('Are you sure you want to delete this template?')) {
             setTemplates(templates.filter((template) => template.id !== templateId));
-        }
     };
 
 
