@@ -132,9 +132,7 @@ const EmailTemplateList: React.FC<EmailTemplateListProps> = ({
                                                 <IconButton
                                                     size="small"
                                                     onClick={() => {
-                                                        if (window.confirm('Are you sure you want to delete this template?')) {
                                                             onDelete(template.id);
-                                                        }
                                                     }}
                                                 >
                                                     <DeleteIcon />
