@@ -1,4 +1,4 @@
-import { Box, Grid2, TextField, Button, Typography } from "@mui/material";
+import { Box, Grid2, TextField, Typography } from "@mui/material";
 import { Card, CustomButton } from "@/components";
 
 interface CompanyFormProps {

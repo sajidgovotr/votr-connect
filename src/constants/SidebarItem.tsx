@@ -3,7 +3,7 @@ import {
     HelpCenterIcon,
     SettingsIcon,
 } from "@/assets/images/sidebar/svg-icons";
-import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, People, Assessment, Email } from "@mui/icons-material";
+import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, Assessment, Email } from "@mui/icons-material";
 
 const UserItems = {
     home: [

@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, TextField, Typography } from "@mui/material";
-import ToggleSwitch from '../ToggleSwitch';
+import { Box, TextField, Typography } from "@mui/material";
 import CustomButton from '../CustomButton';
 
 const SecuritySettings = () => {

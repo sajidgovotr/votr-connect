@@ -1,8 +1,7 @@
-import { Box, Container, Typography, TextField, Grid, Button, Stepper, Step, StepLabel, Switch, FormControlLabel, MenuItem, Select, InputLabel, FormControl, Tabs, Tab } from '@mui/material';
+import { Box, Container, Typography, TextField, Grid, Button, Stepper, Step, StepLabel, MenuItem } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router';
 import { ArrowBack } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
-import TimePicker from '@/components/TimePicker';
 
 const steps = ['Basic Info', 'Connection Details', 'Schedule', 'Review'];
 
