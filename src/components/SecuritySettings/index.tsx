@@ -4,7 +4,6 @@ import ToggleSwitch from '../ToggleSwitch';
 import CustomButton from '../CustomButton';
 
 const SecuritySettings = () => {
-    const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,10 +14,7 @@ const SecuritySettings = () => {
         console.log('Updating password...');
     };
 
-    const handleConfigureTwoFactor = () => {
-        // Add 2FA configuration logic here
-        console.log('Configuring 2FA...');
-    };
+
 
     return (
         <Box>
@@ -174,8 +170,10 @@ const SecuritySettings = () => {
                             fontSize: '0.875rem',
                             fontWeight: 500
                         }}
+
                         title='Update Password'
                     />
+
 
                 </Box>
             </Box>

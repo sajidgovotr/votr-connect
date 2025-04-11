@@ -9,7 +9,6 @@ import {
     IconButton,
     Tooltip,
     Typography,
-    Switch,
     TablePagination,
     Box,
     TextField,
@@ -37,7 +36,8 @@ const EmailTemplateList: React.FC<EmailTemplateListProps> = ({
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const handleChangePage = (event: unknown, newPage: number) => {
+    const handleChangePage = (_event: unknown, newPage: number) => {
+
         setPage(newPage);
     };
 

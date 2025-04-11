@@ -5,8 +5,6 @@ import {
     Paper,
     Typography,
     Button,
-    useTheme,
-    useMediaQuery,
 
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
@@ -36,29 +34,26 @@ const mockTemplates: EmailTemplate[] = [
 const EmailTemplateFormPage: React.FC = () => {
     const navigate = useNavigate();
     const { templateId } = useParams<{ templateId: string }>();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
 
     const [template, setTemplate] = useState<EmailTemplate | null>(null);
 
     useEffect(() => {
         if (templateId) {
-            // In a real app, you would fetch the template from your API
+
             const foundTemplate = mockTemplates.find(t => t.id === templateId);
             if (foundTemplate) {
                 setTemplate(foundTemplate);
             } else {
-                // Template not found, redirect to list
+
                 navigate('/email-templates');
             }
         }
     }, [templateId, navigate]);
 
     const handleSave = (templateData: Omit<EmailTemplate, 'id' | 'createdAt' | 'updatedAt' | 'isActive'>) => {
-        // In a real app, you would make an API call here
         console.log('Saving template:', templateData);
 
-        // Navigate back to the list after saving
         navigate('/email-templates');
     };
 

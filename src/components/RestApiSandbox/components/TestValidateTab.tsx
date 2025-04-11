@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Box, Button, TextField, Typography, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Tab, IconButton } from "@mui/material";
 import CustomButton from '../../CustomButton';
 import SelectBox from '../../SelectBox';
@@ -110,12 +110,6 @@ const TestValidateTab = ({
             (newFormData[index] as any)[field] = value;
         }
         setFormData(newFormData);
-    };
-
-    const handleFileUpload = (index: number, file: File | null) => {
-        if (file) {
-            handleFormDataChange(index, 'value', file);
-        }
     };
 
     const methodOptions = [

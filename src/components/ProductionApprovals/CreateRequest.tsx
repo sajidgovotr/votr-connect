@@ -4,7 +4,6 @@ import {
     Button,
     MenuItem,
     FormControl,
-    InputLabel,
     Select,
     FormHelperText,
     Paper,
