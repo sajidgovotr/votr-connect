@@ -51,7 +51,7 @@ const LogDetails = ({ logId }: LogDetailsProps) => {
         }
     };
 
-    const JsonDisplay = ({ data }: { data: any }) => (
+    const JsonDisplay = ({ data }: { data: object }) => (
         <pre style={{
             backgroundColor: '#F9FAFB',
             padding: '16px',

@@ -6,7 +6,7 @@ import {
     Typography,
     Select,
     MenuItem,
-    PaginationItem
+    PaginationItem,
 } from "@mui/material";
 import { ArrowBackIosNew, ArrowForwardIos } from "@mui/icons-material";
 
@@ -83,8 +83,8 @@ const TablePagination: FC<Props> = ({
                 </Typography>
                 <Select
                     value={selectedRows}
-                    onChange={(event: any) => {
-                        setselectedRows(event.target.value);
+                    onChange={(event) => {
+                        setselectedRows(event.target.value as number);
                         if (handleLimitChange) {
                             handleLimitChange(Number(event.target.value));
                         }

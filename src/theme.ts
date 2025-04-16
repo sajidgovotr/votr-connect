@@ -176,6 +176,36 @@ export const theme = createTheme({
                 },
             },
         },
+        MuiFormLabel: {
+            styleOverrides: {
+                root: {
+                    color: "#000000",
+                    "&.Mui-disabled": {
+                        color: "#000000",
+                    },
+                },
+            },
+        },
+        MuiStepLabel: {
+            styleOverrides: {
+                label: {
+                    color: '#000000',
+                    "&.Mui-disabled": {
+                        color: "#000000",
+                    },
+                },
+            },
+        },
+        MuiTypography: {
+            styleOverrides: {
+                root: {
+                    color: '#000000',
+                    "&.Mui-disabled": {
+                        color: "#000000",
+                    },
+                },
+            },
+        },
         MuiBadge: {
             styleOverrides: {
                 standard: {
@@ -374,6 +404,16 @@ export const theme = createTheme({
             },
             defaultProps: {
                 IconComponent: FiChevronDown,
+            },
+        },
+        MuiRadio: {
+            styleOverrides: {
+                root: {
+                    color: '#5263FF',
+                    '&.Mui-checked': {
+                        color: '#5263FF',
+                    },
+                },
             },
         },
     },

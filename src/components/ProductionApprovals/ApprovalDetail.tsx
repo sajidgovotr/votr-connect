@@ -19,16 +19,11 @@ import { useParams, useNavigate } from 'react-router';
 import { ChevronLeft, Check, Close, AccessTime, Code, SystemUpdate, Description } from '@mui/icons-material';
 
 
-interface ApprovalDetailProps {
-    // If props are needed they can be added here
-}
-
-const ApprovalDetail = (props: ApprovalDetailProps) => {
+const ApprovalDetail = () => {
     const { requestId } = useParams();
     const navigate = useNavigate();
     const [commentText, setCommentText] = useState('');
 
-    console.log(props)
     // Mock data - in a real app, this would be fetched based on the requestId
     const requestDetail = {
         id: requestId || 'REQ-001',

@@ -2,7 +2,15 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // import { authApi } from "../../services";
 
 export interface AuthState {
-    user: any | null;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        userRole: string;
+        isActive: boolean;
+        password: string;
+        profilePicURL: string;
+    } | null;
     token: string | null;
 }
 
@@ -22,7 +30,7 @@ const slice = createSlice({
         },
         logIn: (
             state,
-            action: PayloadAction<{ token: string; user: Partial<any> }>
+            action: PayloadAction<{ token: string; user: Partial<AuthState['user']> }>
         ) => {
             const { token, user } = action.payload;
             state.token = token;
@@ -31,7 +39,7 @@ const slice = createSlice({
                 name: user?.name || "",
                 email: user?.email || "",
                 userRole: user?.userRole || "",
-                isActive: user?.isActive,
+                isActive: user?.isActive || false,
                 password: user?.password || "",
                 profilePicURL: user?.profilePicURL || ""
             };

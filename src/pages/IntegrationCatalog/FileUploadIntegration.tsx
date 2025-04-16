@@ -213,15 +213,25 @@ const FileUploadIntegration = () => {
     const location = useLocation();
     const [activeStep, setActiveStep] = useState(0);
     const [selectedEnvironment, setSelectedEnvironment] = useState('dev');
+    const [selectedProduct, setSelectedProduct] = useState('');
 
     useEffect(() => {
-        // Get environment from URL query params
+        // Get environment and product from URL query params
         const params = new URLSearchParams(location.search);
         const envFromParams = params.get('environment');
+        const productFromParams = params.get('product');
+
         if (envFromParams && ['dev', 'staging', 'prod'].includes(envFromParams)) {
             setSelectedEnvironment(envFromParams);
         }
-    }, [location]);
+
+        if (productFromParams) {
+            setSelectedProduct(productFromParams);
+        } else {
+            // If no product is selected, redirect back to catalog
+            navigate('/integration-catalog');
+        }
+    }, [location, navigate]);
 
     const renderStepContent = (step: number) => {
         switch (step) {
@@ -245,47 +255,50 @@ const FileUploadIntegration = () => {
     };
 
     return (
-        <Container maxWidth="md">
-            <Box sx={{ py: 4 }}>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
                 <Button
-                    variant="text"
-                    onClick={() => navigate(-1)}
                     startIcon={<ArrowBack />}
-                    sx={{ mb: 3, color: '#1F2937', '&:hover': { color: '#5263FF' } }}
+                    onClick={() => navigate('/integration-catalog')}
+                    sx={{ mr: 2 }}
                 >
-                    Back
+                    Back to Catalog
                 </Button>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-                    File Upload Integration
+                <Typography variant="h5" component="h1">
+                    Configure File Upload Integration for {selectedProduct}
                 </Typography>
-                <Box sx={{ mb: 4 }}>
-                    <Stepper activeStep={activeStep} alternativeLabel>
-                        {steps.map((label) => (
-                            <Step key={label}>
-                                <StepLabel>{label}</StepLabel>
-                            </Step>
-                        ))}
-                    </Stepper>
-                </Box>
-                <Box sx={{ p: 4, borderRadius: 2, border: '1px solid #E5E7EB', bgcolor: '#FFFFFF', boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.05)' }}>
-                    {renderStepContent(activeStep)}
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-                        <Button
-                            variant="outlined"
-                            sx={{ mr: 2 }}
-                            onClick={() => setActiveStep((prev) => Math.max(prev - 1, 0))}
-                            disabled={activeStep === 0}
-                        >
-                            Previous
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1))}
-                        >
-                            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                        </Button>
-                    </Box>
+            </Box>
+            <Box sx={{ width: '100%' }}>
+                <Stepper activeStep={activeStep} alternativeLabel>
+                    {steps.map((label) => (
+                        <Step key={label}>
+                            <StepLabel>{label}</StepLabel>
+                        </Step>
+                    ))}
+                </Stepper>
+            </Box>
+            <Box sx={{ mt: 4 }}>
+                {renderStepContent(activeStep)}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+                    <Button
+                        onClick={() => setActiveStep((prev) => prev - 1)}
+                        sx={{ mr: 1 }}
+                        disabled={activeStep === 0}
+                    >
+                        Back
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={() => {
+                            if (activeStep === steps.length - 1) {
+                                navigate('/integration-catalog');
+                            } else {
+                                setActiveStep((prev) => prev + 1);
+                            }
+                        }}
+                    >
+                        {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                    </Button>
                 </Box>
             </Box>
         </Container>

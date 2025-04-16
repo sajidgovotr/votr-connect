@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import Chip from "../Chip";
 import { useState } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import ProductSelection from "../IntegrationSteps/ProductSelection/ProductSelection";
 
 interface IntegrationCardProps {
     title: string;
@@ -64,7 +65,8 @@ const IntegrationCard = ({
             alignItems: 'center',
             textAlign: 'center',
             gap: 2,
-            position: 'relative'
+            position: 'relative',
+            height: '100%'
         }}>
             <Box sx={{ width: '100%', position: 'relative' }}>
                 <Button
@@ -108,7 +110,8 @@ const IntegrationCard = ({
                 bgcolor: '#F3F4F6',
                 p: 3,
                 borderRadius: '8px',
-                width: '100%'
+                width: '100%',
+                flexGrow: 1
             }}>
                 <Typography sx={{ color: '#4B5563', fontSize: '0.875rem' }}>
                     {description}
@@ -180,7 +183,7 @@ const IntegrationCard = ({
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                         >
-                            <MenuItem onClick={handleEdit}>Edit  Configuration</MenuItem>
+                            <MenuItem onClick={handleEdit}>Edit Configuration</MenuItem>
                             <MenuItem
                                 onClick={handleDeconfigureAction}
                                 sx={{ color: '#DC2626' }}
@@ -197,8 +200,10 @@ const IntegrationCard = ({
 
 const IntegrationCatalog = () => {
     const navigate = useNavigate();
+    const [selectedProduct, setSelectedProduct] = useState<string>("");
+
     const handleConfigure = (route: string) => (environment: string) => {
-        navigate(`${route}?environment=${environment}`);
+        navigate(`${route}?environment=${environment}&product=${selectedProduct}`);
     };
 
     const handleRequest = () => {
@@ -206,12 +211,16 @@ const IntegrationCatalog = () => {
     };
 
     const handleEdit = (route: string) => (environment: string) => {
-        navigate(`${route}?environment=${environment}`);
+        navigate(`${route}?environment=${environment}&product=${selectedProduct}`);
     };
 
     const handleDeconfigure = (integrationType: string) => (environment: string) => {
         console.log('Deconfigure clicked for:', integrationType, 'in environment:', environment);
         // Add your deconfigure logic here
+    };
+
+    const handleProductSelect = (product: string) => {
+        setSelectedProduct(product);
     };
 
     // Example configuration status - replace with your actual data
@@ -241,55 +250,84 @@ const IntegrationCatalog = () => {
                     mb: 4
                 }}
             >
-                Select an integration type to get started with configuration.
+                {!selectedProduct
+                    ? "First, select a product you want to integrate with."
+                    : "Now, select an integration type to get started with configuration."}
             </Typography>
 
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                    <IntegrationCard
-                        title="REST API"
-                        description="Share data via endpoints with JSON responses"
-                        buttonText="Configure"
-                        buttonColor="#3B82F6"
-                        onClick={handleConfigure('/integration-catalog/rest-api-integration')}
-                        onEdit={handleEdit('/integration-catalog/rest-api-integration')}
-                        onDeconfigure={handleDeconfigure('rest-api')}
-                        configurationStatus={restApiStatus}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <IntegrationCard
-                        title="GraphQL"
-                        description="Flexible data queries with schema definitions"
-                        buttonText="Configure"
-                        buttonColor="#9333EA"
-                        onClick={handleConfigure('/integration-catalog/graphql-integration')}
-                        onEdit={handleEdit('/integration-catalog/graphql-integration')}
-                        onDeconfigure={handleDeconfigure('graphql')}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <IntegrationCard
-                        title="File Upload"
-                        description="Scheduled file transfers via SFTP/FPS"
-                        buttonText="Configure"
-                        buttonColor="#F97316"
-                        onClick={handleConfigure('/integration-catalog/file-upload-integration')}
-                        onEdit={handleEdit('/integration-catalog/file-upload-integration')}
-                        onDeconfigure={handleDeconfigure('file-upload')}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <IntegrationCard
-                        title="Custom Integration"
-                        description="Special requirements? Contact our team"
-                        buttonText="Request"
-                        buttonColor="#6B7280"
-                        onClick={handleRequest}
-                        isCustomIntegration={true}
-                    />
-                </Grid>
-            </Grid>
+            {!selectedProduct ? (
+                <ProductSelection
+                    selectedProduct={selectedProduct}
+                    onProductSelect={handleProductSelect}
+                />
+            ) : (
+                <>
+                    <Box sx={{ mb: 4 }}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => setSelectedProduct("")}
+                            sx={{ mr: 2 }}
+                        >
+                            Change Product
+                        </Button>
+                        <Typography
+                            component="span"
+                            sx={{
+                                color: '#4B5563',
+                                fontSize: '0.875rem'
+                            }}
+                        >
+                            Selected Product: {selectedProduct}
+                        </Typography>
+                    </Box>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <IntegrationCard
+                                title="REST API"
+                                description="Share data via endpoints with JSON responses"
+                                buttonText="Configure"
+                                buttonColor="#3B82F6"
+                                onClick={handleConfigure('/integration-catalog/rest-api-integration')}
+                                onEdit={handleEdit('/integration-catalog/rest-api-integration')}
+                                onDeconfigure={handleDeconfigure('rest-api')}
+                                configurationStatus={restApiStatus}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <IntegrationCard
+                                title="GraphQL"
+                                description="Flexible data queries with schema definitions"
+                                buttonText="Configure"
+                                buttonColor="#9333EA"
+                                onClick={handleConfigure('/integration-catalog/graphql-integration')}
+                                onEdit={handleEdit('/integration-catalog/graphql-integration')}
+                                onDeconfigure={handleDeconfigure('graphql')}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <IntegrationCard
+                                title="File Upload"
+                                description="Scheduled file transfers via SFTP/FPS"
+                                buttonText="Configure"
+                                buttonColor="#F97316"
+                                onClick={handleConfigure('/integration-catalog/file-upload-integration')}
+                                onEdit={handleEdit('/integration-catalog/file-upload-integration')}
+                                onDeconfigure={handleDeconfigure('file-upload')}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <IntegrationCard
+                                title="Custom Integration"
+                                description="Special requirements? Contact our team"
+                                buttonText="Request"
+                                buttonColor="#6B7280"
+                                onClick={handleRequest}
+                                isCustomIntegration={true}
+                            />
+                        </Grid>
+                    </Grid>
+                </>
+            )}
         </Box>
     );
 };

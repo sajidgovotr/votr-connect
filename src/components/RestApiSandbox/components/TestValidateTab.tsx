@@ -107,7 +107,7 @@ const TestValidateTab = ({
                 newFormData[index] = { ...newFormData[index], type: 'file', value: '' };
             }
         } else {
-            (newFormData[index] as any)[field] = value;
+            (newFormData[index] as FormDataItem)[field] = value as string;
         }
         setFormData(newFormData);
     };

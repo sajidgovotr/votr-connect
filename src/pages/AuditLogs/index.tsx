@@ -4,6 +4,15 @@ import { PageHeader, Table, Search, SelectBox, CustomButton } from '@/components
 import { useNavigate } from 'react-router';
 import type { Label } from '@/types';
 
+interface AuditLog {
+    id: string;
+    timestamp: string;
+    user: string;
+    type: string;
+    clientResource: string;
+    details: string;
+}
+
 const columns = [
     { key: 'timestamp', name: 'Timestamp', minWidth: 170 },
     { key: 'user', name: 'User', minWidth: 130 },
@@ -59,7 +68,7 @@ const AuditLogs = () => {
     const [userRole, setUserRole] = React.useState('all');
     const [dateRange, setDateRange] = React.useState('7d');
 
-    const handleRowClick = (row: any) => {
+    const handleRowClick = (row: AuditLog) => {
         navigate(`/audit-logs/${row.id}`);
     };
 

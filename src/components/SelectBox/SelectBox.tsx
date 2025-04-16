@@ -56,11 +56,13 @@ const SelectBox = (props: ISelectProps) => {
     } = props;
     const handleChange = (
         event: SelectChangeEvent<unknown>,
-        child?: any // need to fix
+        child: React.ReactNode
     ) => {
         handleChangeValue(
             event.target.value as string,
-            child.props.children as string
+            typeof child === 'object' && child !== null && 'props' in child && typeof child.props === 'object' && child.props !== null && 'children' in child.props
+                ? (child.props.children as string)
+                : undefined
         );
     };
 

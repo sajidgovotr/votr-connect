@@ -10,7 +10,8 @@ import {
     Select,
     FormHelperText,
     Paper,
-    Divider
+    Divider,
+    SelectChangeEvent
 } from '@mui/material';
 import { useState } from 'react';
 import CustomButton from '../CustomButton';
@@ -46,7 +47,7 @@ const NewRequestModal = ({ open, onClose, onSubmit }: NewRequestModalProps) => {
         onClose();
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -120,7 +121,7 @@ const NewRequestModal = ({ open, onClose, onSubmit }: NewRequestModalProps) => {
                                 label="Request Type"
                                 name="type"
                                 displayEmpty
-                                onChange={(e) => handleChange(e as any)}
+                                onChange={handleChange}
                                 sx={{
                                     backgroundColor: '#F9FAFB',
                                     '&:hover': {
@@ -152,7 +153,7 @@ const NewRequestModal = ({ open, onClose, onSubmit }: NewRequestModalProps) => {
                                 label="Environment"
                                 name="environment"
                                 displayEmpty
-                                onChange={(e) => handleChange(e as any)}
+                                onChange={handleChange}
                                 sx={{
                                     backgroundColor: '#F9FAFB',
                                     '&:hover': {
