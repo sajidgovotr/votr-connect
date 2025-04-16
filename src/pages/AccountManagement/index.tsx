@@ -6,9 +6,7 @@ import APIKeys from "@/components/APIKeys";
 import SecuritySettings from "@/components/SecuritySettings";
 
 const AccountManagement = () => {
-    const handleSubmit = (data: any) => {
-        console.log('Form submitted:', data);
-    };
+    const handleSubmit = () => { };
 
     const tabs = [
         {

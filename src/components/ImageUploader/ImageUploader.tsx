@@ -72,7 +72,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         <Box
             {...getRootProps()}
             sx={{
-                background: file ? `url(${(file as any).preview})` : "",
+                background: file ? `url(${(file as unknown as { preview: string }).preview})` : "",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
                 backgroundSize: "cover",

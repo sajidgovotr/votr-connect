@@ -9,7 +9,7 @@ import { USERS } from "@/constants/roles";
 const useLogin = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [_login, { isLoading, }] = useLoginMutation();
+    const [, { isLoading, }] = useLoginMutation();
     const { showSnackbar } = useContext(MessageContext) as IMessageContext;
 
 

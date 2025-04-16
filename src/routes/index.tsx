@@ -31,6 +31,8 @@ import AuditLogs from "@/pages/AuditLogs";
 import AuditLogDetails from "@/pages/AuditLogs/AuditLogDetails";
 import EmailTemplatesPage from "@/pages/EmailTemplates/EmailTemplatesPage";
 import EmailTemplateFormPage from "@/pages/EmailTemplates/EmailTemplateFormPage";
+import ExpressIntegrationPage from "@/pages/ExpressIntegration/ExpressIntegrationPage";
+import ConfiguredProducts from "@/pages/ConfiguredProducts";
 
 
 const Routes = () => {
@@ -42,6 +44,16 @@ const Routes = () => {
         {
           path: "",
           element: <Dashboard />
+        }
+      ]
+    },
+    {
+      path: "/express-integration",
+      element: <PrivateRoute navLink="/express-integration" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <ExpressIntegrationPage />
         }
       ]
     },
@@ -88,9 +100,23 @@ const Routes = () => {
         {
           path: "file-upload-integration",
           element: <FileUploadIntegration />
+        },
+      ]
+    },
+    {
+      path: "/configured-products",
+      element: <PrivateRoute navLink="/configured-products" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <ConfiguredProducts />
         }
       ]
     },
+    // {
+    //   path: "tradingview",
+    //   element: <TradingViewIntegration />
+    // },
     {
       path: "/production-approvals",
       element: <PrivateRoute navLink="/production-approvals" component={AppLayout} />,

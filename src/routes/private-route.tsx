@@ -8,7 +8,7 @@ interface IPrivateRoute {
   navLink: string;
 }
 
-const PrivateRoute = ({ component: Component, navLink, ...rest }: IPrivateRoute) => {
+const PrivateRoute = ({ component: Component, ...rest }: IPrivateRoute) => {
   const token = useSelector((state: RootState) => state.auth.token);
 
   if (token) {

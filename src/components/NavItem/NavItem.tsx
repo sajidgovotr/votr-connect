@@ -53,7 +53,7 @@ const NavItem = (props: SidebarItemProps) => {
                 {active ? icon : iconInactive}
 
                 <Typography
-                    color={active ? "primary" : "neutral.500"}
+                    color={"white"}
                     className={` tracking-[-0.5px] font-[200] text-center ${extendedSidebar() ? "!text-sm" : "!text-[10px]"}`}
                 >
                     {title}
