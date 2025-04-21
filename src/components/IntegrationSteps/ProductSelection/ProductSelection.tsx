@@ -67,7 +67,7 @@ const ProductSelection = ({ selectedProduct, onProductSelect }: ProductSelection
                 Choose the product you want to integrate with your system
             </Typography>
 
-            <FormControl component="fieldset">
+            <FormControl component="fieldset" sx={{ width: '100%' }}>
                 <RadioGroup
                     value={selectedProduct}
                     onChange={(e) => onProductSelect(e.target.value)}
@@ -75,12 +75,15 @@ const ProductSelection = ({ selectedProduct, onProductSelect }: ProductSelection
                     <Grid container spacing={2}>
                         {products.map((product) => (
                             <Grid item xs={12} key={product.id}>
-                                <StyledCard className={selectedProduct === product.id ? 'selected' : ''}>
+                                <StyledCard
+                                    className={selectedProduct === product.id ? 'selected' : ''}
+                                    onClick={() => onProductSelect(product.id)}
+                                >
                                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                        <FormControlLabel
+                                        <Radio
+                                            checked={selectedProduct === product.id}
                                             value={product.id}
-                                            control={<Radio />}
-                                            label=""
+                                            name="product-radio"
                                             sx={{ mr: 1 }}
                                         />
                                         <Box>
