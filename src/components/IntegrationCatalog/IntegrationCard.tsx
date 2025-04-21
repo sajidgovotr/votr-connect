@@ -1,103 +1,115 @@
-import { Box, Button, Typography, Stack } from "@mui/material";
-import Chip from "../Chip";
+import { Box, Typography, Chip as MuiChip } from "@mui/material";
+import { ChevronRight } from '@mui/icons-material';
 
 interface IntegrationCardProps {
     title: string;
     description: string;
-    buttonText: string;
-    buttonColor: string;
     onClick: ((environment: string) => void) | (() => void);
     configurationStatus?: {
         environment: 'dev' | 'staging' | 'prod';
         isConfigured: boolean;
     }[];
     isCustomIntegration?: boolean;
+    isRecommended?: boolean;
+    isSelected?: boolean;
+    icon?: React.ReactNode;
 }
 
 const IntegrationCard = ({
     title,
     description,
-    buttonText,
-    buttonColor,
     onClick,
     configurationStatus = [],
+    isRecommended = false,
+    isSelected = false,
+    icon
 }: IntegrationCardProps) => {
+    const isRestApi = title.includes('REST API');
+
     return (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: 2,
-            position: 'relative',
-            height: '100%'
-        }}>
-            <Box sx={{ width: '100%', position: 'relative' }}>
-                <Button
-                    fullWidth
-                    sx={{
-                        bgcolor: buttonColor,
-                        color: 'white',
-                        py: 2,
-                        fontSize: '1.125rem',
-                        textTransform: 'none',
-                        '&:hover': {
-                            bgcolor: buttonColor,
-                            opacity: 0.9
-                        }
-                    }}
-                >
-                    {title}
-                </Button>
-                <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{
-                        position: 'absolute',
-                        top: -10,
-                        right: -10,
-                        zIndex: 1
-                    }}
-                >
-                    {configurationStatus.map(({ environment, isConfigured }) => (
-                        isConfigured && (
-                            <Chip
-                                key={environment}
-                                name={`${environment} configured`}
-                                className="!bg-green-100 !text-green-800"
+        <Box
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                py: 3,
+                px: 3,
+                border: '1px solid',
+                borderRadius: '12px',
+                backgroundColor: isSelected ? '#f9fafb' : 'white',
+                borderColor: isSelected ? '#e0e7ff' : 'white',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                    borderColor: '#6366f1',
+                    backgroundColor: isSelected ? '#f9fafb' : (isRestApi ? '#f5f7ff' : '#f8fafc'),
+                },
+                width: '100%'
+            }}
+            onClick={() => (onClick as () => void)()}
+        >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
+                {icon}
+                <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography
+                            sx={{
+                                fontSize: '16px',
+                                fontWeight: 500,
+                                color: isSelected ? '#4f46e5' : '#111827'
+                            }}
+                        >
+                            {title}
+                        </Typography>
+                        {isRecommended && (
+                            <MuiChip
+                                label="Recommended"
+                                size="small"
+                                sx={{
+                                    bgcolor: '#dcfce7',
+                                    color: '#15803d',
+                                    fontWeight: 500,
+                                    fontSize: '0.75rem',
+                                    height: '24px',
+                                    borderRadius: '4px',
+                                    ml: 1,
+                                    px: 1
+                                }}
                             />
-                        )
-                    ))}
-                </Stack>
+                        )}
+                        {configurationStatus.map(({ environment, isConfigured }) => (
+                            isConfigured && (
+                                <MuiChip
+                                    key={environment}
+                                    size="small"
+                                    label={`${environment} configured`}
+                                    sx={{
+                                        bgcolor: '#dcfce7',
+                                        color: '#15803d',
+                                        fontWeight: 500,
+                                        fontSize: '0.75rem',
+                                        height: '24px',
+                                        borderRadius: '4px',
+                                        ml: 1,
+                                        px: 1
+                                    }}
+                                />
+                            )
+                        ))}
+                    </Box>
+                    <Typography
+                        sx={{
+                            fontSize: '14px',
+                            color: '#6b7280',
+                            mt: 0.5,
+                            fontWeight: 400
+                        }}
+                    >
+                        {description}
+                    </Typography>
+                </Box>
             </Box>
-            <Box sx={{
-                bgcolor: '#F3F4F6',
-                p: 3,
-                borderRadius: '8px',
-                width: '100%',
-                flexGrow: 1
-            }}>
-                <Typography sx={{ color: '#4B5563', fontSize: '0.875rem' }}>
-                    {description}
-                </Typography>
-            </Box>
-            <Stack direction="column" spacing={2} width="100%">
-                <Button
-                    variant="contained"
-                    onClick={() => (onClick as () => void)()}
-                    sx={{
-                        bgcolor: buttonColor,
-                        color: 'white',
-                        textTransform: 'none',
-                        '&:hover': {
-                            bgcolor: buttonColor,
-                            opacity: 0.9
-                        }
-                    }}
-                >
-                    {buttonText}
-                </Button>
-            </Stack>
+            <ChevronRight sx={{ color: isSelected ? '#4f46e5' : '#9ca3af' }} />
         </Box>
     );
 };

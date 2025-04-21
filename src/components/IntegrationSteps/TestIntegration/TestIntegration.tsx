@@ -67,7 +67,7 @@ const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
     };
 
     const renderConfigurationStep = () => (
-        <StyledCard>
+        <Box>
             <Typography variant="h6" gutterBottom>
                 Test Configuration
             </Typography>
@@ -122,7 +122,7 @@ const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
                     </Button>
                 </Grid>
             </Grid>
-        </StyledCard>
+        </Box>
     );
 
     const renderRunTestStep = () => (
@@ -207,17 +207,26 @@ const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
 
     return (
         <Box>
-            <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-                {TestSteps.map((label) => (
-                    <Step key={label}>
-                        <StepLabel>{label}</StepLabel>
-                    </Step>
-                ))}
-            </Stepper>
+            <Typography variant="h5" sx={{ fontSize: '24px', color: '#111827', fontWeight: 600, mb: 3 }}>
+                Test Your Integration
+            </Typography>
 
-            {activeStep === 0 && renderConfigurationStep()}
-            {activeStep === 1 && renderRunTestStep()}
-            {activeStep === 2 && renderTestResults()}
+            <Box sx={{ display: 'flex' }}>
+                <Box sx={{ width: '240px', mr: 4 }}>
+                    <Stepper activeStep={activeStep} orientation="vertical">
+                        {TestSteps.map((label) => (
+                            <Step key={label}>
+                                <StepLabel>{label}</StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                </Box>
+                <Box sx={{ flexGrow: 1 }}>
+                    {activeStep === 0 && renderConfigurationStep()}
+                    {activeStep === 1 && renderRunTestStep()}
+                    {activeStep === 2 && renderTestResults()}
+                </Box>
+            </Box>
         </Box>
     );
 };
