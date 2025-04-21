@@ -5,7 +5,6 @@ import {
     Grid,
     Radio,
     RadioGroup,
-    FormControlLabel,
     FormControl,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';

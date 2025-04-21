@@ -1,6 +1,5 @@
 import { Box, Typography, Chip as MuiChip } from "@mui/material";
 import { ChevronRight } from '@mui/icons-material';
-import Chip from "../Chip";
 
 interface IntegrationCardProps {
     title: string;
@@ -21,7 +20,6 @@ const IntegrationCard = ({
     description,
     onClick,
     configurationStatus = [],
-    isCustomIntegration = false,
     isRecommended = false,
     isSelected = false,
     icon
