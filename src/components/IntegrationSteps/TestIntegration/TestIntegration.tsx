@@ -186,7 +186,7 @@ const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
                             color="primary"
                             onClick={() => onTestComplete(testStatus === 'success')}
                         >
-                            Complete Integration
+                            Finish
                         </Button>
                         <Button
                             sx={{ ml: 2 }}

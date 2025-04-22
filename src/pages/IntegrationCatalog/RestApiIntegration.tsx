@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router';
 import { ArrowBack } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 
-const steps = ['Basic Info', 'Authentication', 'Data Schema', 'Review'];
+const steps = ['Basic Info', 'Authentication', 'Data Schema', 'Field Mapping', 'Review'];
 
 interface BasicInfoProps {
     selectedEnvironment: string;
@@ -177,6 +177,99 @@ export const DataSchema = () => (
     </Box>
 );
 
+export const FieldMapping = () => {
+    const [mappings, setMappings] = useState([
+        { sourceField: 'id', destinationField: 'shareholderId' },
+        { sourceField: 'name', destinationField: 'fullName' }
+    ]);
+
+    const handleAddMapping = () => {
+        setMappings([...mappings, { sourceField: '', destinationField: '' }]);
+    };
+
+    const handleMappingChange = (index: number, field: 'sourceField' | 'destinationField', value: string) => {
+        const updatedMappings = [...mappings];
+        updatedMappings[index][field] = value;
+        setMappings(updatedMappings);
+    };
+
+    const handleDeleteMapping = (index: number) => {
+        const updatedMappings = [...mappings];
+        updatedMappings.splice(index, 1);
+        setMappings(updatedMappings);
+    };
+
+    return (
+        <Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                Configure Field Mapping
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Map your source fields to destination fields
+            </Typography>
+            <Grid container spacing={3}>
+                <Grid item xs={12}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                        Source to Destination Mapping
+                    </Typography>
+                    <Box sx={{ p: 2, border: '1px solid #E5E7EB', borderRadius: 1, bgcolor: '#F9FAFB', mb: 2 }}>
+                        {mappings.map((mapping, index) => (
+                            <Grid container spacing={2} alignItems="center" sx={{ mb: index !== mappings.length - 1 ? 2 : 0 }} key={index}>
+                                <Grid item xs={5}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        label="Source Field"
+                                        value={mapping.sourceField}
+                                        onChange={(e) => handleMappingChange(index, 'sourceField', e.target.value)}
+                                    />
+                                </Grid>
+                                <Grid item xs={2} sx={{ textAlign: 'center' }}>
+                                    <Typography variant="body2">→</Typography>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        label="Destination Field"
+                                        value={mapping.destinationField}
+                                        onChange={(e) => handleMappingChange(index, 'destinationField', e.target.value)}
+                                    />
+                                </Grid>
+                                <Grid item xs={1} sx={{ textAlign: 'center' }}>
+                                    <Button
+                                        color="error"
+                                        size="small"
+                                        onClick={() => handleDeleteMapping(index)}
+                                        disabled={mappings.length <= 1}
+                                    >
+                                        ✕
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        ))}
+                    </Box>
+                    <Button variant="outlined" sx={{ mt: 1 }} onClick={handleAddMapping}>
+                        + Add Field Mapping
+                    </Button>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                        Transformation Rules
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        multiline
+                        rows={4}
+                        placeholder="// Optional: Add transformation rules or logic"
+                        sx={{ mb: 2 }}
+                    />
+                </Grid>
+            </Grid>
+        </Box>
+    );
+};
+
 const Review = ({ setActiveStep, selectedEnvironment }: { setActiveStep: (step: number) => void, selectedEnvironment: string }) => (
     <Box>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
@@ -221,6 +314,15 @@ const Review = ({ setActiveStep, selectedEnvironment }: { setActiveStep: (step: 
             </Typography>
             <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setActiveStep(2)}>Edit</Button>
         </Box>
+        <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                Field Mapping
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+                2 fields mapped with custom transformations
+            </Typography>
+            <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setActiveStep(3)}>Edit</Button>
+        </Box>
     </Box>
 );
 
@@ -261,6 +363,8 @@ const RestApiIntegration = () => {
             case 2:
                 return <DataSchema />;
             case 3:
+                return <FieldMapping />;
+            case 4:
                 return <Review setActiveStep={setActiveStep} selectedEnvironment={selectedEnvironment} />;
             default:
                 return <BasicInfo

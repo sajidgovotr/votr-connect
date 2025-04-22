@@ -153,9 +153,9 @@ const ExpressIntegrationPage = () => {
                 <Divider sx={{ mb: 3 }} />
 
                 <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-                    {steps.map((label) => (
-                        <Step key={label}>
-                            <StepLabel>{label}</StepLabel>
+                    {steps.map((label, index) => (
+                        <Step sx={{ cursor: 'pointer' }} key={label}>
+                            <StepLabel onClick={() => setActiveStep(index)}>{label}</StepLabel>
                         </Step>
                     ))}
                 </Stepper>
