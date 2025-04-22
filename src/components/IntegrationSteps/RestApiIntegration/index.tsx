@@ -11,7 +11,7 @@ import {
     Button,
     Grid,
 } from '@mui/material';
-import { DataSchema } from '@/pages/IntegrationCatalog/RestApiIntegration';
+import { DataSchema, FieldMapping } from '@/pages/IntegrationCatalog/RestApiIntegration';
 
 interface RestApiIntegrationStepsProps {
     selectedProduct: string;
@@ -31,6 +31,10 @@ const steps = [
     {
         label: 'Data Schema',
         description: 'Define the data structure for your integration',
+    },
+    {
+        label: 'Field Mapping',
+        description: 'Map source fields to destination fields',
     },
     {
         label: 'Review',
@@ -79,6 +83,8 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
             case 2:
                 return true;
             case 3:
+                return true;
+            case 4:
                 return true;
             default:
                 return false;
@@ -185,6 +191,11 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                 );
 
             case 3:
+                return (
+                    <FieldMapping />
+                );
+
+            case 4:
                 return (
                     <Box>
                         <Typography variant="subtitle1" gutterBottom>
