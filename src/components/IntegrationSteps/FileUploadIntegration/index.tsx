@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Box,
     Typography,
@@ -16,6 +16,9 @@ import {
 import TimePicker from '@/components/TimePicker';
 import { useFileUploadIntegrationMutation } from '@/services/express-integration';
 import useMessage from '@/hooks/useMessage';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 interface FileUploadIntegrationStepsProps {
     selectedProduct: string;
@@ -42,190 +45,228 @@ const steps = [
     },
 ];
 
+const schema = yup.object().shape({
+    integrationName: yup.string().required('Integration name is required'),
+    environment: yup.string().required('Environment is required'),
+    timeZone: yup.string().required('Time zone is required'),
+    fileFormat: yup.string().required('File format is required'),
+    fileNamePattern: yup.string().required('File name pattern is required'),
+    maxFileSize: yup.string().required('Max file size is required'),
+    hasHeader: yup.boolean(),
+    protocol: yup.string().required('Protocol is required'),
+    schedule: yup.string().required('Schedule is required'),
+    timeOfDay: yup.string().required('Time of day is required'),
+    // FTP/SFTP specific fields
+    ftpType: yup.string().when('protocol', {
+        is: 'ftp',
+        then: (schema) => schema.required('FTP type is required'),
+    }),
+    host: yup.string().when('protocol', {
+        is: 'ftp',
+        then: (schema) => schema.required('Host is required'),
+    }),
+    port: yup.string().when('protocol', {
+        is: 'ftp',
+        then: (schema) => schema.required('Port is required'),
+    }),
+    username: yup.string().when('protocol', {
+        is: 'ftp',
+        then: (schema) => schema.required('Username is required'),
+    }),
+    password: yup.string().when(['protocol', 'ftpType'], {
+        is: (protocol: string, ftpType: string) => protocol === 'ftp' && ftpType === 'ftp',
+        then: (schema) => schema.required('Password is required'),
+    }),
+    sshKey: yup.string().when(['protocol', 'ftpType'], {
+        is: (protocol: string, ftpType: string) => protocol === 'ftp' && ftpType === 'sftp',
+        then: (schema) => schema.required('SSH key is required'),
+    }),
+    passphrase: yup.string(),
+    // S3 specific fields
+    region: yup.string().when('protocol', {
+        is: 's3',
+        then: (schema) => schema.required('Region is required'),
+    }),
+    bucketName: yup.string().when('protocol', {
+        is: 's3',
+        then: (schema) => schema.required('Bucket name is required'),
+    }),
+    folderPath: yup.string(),
+    arn: yup.string().when('protocol', {
+        is: 's3',
+        then: (schema) => schema.required('ARN is required'),
+    }),
+    accessKey: yup.string().when('protocol', {
+        is: 's3',
+        then: (schema) => schema.required('Access key is required'),
+    }),
+    secretKey: yup.string().when('protocol', {
+        is: 's3',
+        then: (schema) => schema.required('Secret key is required'),
+    }),
+});
+
+type FormData = yup.InferType<typeof schema>;
+
 const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUploadIntegrationStepsProps) => {
-    const [activeStep, setActiveStep] = useState(0);
-    const [fileUploadIntegration, { isLoading }] = useFileUploadIntegrationMutation();
-    const { showSnackbar } = useMessage()
-    const [formData, setFormData] = useState({
-        integrationName: '',
-        environment: 'dev',
-        protocol: 'ftp',
-        host: '',
-        port: '',
-        username: '',
-        password: '',
-        fileTypes: 'csv,xlsx',
-        maxFileSize: '10',
-        validateContent: true,
-        schedule: 'daily',
-        timeOfDay: '',
-        fileName: '',
-        fileFormat: 'xlsx',
-        fileNamePattern: '',
-        hasHeader: true,
-        timeZone: 'UTC',
-        // FTP/SFTP specific fields
-        ftpType: 'ftp',
-        sshKey: '',
-        passphrase: '',
-        // S3 specific fields
-        region: '',
-        bucketName: '',
-        folderPath: '',
-        arn: '',
-        accessKey: '',
-        secretKey: '',
+    const [activeStep, setActiveStep] = React.useState(0);
+    const [fileUploadIntegration] = useFileUploadIntegrationMutation();
+    const { showSnackbar } = useMessage();
+
+    const {
+        control,
+        handleSubmit,
+        watch,
+        formState: { errors, isSubmitting },
+        trigger,
+    } = useForm<FormData>({
+        resolver: yupResolver(schema),
+        defaultValues: {
+            environment: 'dev',
+            protocol: 'ftp',
+            ftpType: 'ftp',
+            fileFormat: 'xlsx',
+            hasHeader: true,
+            timeZone: 'UTC',
+            schedule: 'daily',
+        },
+        mode: 'onChange',
     });
 
+    const protocol = watch('protocol');
+    const ftpType = watch('ftpType');
 
     const handleNext = async () => {
         if (activeStep === steps.length - 1) {
-            return await handleSubmit()
+            return await handleSubmit(onSubmit)();
         }
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
+        // Validate current step before proceeding
+        const currentStepFields = getStepFields(activeStep);
+        const isValid = await trigger(currentStepFields);
+
+        if (isValid) {
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
+    };
+
+    const getStepFields = (step: number): (keyof FormData)[] => {
+        switch (step) {
+            case 0:
+                return ['integrationName', 'environment', 'timeZone'];
+            case 1:
+                return ['fileFormat', 'fileNamePattern', 'maxFileSize'];
+            case 2:
+                if (protocol === 'ftp') {
+                    return ['protocol', 'ftpType', 'host', 'port', 'username',
+                        ftpType === 'ftp' ? 'password' : 'sshKey'];
+                } else {
+                    return ['protocol', 'region', 'bucketName', 'arn', 'accessKey', 'secretKey'];
+                }
+            default:
+                return [];
+        }
     };
 
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    const handleInputChange = (field: keyof typeof formData, value?: string) => (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setFormData({
-            ...formData,
-            [field]: value || event.target.value,
-        });
-    };
+    const onSubmit = async (data: FormData) => {
+        try {
+            let payload;
 
-    const handleSwitchChange = (field: keyof typeof formData) => (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setFormData({
-            ...formData,
-            [field]: event.target.checked,
-        });
-    };
-
-    const handleSubmit = async () => {
-        let payload;
-
-        if (formData.protocol === 'ftp') {
-            if (formData.ftpType === 'ftp') {
-                payload = {
-                    name: formData.integrationName,
-                    fileFormat: formData.fileFormat.toUpperCase(),
-                    fileNamePattern: formData.fileNamePattern,
-                    isHeaderRowIncluded: formData.hasHeader,
-                    transferFrequency: formData.schedule,
-                    timeOfDay: formData.timeOfDay,
-                    timeZone: formData.timeZone,
-                    afterSuccessfulTransferAction: "archive",
-                    afterFailedTransferAction: "retry",
-                    url: formData.host,
-                    ftp: {
-                        host: formData.host,
-                        port: parseInt(formData.port),
-                        type: formData.ftpType,
-                        ftpAuthentication: {
-                            type: "password",
-                            username: formData.username,
-                            password: formData.password
+            if (data.protocol === 'ftp') {
+                if (data.ftpType === 'ftp') {
+                    payload = {
+                        name: data.integrationName,
+                        fileFormat: data.fileFormat.toUpperCase(),
+                        fileNamePattern: data.fileNamePattern,
+                        isHeaderRowIncluded: data.hasHeader,
+                        transferFrequency: data.schedule,
+                        timeOfDay: data.timeOfDay,
+                        timeZone: data.timeZone,
+                        afterSuccessfulTransferAction: "archive",
+                        afterFailedTransferAction: "retry",
+                        url: data.host,
+                        ftp: {
+                            host: data.host,
+                            port: parseInt(data.port || ''),
+                            type: data.ftpType,
+                            ftpAuthentication: {
+                                type: "password",
+                                username: data.username,
+                                password: data.password
+                            }
                         }
-                    }
-                };
-            } else if (formData.ftpType === 'sftp') {
+                    };
+                } else {
+                    payload = {
+                        name: data.integrationName,
+                        fileFormat: data.fileFormat.toUpperCase(),
+                        fileNamePattern: data.fileNamePattern,
+                        isHeaderRowIncluded: data.hasHeader,
+                        transferFrequency: data.schedule,
+                        timeOfDay: data.timeOfDay,
+                        timeZone: data.timeZone,
+                        afterSuccessfulTransferAction: "archive",
+                        afterFailedTransferAction: "retry",
+                        url: data.host,
+                        ftp: {
+                            host: data.host,
+                            port: parseInt(data.port || ''),
+                            type: data.ftpType,
+                            ftpAuthentication: {
+                                type: "sshKey",
+                                username: data.username,
+                                sshKey: data.sshKey,
+                                passphrase: data.passphrase
+                            }
+                        }
+                    };
+                }
+            } else {
                 payload = {
-                    name: formData.integrationName,
-                    fileFormat: formData.fileFormat.toUpperCase(),
-                    fileNamePattern: formData.fileNamePattern,
-                    isHeaderRowIncluded: formData.hasHeader,
-                    transferFrequency: formData.schedule,
-                    timeOfDay: formData.timeOfDay,
-                    timeZone: formData.timeZone,
+                    name: data.integrationName,
+                    fileFormat: data.fileFormat.toUpperCase(),
+                    fileNamePattern: data.fileNamePattern,
+                    isHeaderRowIncluded: data.hasHeader,
+                    transferFrequency: data.schedule,
+                    timeOfDay: data.timeOfDay,
+                    timeZone: data.timeZone,
                     afterSuccessfulTransferAction: "archive",
                     afterFailedTransferAction: "retry",
-                    url: formData.host,
-                    ftp: {
-                        host: formData.host,
-                        port: parseInt(formData.port),
-                        type: formData.ftpType,
-                        ftpAuthentication: {
-                            type: "sshKey",
-                            username: formData.username,
-                            sshKey: formData.sshKey,
-                            passphrase: formData.passphrase
+                    url: `s3://${data.bucketName}.s3.${data.region}.amazonaws.com${data.folderPath || ''}`,
+                    amazonS3Details: {
+                        region: data.region,
+                        bucketName: data.bucketName,
+                        folderPath: data.folderPath || '',
+                        amazonS3Authentication: {
+                            authenticationMethod: "accessKey",
+                            ARN: data.arn,
+                            accessKey: data.accessKey,
+                            secretKey: data.secretKey
                         }
                     }
                 };
             }
-        } else if (formData.protocol === 's3') {
-            payload = {
-                name: formData.integrationName,
-                fileFormat: formData.fileFormat.toUpperCase(),
-                fileNamePattern: formData.fileNamePattern,
-                isHeaderRowIncluded: formData.hasHeader,
-                transferFrequency: formData.schedule,
-                timeOfDay: formData.timeOfDay,
-                timeZone: formData.timeZone,
-                afterSuccessfulTransferAction: "archive",
-                afterFailedTransferAction: "retry",
-                url: `s3://${formData.bucketName}.s3.${formData.region}.amazonaws.com${formData.folderPath}`,
-                amazonS3Details: {
-                    region: formData.region,
-                    bucketName: formData.bucketName,
-                    folderPath: formData.folderPath,
-                    amazonS3Authentication: {
-                        authenticationMethod: "accessKey",
-                        ARN: formData.arn,
-                        accessKey: formData.accessKey,
-                        secretKey: formData.secretKey
-                    }
-                }
-            };
-        }
 
-        const response = await fileUploadIntegration(payload);
-        if (response.error) {
-            showSnackbar('Failed to create integration', '', 'error')
-        } else {
-            showSnackbar('Integration created successfully', '', 'success')
-            onStepComplete(true);
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            const response = await fileUploadIntegration(payload);
+            if (response.error) {
+                showSnackbar('Failed to create integration', '', 'error');
+            } else {
+                showSnackbar('Integration created successfully', '', 'success');
+                onStepComplete(true);
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            }
+        } catch (error) {
+            showSnackbar('An error occurred while creating the integration', '', 'error');
         }
     };
 
     const isStepValid = (step: number) => {
-        switch (step) {
-            case 0:
-                return !!formData.integrationName && !!formData.environment;
-            case 1:
-                return !!formData.fileTypes && !!formData.maxFileSize;
-            case 2:
-                if (formData.protocol === 'ftp') {
-                    return (
-                        !!formData.protocol &&
-                        !!formData.host &&
-                        !!formData.port &&
-                        !!formData.username &&
-                        (formData.ftpType === 'ftp' ? !!formData.password : !!formData.sshKey)
-                    );
-                } else if (formData.protocol === 's3') {
-                    return (
-                        !!formData.protocol &&
-                        !!formData.region &&
-                        !!formData.bucketName &&
-                        !!formData.arn &&
-                        !!formData.accessKey &&
-                        !!formData.secretKey
-                    );
-                }
-                return false;
-            case 3:
-                return true;
-            default:
-                return false;
-        }
+        const stepFields = getStepFields(step);
+        return stepFields.every(field => !errors[field]);
     };
 
     const renderStepContent = (step: number) => {
@@ -234,47 +275,65 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                 return (
                     <Grid container spacing={3}>
                         <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                label="Integration Name"
-                                required
-                                value={formData.integrationName}
-                                onChange={handleInputChange('integrationName')}
+                            <Controller
+                                name="integrationName"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        label="Integration Name"
+                                        error={!!errors.integrationName}
+                                        helperText={errors.integrationName?.message}
+                                    />
+                                )}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Environment"
-                                value={formData.environment}
-                                onChange={handleInputChange('environment')}
-                                required
-                            >
-                                <MenuItem value="dev">Development</MenuItem>
-                                <MenuItem value="staging">Staging</MenuItem>
-                                <MenuItem value="prod">Production</MenuItem>
-                            </TextField>
+                            <Controller
+                                name="environment"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        select
+                                        label="Environment"
+                                        error={!!errors.environment}
+                                        helperText={errors.environment?.message}
+                                    >
+                                        <MenuItem value="dev">Development</MenuItem>
+                                        <MenuItem value="staging">Staging</MenuItem>
+                                        <MenuItem value="prod">Production</MenuItem>
+                                    </TextField>
+                                )}
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Time Zone"
-                                value={formData.timeZone}
-                                onChange={handleInputChange('timeZone')}
-                                required
-                            >
-                                <MenuItem value="UTC">UTC</MenuItem>
-                                <MenuItem value="America/New_York">America/New_York</MenuItem>
-                                <MenuItem value="Europe/London">Europe/London</MenuItem>
-                                <MenuItem value="Asia/Tokyo">Asia/Tokyo</MenuItem>
-                                <MenuItem value="Australia/Sydney">Australia/Sydney</MenuItem>
-                                <MenuItem value="Asia/Dubai">Asia/Dubai</MenuItem>
-                                <MenuItem value="Asia/Kolkata">Asia/Kolkata</MenuItem>
-                                <MenuItem value="Europe/Paris">Europe/Paris</MenuItem>
-                                <MenuItem value="America/Los_Angeles">America/Los_Angeles</MenuItem>
-                            </TextField>
+                            <Controller
+                                name="timeZone"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        select
+                                        label="Time Zone"
+                                        error={!!errors.timeZone}
+                                        helperText={errors.timeZone?.message}
+                                    >
+                                        <MenuItem value="UTC">UTC</MenuItem>
+                                        <MenuItem value="America/New_York">America/New_York</MenuItem>
+                                        <MenuItem value="Europe/London">Europe/London</MenuItem>
+                                        <MenuItem value="Asia/Tokyo">Asia/Tokyo</MenuItem>
+                                        <MenuItem value="Australia/Sydney">Australia/Sydney</MenuItem>
+                                        <MenuItem value="Asia/Dubai">Asia/Dubai</MenuItem>
+                                        <MenuItem value="Asia/Kolkata">Asia/Kolkata</MenuItem>
+                                        <MenuItem value="Europe/Paris">Europe/Paris</MenuItem>
+                                        <MenuItem value="America/Los_Angeles">America/Los_Angeles</MenuItem>
+                                    </TextField>
+                                )}
+                            />
                         </Grid>
                     </Grid>
                 );
@@ -282,69 +341,73 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
             case 1:
                 return (
                     <Grid container spacing={3}>
-                        {/* <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                label="File Name"
-                                required
-                                value={formData.fileName}
-                                onChange={handleInputChange('fileName')}
-                            />
-                        </Grid> */}
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="File Format"
-                                required
-                                value={formData.fileFormat}
-                                onChange={handleInputChange('fileFormat')}
-                            >
-                                <MenuItem value="xlsx">XLSX</MenuItem>
-                                <MenuItem value="csv">CSV</MenuItem>
-                                <MenuItem value="txt">TXT</MenuItem>
-                                <MenuItem value="json">JSON</MenuItem>
-                            </TextField>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="File Name Pattern"
-                                required
-                                value={formData.fileNamePattern}
-                                onChange={handleInputChange('fileNamePattern')}
-                                helperText="e.g., data_*.xlsx, report_*.csv"
+                            <Controller
+                                name="fileFormat"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        select
+                                        label="File Format"
+                                        error={!!errors.fileFormat}
+                                        helperText={errors.fileFormat?.message}
+                                    >
+                                        <MenuItem value="xlsx">XLSX</MenuItem>
+                                        <MenuItem value="csv">CSV</MenuItem>
+                                        <MenuItem value="txt">TXT</MenuItem>
+                                        <MenuItem value="json">JSON</MenuItem>
+                                    </TextField>
+                                )}
                             />
                         </Grid>
-                        {/* <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                label="Allowed File Types (comma-separated)"
-                                required
-                                value={formData.fileTypes}
-                                onChange={handleInputChange('fileTypes')}
-                                placeholder="csv,xlsx,txt"
-                            />
-                        </Grid> */}
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                label="Max File Size (MB)"
-                                required
-                                type="number"
-                                value={formData.maxFileSize}
-                                onChange={handleInputChange('maxFileSize')}
+                            <Controller
+                                name="fileNamePattern"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        label="File Name Pattern"
+                                        error={!!errors.fileNamePattern}
+                                        helperText={errors.fileNamePattern?.message || "e.g., data_*.xlsx, report_*.csv"}
+                                    />
+                                )}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Controller
+                                name="maxFileSize"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        label="Max File Size (MB)"
+                                        type="number"
+                                        error={!!errors.maxFileSize}
+                                        helperText={errors.maxFileSize?.message}
+                                    />
+                                )}
                             />
                         </Grid>
                         <Grid item xs={6}>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={formData.hasHeader}
-                                        onChange={handleSwitchChange('hasHeader')}
+                            <Controller
+                                name="hasHeader"
+                                control={control}
+                                render={({ field }) => (
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                        }
+                                        label="File Contains Header Row"
                                     />
-                                }
-                                label="File Contains Header Row"
+                                )}
                             />
                         </Grid>
                     </Grid>
@@ -354,51 +417,75 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                 return (
                     <Grid container spacing={3}>
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Transfer Protocol"
-                                value={formData.protocol}
-                                onChange={handleInputChange('protocol')}
-                                required
-                            >
-                                <MenuItem value="ftp">FTP/SFTP</MenuItem>
-                                <MenuItem value="s3">Amazon S3</MenuItem>
-                            </TextField>
-                        </Grid>
-
-                        {formData.protocol === 'ftp' && (
-                            <>
-                                <Grid item xs={12} md={6}>
+                            <Controller
+                                name="protocol"
+                                control={control}
+                                render={({ field }) => (
                                     <TextField
+                                        {...field}
                                         fullWidth
                                         select
-                                        label="Type"
-                                        value={formData.ftpType}
-                                        onChange={handleInputChange('ftpType')}
-                                        required
+                                        label="Transfer Protocol"
+                                        error={!!errors.protocol}
+                                        helperText={errors.protocol?.message}
                                     >
-                                        <MenuItem value="ftp">FTP</MenuItem>
-                                        <MenuItem value="sftp">SFTP</MenuItem>
+                                        <MenuItem value="ftp">FTP/SFTP</MenuItem>
+                                        <MenuItem value="s3">Amazon S3</MenuItem>
                                     </TextField>
-                                </Grid>
+                                )}
+                            />
+                        </Grid>
+
+                        {protocol === 'ftp' && (
+                            <>
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Host"
-                                        required
-                                        value={formData.host}
-                                        onChange={handleInputChange('host')}
+                                    <Controller
+                                        name="ftpType"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                select
+                                                label="Type"
+                                                error={!!errors.ftpType}
+                                                helperText={errors.ftpType?.message}
+                                            >
+                                                <MenuItem value="ftp">FTP</MenuItem>
+                                                <MenuItem value="sftp">SFTP</MenuItem>
+                                            </TextField>
+                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Port"
-                                        required
-                                        type="number"
-                                        value={formData.port}
-                                        onChange={handleInputChange('port')}
+                                    <Controller
+                                        name="host"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Host"
+                                                error={!!errors.host}
+                                                helperText={errors.host?.message}
+                                            />
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <Controller
+                                        name="port"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Port"
+                                                type="number"
+                                                error={!!errors.port}
+                                                helperText={errors.port?.message}
+                                            />
+                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -406,58 +493,86 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                                         Authentication
                                     </Typography>
                                 </Grid>
-                                {formData.ftpType === 'ftp' ? (
+                                {ftpType === 'ftp' ? (
                                     <>
                                         <Grid item xs={12} md={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Username"
-                                                required
-                                                value={formData.username}
-                                                onChange={handleInputChange('username')}
+                                            <Controller
+                                                name="username"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        fullWidth
+                                                        label="Username"
+                                                        error={!!errors.username}
+                                                        helperText={errors.username?.message}
+                                                    />
+                                                )}
                                             />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Password"
-                                                required
-                                                type="password"
-                                                value={formData.password}
-                                                onChange={handleInputChange('password')}
+                                            <Controller
+                                                name="password"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        fullWidth
+                                                        label="Password"
+                                                        type="password"
+                                                        error={!!errors.password}
+                                                        helperText={errors.password?.message}
+                                                    />
+                                                )}
                                             />
                                         </Grid>
                                     </>
                                 ) : (
                                     <>
                                         <Grid item xs={12} md={6}>
-                                            <TextField
-                                                fullWidth
-                                                label="Username"
-                                                required
-                                                value={formData.username}
-                                                onChange={handleInputChange('username')}
+                                            <Controller
+                                                name="username"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        fullWidth
+                                                        label="Username"
+                                                        error={!!errors.username}
+                                                        helperText={errors.username?.message}
+                                                    />
+                                                )}
                                             />
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="SSH Key"
-                                                required
-                                                multiline
-                                                rows={4}
-                                                value={formData.sshKey}
-                                                onChange={handleInputChange('sshKey')}
-                                                helperText="Paste your SSH private key here"
+                                            <Controller
+                                                name="sshKey"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        fullWidth
+                                                        label="SSH Key"
+                                                        multiline
+                                                        rows={4}
+                                                        error={!!errors.sshKey}
+                                                        helperText={errors.sshKey?.message || "Paste your SSH private key here"}
+                                                    />
+                                                )}
                                             />
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <TextField
-                                                fullWidth
-                                                label="Passphrase (Optional)"
-                                                type="password"
-                                                value={formData.passphrase}
-                                                onChange={handleInputChange('passphrase')}
+                                            <Controller
+                                                name="passphrase"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        fullWidth
+                                                        label="Passphrase (Optional)"
+                                                        type="password"
+                                                    />
+                                                )}
                                             />
                                         </Grid>
                                     </>
@@ -465,34 +580,50 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                             </>
                         )}
 
-                        {formData.protocol === 's3' && (
+                        {protocol === 's3' && (
                             <>
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Region"
-                                        required
-                                        value={formData.region}
-                                        onChange={handleInputChange('region')}
-                                        helperText="e.g., us-east-1"
+                                    <Controller
+                                        name="region"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Region"
+                                                error={!!errors.region}
+                                                helperText={errors.region?.message || "e.g., us-east-1"}
+                                            />
+                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Bucket Name"
-                                        required
-                                        value={formData.bucketName}
-                                        onChange={handleInputChange('bucketName')}
+                                    <Controller
+                                        name="bucketName"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Bucket Name"
+                                                error={!!errors.bucketName}
+                                                helperText={errors.bucketName?.message}
+                                            />
+                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Folder Path"
-                                        value={formData.folderPath}
-                                        onChange={handleInputChange('folderPath')}
-                                        helperText="Optional path within the bucket"
+                                    <Controller
+                                        name="folderPath"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Folder Path"
+                                                helperText="Optional path within the bucket"
+                                            />
+                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -501,108 +632,133 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="ARN"
-                                        required
-                                        value={formData.arn}
-                                        onChange={handleInputChange('arn')}
-                                        helperText="Amazon Resource Name"
+                                    <Controller
+                                        name="arn"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="ARN"
+                                                error={!!errors.arn}
+                                                helperText={errors.arn?.message || "Amazon Resource Name"}
+                                            />
+                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Access Key"
-                                        required
-                                        value={formData.accessKey}
-                                        onChange={handleInputChange('accessKey')}
+                                    <Controller
+                                        name="accessKey"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Access Key"
+                                                error={!!errors.accessKey}
+                                                helperText={errors.accessKey?.message}
+                                            />
+                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Secret Key"
-                                        required
-                                        type="password"
-                                        value={formData.secretKey}
-                                        onChange={handleInputChange('secretKey')}
+                                    <Controller
+                                        name="secretKey"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Secret Key"
+                                                type="password"
+                                                error={!!errors.secretKey}
+                                                helperText={errors.secretKey?.message}
+                                            />
+                                        )}
                                     />
                                 </Grid>
                             </>
                         )}
 
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Schedule"
-                                value={formData.schedule}
-                                onChange={handleInputChange('schedule')}
-                            >
-                                <MenuItem value="daily">Daily</MenuItem>
-                                <MenuItem value="weekly">Weekly</MenuItem>
-                                <MenuItem value="monthly">Monthly</MenuItem>
-                            </TextField>
+                            <Controller
+                                name="schedule"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        select
+                                        label="Schedule"
+                                        error={!!errors.schedule}
+                                        helperText={errors.schedule?.message}
+                                    >
+                                        <MenuItem value="daily">Daily</MenuItem>
+                                        <MenuItem value="weekly">Weekly</MenuItem>
+                                        <MenuItem value="monthly">Monthly</MenuItem>
+                                    </TextField>
+                                )}
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <TimePicker
-                                label="Time of Day"
-                                value={formData.timeOfDay}
-                                onChangeValue={(value) => handleInputChange('timeOfDay', value)}
+                            <Controller
+                                name="timeOfDay"
+                                control={control}
+                                render={({ field }) => (
+                                    <TimePicker
+                                        label="Time of Day"
+                                        value={field.value}
+                                        onChangeValue={field.onChange}
+                                    />
+                                )}
                             />
                         </Grid>
                     </Grid>
                 );
 
             case 3:
+                const formValues = watch();
                 return (
                     <Box>
                         <Typography variant="subtitle1" gutterBottom>
                             Configuration Summary
                         </Typography>
                         <Typography variant="body2">
-                            Integration Name: {formData.integrationName}
+                            Integration Name: {formValues.integrationName}
                         </Typography>
                         <Typography variant="body2">
-                            Environment: {formData.environment}
+                            Environment: {formValues.environment}
                         </Typography>
                         <Typography variant="body2">
-                            File Name: {formData.fileName}
+                            File Format: {formValues.fileFormat?.toUpperCase()}
                         </Typography>
                         <Typography variant="body2">
-                            File Format: {formData.fileFormat.toUpperCase()}
+                            File Name Pattern: {formValues.fileNamePattern}
                         </Typography>
                         <Typography variant="body2">
-                            File Name Pattern: {formData.fileNamePattern}
+                            Has Header: {formValues.hasHeader ? 'Yes' : 'No'}
                         </Typography>
                         <Typography variant="body2">
-                            Has Header: {formData.hasHeader ? 'Yes' : 'No'}
+                            Max File Size: {formValues.maxFileSize} MB
                         </Typography>
                         <Typography variant="body2">
-                            File Types: {formData.fileTypes}
+                            Protocol: {formValues.protocol?.toUpperCase()}
                         </Typography>
-                        <Typography variant="body2">
-                            Max File Size: {formData.maxFileSize} MB
-                        </Typography>
-                        <Typography variant="body2">
-                            Protocol: {formData.protocol.toUpperCase()}
-                        </Typography>
-                        {formData.protocol === 'ftp' && (
+                        {formValues.protocol === 'ftp' && (
                             <>
                                 <Typography variant="body2">
-                                    Type: {formData.ftpType.toUpperCase()}
+                                    Type: {formValues.ftpType?.toUpperCase()}
                                 </Typography>
                                 <Typography variant="body2">
-                                    Host: {formData.host}
+                                    Host: {formValues.host}
                                 </Typography>
                                 <Typography variant="body2">
-                                    Port: {formData.port}
+                                    Port: {formValues.port}
                                 </Typography>
-                                {formData.ftpType === 'ftp' ? (
+                                {formValues.ftpType === 'ftp' ? (
                                     <>
                                         <Typography variant="body2">
-                                            Username: {formData.username}
+                                            Username: {formValues.username}
                                         </Typography>
                                         <Typography variant="body2">
                                             Password: ********
@@ -614,28 +770,28 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                                             SSH Key: ********
                                         </Typography>
                                         <Typography variant="body2">
-                                            Passphrase: {formData.passphrase ? 'Set' : 'Not Set'}
+                                            Passphrase: {formValues.passphrase ? 'Set' : 'Not Set'}
                                         </Typography>
                                     </>
                                 )}
                             </>
                         )}
-                        {formData.protocol === 's3' && (
+                        {formValues.protocol === 's3' && (
                             <>
                                 <Typography variant="body2">
-                                    Region: {formData.region}
+                                    Region: {formValues.region}
                                 </Typography>
                                 <Typography variant="body2">
-                                    Bucket Name: {formData.bucketName}
+                                    Bucket Name: {formValues.bucketName}
                                 </Typography>
                                 <Typography variant="body2">
-                                    Folder Path: {formData.folderPath || 'Root'}
+                                    Folder Path: {formValues.folderPath || 'Root'}
                                 </Typography>
                                 <Typography variant="body2">
-                                    ARN: {formData.arn}
+                                    ARN: {formValues.arn}
                                 </Typography>
                                 <Typography variant="body2">
-                                    Access Key: {formData.accessKey}
+                                    Access Key: {formValues.accessKey}
                                 </Typography>
                                 <Typography variant="body2">
                                     Secret Key: ********
@@ -643,10 +799,10 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                             </>
                         )}
                         <Typography variant="body2">
-                            Schedule: {formData.schedule}
+                            Schedule: {formValues.schedule}
                         </Typography>
                         <Typography variant="body2">
-                            Time of Day: {formData.timeOfDay}
+                            Time of Day: {formValues.timeOfDay}
                         </Typography>
                     </Box>
                 );
@@ -677,7 +833,7 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                                     variant="contained"
                                     onClick={handleNext}
                                     sx={{ mt: 1, mr: 1 }}
-                                    disabled={!isStepValid(index)}
+                                    disabled={!isStepValid(index) || isSubmitting}
                                 >
                                     {index === steps.length - 1 ? 'Finish' : 'Continue'}
                                 </Button>

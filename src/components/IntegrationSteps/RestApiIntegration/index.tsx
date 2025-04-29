@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 import {
     Box,
     Typography,
@@ -10,40 +13,16 @@ import {
     MenuItem,
     Button,
     Grid,
+    IconButton,
 } from '@mui/material';
-import { DataSchema, FieldMapping } from '@/pages/IntegrationCatalog/RestApiIntegration';
 import { useRestApiIntegrationMutation } from '@/services/express-integration';
 import useMessage from '@/hooks/useMessage';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface RestApiIntegrationStepsProps {
     selectedProduct: string;
     selectedEnvironment: string;
     onStepComplete: (completed: boolean) => void;
-}
-
-interface DataSchemaState {
-    schemaName: string;
-    endpoint: string;
-    fields: Array<{
-        name: string;
-        type: string;
-        required: boolean;
-    }>;
-}
-
-interface FieldMappingState {
-    sourceFields: Array<{
-        name: string;
-        type: string;
-    }>;
-    destinationFields: Array<{
-        name: string;
-        type: string;
-    }>;
-    mappings: Array<{
-        source: string;
-        destination: string;
-    }>;
 }
 
 const steps = [
@@ -69,102 +48,128 @@ const steps = [
     },
 ];
 
+interface FormValues {
+    integrationName: string;
+    baseURL: string;
+    method: string;
+    environment: string;
+    dataFormat: string;
+    authMethod: string;
+    apiKey: string;
+    dataSchema: {
+        schemaName: string;
+        endpoint: string;
+        fields: Array<{
+            name: string;
+            type: string;
+            required: boolean;
+        }>;
+    };
+}
+
+const schema = yup.object().shape({
+    integrationName: yup.string().required('Integration name is required'),
+    baseURL: yup.string().required('Base URL is required').url('Must be a valid URL'),
+    method: yup.string().required('Method is required'),
+    environment: yup.string().required('Environment is required'),
+    dataFormat: yup.string().required('Data format is required'),
+    authMethod: yup.string().required('Authentication method is required'),
+    apiKey: yup.string().required('API Key is required'),
+    dataSchema: yup.object().shape({
+        schemaName: yup.string().required('Schema name is required'),
+        endpoint: yup.string().required('Endpoint is required'),
+        fields: yup.array().of(
+            yup.object().shape({
+                name: yup.string().required('Field name is required'),
+                type: yup.string().required('Field type is required'),
+                required: yup.boolean().required('Required field selection is required'),
+            })
+        ).min(1, 'At least one field is required').required('Fields are required'),
+    }).required('Data schema is required'),
+});
+
 const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiIntegrationStepsProps) => {
     const [restApiIntegrationMutation, { isLoading: isRestApiIntegrationLoading }] = useRestApiIntegrationMutation();
     const { showSnackbar } = useMessage();
     const [activeStep, setActiveStep] = useState(0);
-    const [formData, setFormData] = useState({
-        integrationName: '',
-        baseURL: '',
-        method: 'GET',
-        environment: 'dev',
-        dataFormat: 'json',
-        authMethod: 'apikey',
-        apiKey: '',
-        dataSchema: {
-            schemaName: '',
-            endpoint: '',
-            fields: [],
-        } as DataSchemaState,
-        fieldMapping: {
-            sourceFields: [],
-            destinationFields: [],
-            mappings: [],
-        } as FieldMappingState,
+
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        setValue,
+        trigger,
+    } = useForm<FormValues>({
+        resolver: yupResolver(schema),
+        mode: 'onChange',
+        reValidateMode: 'onChange',
+        defaultValues: {
+            integrationName: '',
+            baseURL: '',
+            method: 'GET',
+            environment: 'dev',
+            dataFormat: 'json',
+            authMethod: 'apikey',
+            apiKey: '',
+            dataSchema: {
+                schemaName: '',
+                endpoint: '',
+                fields: [],
+            },
+        },
     });
 
-    const handleNext = async () => {
-        if (activeStep === steps.length - 1) {
-            return await handleSubmit();
+    const getStepFields = (step: number): (keyof FormValues)[] => {
+        switch (step) {
+            case 0:
+                return ['integrationName', 'baseURL', 'method', 'environment', 'dataFormat'];
+            case 1:
+                return ['authMethod', 'apiKey'];
+            case 2:
+                return ['dataSchema'];
+            default:
+                return [];
         }
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    };
+
+    const isStepValid = (step: number) => {
+        const stepFields = getStepFields(step);
+        return stepFields.every(field => {
+            if (field === 'dataSchema') {
+                const dataSchema = watch('dataSchema');
+                return dataSchema.schemaName && dataSchema.endpoint && dataSchema.fields.length > 0;
+            }
+            return !errors[field];
+        });
     };
 
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    const handleInputChange = (field: keyof typeof formData) => (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setFormData({
-            ...formData,
-            [field]: event.target.value,
-        });
-    };
-
-    const isStepValid = (step: number) => {
-        switch (step) {
-            case 0:
-                return !!formData.integrationName && !!formData.environment;
-            case 1:
-                return !!formData.authMethod && !!formData.apiKey;
-            case 2:
-                return !!formData.dataSchema.schemaName && formData.dataSchema.fields.length > 0;
-            // case 3:
-            //     return formData.fieldMapping.mappings.length > 0;
-            case 3:
-                return true;
-            default:
-                return false;
-        }
-    };
-
-    const handleDataSchemaChange = (newDataSchema: DataSchemaState) => {
-        setFormData(prev => ({
-            ...prev,
-            dataSchema: newDataSchema
-        }));
-    };
-
-    const handleFieldMappingChange = (newFieldMapping: FieldMappingState) => {
-        setFormData(prev => ({
-            ...prev,
-            fieldMapping: newFieldMapping
-        }));
-    };
-
-    const handleSubmit = async () => {
+    const onSubmit = async (data: FormValues) => {
         const payload = {
-            name: formData.integrationName,
-            environment: formData.environment,
-            dataFormat: formData.dataFormat,
-            method: formData.method,
-            url: formData.baseURL,
+            name: data.integrationName,
+            environment: data.environment,
+            dataFormat: data.dataFormat,
+            method: data.method,
+            url: data.baseURL,
             authentication: {
-                authenticationType: formData.authMethod,
-                apiKey: formData.apiKey,
+                authenticationType: data.authMethod,
+                apiKey: data.apiKey,
             },
             schema: {
-                resourceName: formData.dataSchema.schemaName,
-                endpointPath: formData.dataSchema.endpoint,
-                fieldDetails: formData.dataSchema.fields.map((field) => ({
+                resourceName: data.dataSchema.schemaName,
+                endpointPath: data.dataSchema.endpoint,
+                fieldDetails: data.dataSchema.fields.map((field) => ({
                     name: field.name,
                     type: field.type,
                     isRequired: field.required,
                 })),
             }
-        }
+        };
+
         const response = await restApiIntegrationMutation(payload);
         if (response.error) {
             showSnackbar('Error', 'Failed to create integration', 'error', 10000);
@@ -173,70 +178,124 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
             onStepComplete(true);
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
         }
-    }
+    };
+
+    const handleNext = async () => {
+        // Validate current step before proceeding
+        const currentStepFields = getStepFields(activeStep);
+        const isValid = await trigger(currentStepFields);
+
+        if (!isValid) {
+            return;
+        }
+
+        if (activeStep === steps.length - 1) {
+            return await handleSubmit(onSubmit)();
+        }
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    };
+
+    const handleRemoveField = (index: number) => {
+        const currentFields = watch('dataSchema.fields');
+        const newFields = currentFields.filter((_, i) => i !== index);
+        setValue('dataSchema.fields', newFields, { shouldValidate: true });
+        trigger('dataSchema');
+    };
+
     const renderStepContent = (step: number) => {
         switch (step) {
             case 0:
                 return (
                     <Grid container spacing={3}>
                         <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                label="Integration Name"
-                                required
-                                value={formData.integrationName}
-                                onChange={handleInputChange('integrationName')}
+                            <Controller
+                                name="integrationName"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        label="Integration Name"
+                                        error={!!error}
+                                        helperText={error?.message}
+                                    />
+                                )}
                             />
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField
-                                fullWidth
-                                label="Base URL"
-                                required
-                                value={formData.baseURL}
-                                onChange={handleInputChange('baseURL')}
+                            <Controller
+                                name="baseURL"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        label="Base URL"
+                                        error={!!error}
+                                        helperText={error?.message}
+                                    />
+                                )}
                             />
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField
-                                fullWidth
-                                label="Method"
-                                required
-                                select
-                                value={formData.method}
-                                onChange={handleInputChange('method')}
-                            >
-                                <MenuItem value="GET">GET</MenuItem>
-                                <MenuItem value="POST">POST</MenuItem>
-                                <MenuItem value="PUT">PUT</MenuItem>
-                                <MenuItem value="DELETE">DELETE</MenuItem>
-                            </TextField>
+                            <Controller
+                                name="method"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        select
+                                        label="Method"
+                                        error={!!error}
+                                        helperText={error?.message}
+                                    >
+                                        <MenuItem value="GET">GET</MenuItem>
+                                        <MenuItem value="POST">POST</MenuItem>
+                                        <MenuItem value="PUT">PUT</MenuItem>
+                                        <MenuItem value="DELETE">DELETE</MenuItem>
+                                    </TextField>
+                                )}
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Environment"
-                                value={formData.environment}
-                                onChange={handleInputChange('environment')}
-                                required
-                            >
-                                <MenuItem value="dev">Development</MenuItem>
-                                <MenuItem value="staging">Staging</MenuItem>
-                                <MenuItem value="prod">Production</MenuItem>
-                            </TextField>
+                            <Controller
+                                name="environment"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        select
+                                        label="Environment"
+                                        error={!!error}
+                                        helperText={error?.message}
+                                    >
+                                        <MenuItem value="dev">Development</MenuItem>
+                                        <MenuItem value="staging">Staging</MenuItem>
+                                        <MenuItem value="prod">Production</MenuItem>
+                                    </TextField>
+                                )}
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Data Format"
-                                value={formData.dataFormat}
-                                onChange={handleInputChange('dataFormat')}
-                            >
-                                <MenuItem value="json">JSON</MenuItem>
-                                <MenuItem value="xml">XML</MenuItem>
-                            </TextField>
+                            <Controller
+                                name="dataFormat"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        select
+                                        label="Data Format"
+                                        error={!!error}
+                                        helperText={error?.message}
+                                    >
+                                        <MenuItem value="json">JSON</MenuItem>
+                                        <MenuItem value="xml">XML</MenuItem>
+                                    </TextField>
+                                )}
+                            />
                         </Grid>
                     </Grid>
                 );
@@ -245,79 +304,151 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                 return (
                     <Grid container spacing={3}>
                         <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                select
-                                label="Authentication Method"
-                                value={formData.authMethod}
-                                onChange={handleInputChange('authMethod')}
-                            >
-                                {/* <MenuItem value="oauth2">OAuth 2.0</MenuItem> */}
-                                <MenuItem value="apikey">API Key</MenuItem>
-                            </TextField>
-                        </Grid>
-                        {
-                            formData.authMethod === 'apikey' && (
-                                <Grid item xs={12}>
+                            <Controller
+                                name="authMethod"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
                                     <TextField
-                                        fullWidth
-                                        label="API Key"
-                                        value={formData.apiKey}
-                                        onChange={handleInputChange('apiKey')}
-                                    />
-                                </Grid>
-                            )}
-                        {/* {formData.authMethod === 'oauth2' && (
-                            <>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
+                                        {...field}
                                         fullWidth
                                         select
-                                        label="Grant Type"
-                                        value={formData.grantType}
-                                        onChange={handleInputChange('grantType')}
+                                        label="Authentication Method"
+                                        error={!!error}
+                                        helperText={error?.message}
                                     >
-                                        <MenuItem value="client_credentials">Client Credentials</MenuItem>
-                                        <MenuItem value="authorization_code">Authorization Code</MenuItem>
+                                        <MenuItem value="apikey">API Key</MenuItem>
                                     </TextField>
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Scopes"
-                                        value={formData.scopes}
-                                        onChange={handleInputChange('scopes')}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Token URL"
-                                        required
-                                        value={formData.tokenUrl}
-                                        onChange={handleInputChange('tokenUrl')}
-                                    />
-                                </Grid>
-                            </>
-                        )} */}
+                                )}
+                            />
+                        </Grid>
+                        {watch('authMethod') === 'apikey' && (
+                            <Grid item xs={12}>
+                                <Controller
+                                    name="apiKey"
+                                    control={control}
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            label="API Key"
+                                            error={!!error}
+                                            helperText={error?.message}
+                                        />
+                                    )}
+                                />
+                            </Grid>
+                        )}
                     </Grid>
                 );
 
             case 2:
                 return (
-                    <DataSchema
-                        data={formData.dataSchema}
-                        onChange={handleDataSchemaChange}
-                    />
+                    <Box>
+                        <Controller
+                            name="dataSchema.schemaName"
+                            control={control}
+                            render={({ field, fieldState: { error } }) => (
+                                <TextField
+                                    {...field}
+                                    fullWidth
+                                    label="Schema Name"
+                                    error={!!error}
+                                    helperText={error?.message}
+                                    sx={{ mb: 2 }}
+                                />
+                            )}
+                        />
+                        <Controller
+                            name="dataSchema.endpoint"
+                            control={control}
+                            render={({ field, fieldState: { error } }) => (
+                                <TextField
+                                    {...field}
+                                    fullWidth
+                                    label="Endpoint"
+                                    error={!!error}
+                                    helperText={error?.message}
+                                    sx={{ mb: 2 }}
+                                />
+                            )}
+                        />
+                        <Box>
+                            {watch('dataSchema.fields')?.map((_field, index) => (
+                                <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                                    <Controller
+                                        name={`dataSchema.fields.${index}.name`}
+                                        control={control}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Field Name"
+                                                error={!!error}
+                                                helperText={error?.message}
+                                                required
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name={`dataSchema.fields.${index}.type`}
+                                        control={control}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                select
+                                                label="Type"
+                                                error={!!error}
+                                                helperText={error?.message}
+                                                required
+                                            >
+                                                <MenuItem value="string">String</MenuItem>
+                                                <MenuItem value="number">Number</MenuItem>
+                                                <MenuItem value="boolean">Boolean</MenuItem>
+                                            </TextField>
+                                        )}
+                                    />
+                                    <Controller
+                                        name={`dataSchema.fields.${index}.required`}
+                                        control={control}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                select
+                                                label="Required"
+                                                error={!!error}
+                                                helperText={error?.message}
+                                                required
+                                            >
+                                                <MenuItem value="true">Yes</MenuItem>
+                                                <MenuItem value="false">No</MenuItem>
+                                            </TextField>
+                                        )}
+                                    />
+                                    <IconButton
+                                        onClick={() => handleRemoveField(index)}
+                                        color="error"
+                                    >
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Box>
+                            ))}
+                            <Button
+                                variant="outlined"
+                                onClick={() => {
+                                    const currentFields = watch('dataSchema.fields') || [];
+                                    setValue('dataSchema.fields', [
+                                        ...currentFields,
+                                        { name: '', type: 'string', required: false }
+                                    ], { shouldValidate: true });
+                                }}
+                            >
+                                Add Field
+                            </Button>
+                        </Box>
+                    </Box>
                 );
-
-            // case 3:
-            //     return (
-            //         <FieldMapping
-            //             data={formData.fieldMapping}
-            //             onChange={handleFieldMappingChange}
-            //         />
-            //     );
 
             case 3:
                 return (
@@ -326,29 +457,16 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                             Configuration Summary
                         </Typography>
                         <Typography variant="body2">
-                            Integration Name: {formData.integrationName}
+                            Integration Name: {watch('integrationName')}
                         </Typography>
                         <Typography variant="body2">
-                            Environment: {formData.environment}
+                            Environment: {watch('environment')}
                         </Typography>
                         <Typography variant="body2">
-                            Authentication Method: {formData.authMethod}
-                        </Typography>
-                        {/* {formData.authMethod === 'oauth2' && (
-                            <>
-                                <Typography variant="body2">
-                                    Grant Type: {formData.grantType}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Token URL: {formData.tokenUrl}
-                                </Typography>
-                            </>
-                        )} */}
-                        <Typography variant="body2">
-                            Data Schema: {formData.dataSchema.schemaName}
+                            Authentication Method: {watch('authMethod')}
                         </Typography>
                         <Typography variant="body2">
-                            Field Mappings: {formData.fieldMapping.mappings.length} mappings configured
+                            Data Schema: {watch('dataSchema.schemaName')}
                         </Typography>
                     </Box>
                 );
