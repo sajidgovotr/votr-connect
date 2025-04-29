@@ -181,13 +181,16 @@ const ExpressIntegrationPage = () => {
                             {renderStepContent(activeStep)}
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                            <Button
-                                variant="outlined"
-                                disabled={activeStep === 0}
-                                onClick={handleBack}
-                            >
-                                Back
-                            </Button>
+                            {activeStep !== 3 &&
+                                <Button
+                                    variant="outlined"
+                                    disabled={activeStep === 0}
+                                    onClick={handleBack}
+                                >
+                                    Back
+                                </Button>
+                            }
+
                             {activeStep !== 1 && activeStep !== 3 && (
                                 <Button
                                     variant="contained"
@@ -197,6 +200,7 @@ const ExpressIntegrationPage = () => {
                                     Next
                                 </Button>
                             )}
+
                         </Box>
                     </Box>
                 )}

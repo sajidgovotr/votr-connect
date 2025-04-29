@@ -38,12 +38,12 @@ const integrationTypes = [
         disabled: false
     },
     {
-        id: 'sftp',
+        id: 'file-upload',
         title: 'SFTP File Transfer',
         description: 'Upload daily position files to VOTR Connect\'s SFTP server',
         icon: UploadOutlinedIcon,
         recommended: false,
-        disabled: true
+        disabled: false
     },
     {
         id: 'database',
@@ -59,7 +59,7 @@ const integrationTypes = [
         description: 'Need a different integration method? Let us know your requirements',
         icon: BuildOutlinedIcon,
         recommended: false,
-        disabled: false
+        disabled: true
     }
 ];
 

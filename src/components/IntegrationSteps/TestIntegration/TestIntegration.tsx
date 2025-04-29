@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 import {
     Box,
     Typography,
@@ -11,6 +14,7 @@ import {
     StepLabel,
     CircularProgress,
     Alert,
+    Snackbar,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -35,24 +39,55 @@ interface TestIntegrationProps {
     onTestComplete: (success: boolean) => void;
 }
 
+interface TestConfigForm {
+    endpoint: string;
+    headers: string;
+    payload: string;
+}
+
+const schema = yup.object().shape({
+    endpoint: yup.string().url('Please enter a valid URL').required('Endpoint is required'),
+    headers: yup.string().test('is-valid-json', 'Headers must be valid JSON', (value) => {
+        if (!value) return true;
+        try {
+            JSON.parse(value);
+            return true;
+        } catch {
+            return false;
+        }
+    }).required(),
+    payload: yup.string().test('is-valid-json', 'Payload must be valid JSON', (value) => {
+        if (!value) return true;
+        try {
+            JSON.parse(value);
+            return true;
+        } catch {
+            return false;
+        }
+    }).required(),
+});
+
 const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
     const [activeStep, setActiveStep] = useState(0);
     const [testStatus, setTestStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
     const [testResults, setTestResults] = useState<{ status: number, responseTime: string, payload: string } | null>(null);
-    const [testConfig, setTestConfig] = useState({
-        endpoint: '',
-        headers: '',
-        payload: '',
+    const [showSkipMessage, setShowSkipMessage] = useState(false);
+
+    const { register, handleSubmit, formState: { errors } } = useForm<TestConfigForm>({
+        resolver: yupResolver(schema),
+        defaultValues: {
+            endpoint: '',
+            headers: '',
+            payload: '',
+        }
     });
 
-    const handleConfigChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTestConfig(prev => ({
-            ...prev,
-            [field]: event.target.value
-        }));
-    };
+    const onSubmit = async () => {
+        if (activeStep === 0) {
+            setActiveStep(1);
+            return;
+        }
 
-    const handleRunTest = async () => {
         setTestStatus('running');
         // Simulate API test
         setTimeout(() => {
@@ -66,8 +101,13 @@ const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
         }, 2000);
     };
 
+    const handleSkipTesting = () => {
+        setShowSkipMessage(true);
+        onTestComplete(true);
+    };
+
     const renderConfigurationStep = () => (
-        <Box>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
             <Typography variant="h6" gutterBottom>
                 Test Configuration
             </Typography>
@@ -76,47 +116,46 @@ const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
                     <TextField
                         fullWidth
                         label="Test Endpoint"
-                        value={testConfig.endpoint}
-                        onChange={handleConfigChange('endpoint')}
+                        {...register('endpoint')}
+                        error={!!errors.endpoint}
+                        helperText={errors.endpoint?.message}
                         placeholder="https://api.example.com/test"
-                        helperText="Enter the endpoint URL for testing"
                     />
                 </Grid>
                 <Grid item xs={12}>
                     <TextField
                         fullWidth
                         label="Headers"
-                        value={testConfig.headers}
-                        onChange={handleConfigChange('headers')}
+                        {...register('headers')}
+                        error={!!errors.headers}
+                        helperText={errors.headers?.message}
                         multiline
                         rows={4}
                         placeholder='{
     "Content-Type": "application/json",
     "Authorization": "Bearer YOUR_TOKEN"
 }'
-                        helperText="Enter request headers in JSON format"
                     />
                 </Grid>
                 <Grid item xs={12}>
                     <TextField
                         fullWidth
                         label="Test Payload"
-                        value={testConfig.payload}
-                        onChange={handleConfigChange('payload')}
+                        {...register('payload')}
+                        error={!!errors.payload}
+                        helperText={errors.payload?.message}
                         multiline
                         rows={4}
                         placeholder='{
     "test": "data"
 }'
-                        helperText="Enter test payload in JSON format"
                     />
                 </Grid>
                 <Grid item xs={12}>
                     <Button
+                        type="submit"
                         variant="contained"
                         color="primary"
-                        onClick={() => setActiveStep(1)}
-                        disabled={!testConfig.endpoint}
                     >
                         Next
                     </Button>
@@ -141,7 +180,7 @@ const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
                         variant="contained"
                         color="primary"
                         size="large"
-                        onClick={handleRunTest}
+                        onClick={handleSubmit(onSubmit)}
                     >
                         Start Test
                     </Button>
@@ -227,6 +266,24 @@ const TestIntegration = ({ onTestComplete }: TestIntegrationProps) => {
                     {activeStep === 2 && renderTestResults()}
                 </Box>
             </Box>
+
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                    variant="outlined"
+                    onClick={handleSkipTesting}
+                    sx={{ mr: 2 }}
+                >
+                    Skip Testing
+                </Button>
+            </Box>
+
+            <Snackbar
+                open={showSkipMessage}
+                autoHideDuration={3000}
+                onClose={() => setShowSkipMessage(false)}
+                message="Testing has been skipped"
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            />
         </Box>
     );
 };
