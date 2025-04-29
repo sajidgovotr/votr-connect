@@ -55,7 +55,7 @@ const schema = yup.object().shape({
     hasHeader: yup.boolean(),
     protocol: yup.string().required('Protocol is required'),
     schedule: yup.string().required('Schedule is required'),
-    timeOfDay: yup.string(),
+    timeOfDay: yup.string().required('Time of day is required'),
     // FTP/SFTP specific fields
     ftpType: yup.string().when('protocol', {
         is: 'ftp',
@@ -160,9 +160,9 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
             case 2:
                 if (protocol === 'ftp') {
                     return ['protocol', 'ftpType', 'host', 'port', 'username',
-                        ftpType === 'ftp' ? 'password' : 'sshKey'];
+                        ftpType === 'ftp' ? 'password' : 'sshKey', 'schedule', 'timeOfDay'];
                 } else {
-                    return ['protocol', 'region', 'bucketName', 'arn', 'accessKey', 'secretKey'];
+                    return ['protocol', 'region', 'bucketName', 'arn', 'accessKey', 'secretKey', 'schedule', 'timeOfDay'];
                 }
             default:
                 return [];
@@ -706,11 +706,16 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                                 name="timeOfDay"
                                 control={control}
                                 render={({ field }) => (
-                                    <TimePicker
-                                        label="Time of Day (Optional)"
-                                        value={field.value}
-                                        onChangeValue={field.onChange}
-                                    />
+                                    <Box sx={{ position: 'relative' }}>
+                                        <TimePicker
+                                            required={true}
+                                            label="Time of Day"
+                                            value={field.value}
+                                            onChangeValue={field.onChange}
+                                            error={!!errors.timeOfDay}
+                                            helperText={errors.timeOfDay?.message}
+                                        />
+                                    </Box>
                                 )}
                             />
                         </Grid>
