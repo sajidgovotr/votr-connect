@@ -55,7 +55,7 @@ const schema = yup.object().shape({
     hasHeader: yup.boolean(),
     protocol: yup.string().required('Protocol is required'),
     schedule: yup.string().required('Schedule is required'),
-    timeOfDay: yup.string().required('Time of day is required'),
+    timeOfDay: yup.string(),
     // FTP/SFTP specific fields
     ftpType: yup.string().when('protocol', {
         is: 'ftp',
@@ -184,7 +184,7 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                         fileNamePattern: data.fileNamePattern,
                         isHeaderRowIncluded: data.hasHeader,
                         transferFrequency: data.schedule,
-                        timeOfDay: data.timeOfDay,
+                        timeOfDay: data.timeOfDay || undefined,
                         timeZone: data.timeZone,
                         afterSuccessfulTransferAction: "archive",
                         afterFailedTransferAction: "retry",
@@ -207,7 +207,7 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                         fileNamePattern: data.fileNamePattern,
                         isHeaderRowIncluded: data.hasHeader,
                         transferFrequency: data.schedule,
-                        timeOfDay: data.timeOfDay,
+                        timeOfDay: data.timeOfDay || undefined,
                         timeZone: data.timeZone,
                         afterSuccessfulTransferAction: "archive",
                         afterFailedTransferAction: "retry",
@@ -232,7 +232,7 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                     fileNamePattern: data.fileNamePattern,
                     isHeaderRowIncluded: data.hasHeader,
                     transferFrequency: data.schedule,
-                    timeOfDay: data.timeOfDay,
+                    timeOfDay: data.timeOfDay || undefined,
                     timeZone: data.timeZone,
                     afterSuccessfulTransferAction: "archive",
                     afterFailedTransferAction: "retry",
@@ -706,7 +706,7 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                                 control={control}
                                 render={({ field }) => (
                                     <TimePicker
-                                        label="Time of Day"
+                                        label="Time of Day (Optional)"
                                         value={field.value}
                                         onChangeValue={field.onChange}
                                     />
