@@ -1,4 +1,4 @@
-import { Box, Container, Typography, TextField, Grid, MenuItem, Button, Stepper, Step, StepLabel } from '@mui/material';
+import { Box, Container, Typography, TextField, Grid, MenuItem, Button, Stepper, Step, StepLabel, FormControlLabel, Checkbox } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router';
 import { ArrowBack } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
@@ -133,70 +133,187 @@ const Authentication = () => (
     </Box>
 );
 
-export const DataSchema = () => (
-    <Box>
-        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-            Configure REST API Integration
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Define the data schema for your integration
-        </Typography>
-        <Grid container spacing={3}>
-            <Grid item xs={12}>
-                <TextField
-                    fullWidth
-                    label="Resource Name"
-                    required
-                    defaultValue="Shareholders"
-                    sx={{ mb: 2 }}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <TextField
-                    fullWidth
-                    label="Endpoint Path"
-                    required
-                    defaultValue="/shareholders"
-                    sx={{ mb: 2 }}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                    Field Definitions
-                </Typography>
-                <Box sx={{ p: 2, border: '1px solid #E5E7EB', borderRadius: 1, bgcolor: '#F9FAFB' }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                        <strong>id</strong> (string, required): Unique identifier
-                    </Typography>
-                    <Typography variant="body2">
-                        <strong>name</strong> (string, required): Shareholder's full name
-                    </Typography>
-                </Box>
-            </Grid>
-        </Grid>
-    </Box>
-);
+interface DataSchemaState {
+    schemaName: string;
+    endpoint: string;
+    fields: Array<{
+        name: string;
+        type: string;
+        required: boolean;
+    }>;
+}
 
-export const FieldMapping = () => {
-    const [mappings, setMappings] = useState([
-        { sourceField: 'id', destinationField: 'shareholderId' },
-        { sourceField: 'name', destinationField: 'fullName' }
-    ]);
+interface FieldMappingState {
+    sourceFields: Array<{
+        name: string;
+        type: string;
+    }>;
+    destinationFields: Array<{
+        name: string;
+        type: string;
+    }>;
+    mappings: Array<{
+        source: string;
+        destination: string;
+    }>;
+}
 
-    const handleAddMapping = () => {
-        setMappings([...mappings, { sourceField: '', destinationField: '' }]);
+export const DataSchema = ({ data, onChange }: { data: DataSchemaState, onChange: (data: DataSchemaState) => void }) => {
+    const handleChange = (field: keyof typeof data) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        onChange({
+            ...data,
+            [field]: event.target.value
+        });
     };
 
-    const handleMappingChange = (index: number, field: 'sourceField' | 'destinationField', value: string) => {
-        const updatedMappings = [...mappings];
-        updatedMappings[index][field] = value;
-        setMappings(updatedMappings);
+    const handleFieldChange = (index: number, field: 'name' | 'type' | 'required', value: string | boolean) => {
+        const updatedFields = [...data.fields];
+        updatedFields[index] = {
+            ...updatedFields[index],
+            [field]: value
+        };
+        onChange({
+            ...data,
+            fields: updatedFields
+        });
+    };
+
+    const handleAddField = () => {
+        onChange({
+            ...data,
+            fields: [...data.fields, { name: '', type: 'string', required: false }]
+        });
+    };
+
+    const handleDeleteField = (index: number) => {
+        const updatedFields = [...data.fields];
+        updatedFields.splice(index, 1);
+        onChange({
+            ...data,
+            fields: updatedFields
+        });
+    };
+
+    return (
+        <Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                Configure REST API Integration
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Define the data schema for your integration
+            </Typography>
+            <Grid container spacing={3}>
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        label="Schema Name"
+                        required
+                        value={data.schemaName}
+                        onChange={handleChange('schemaName')}
+                        sx={{ mb: 2 }}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        label="Endpoint"
+                        value={data.endpoint}
+                        onChange={handleChange('endpoint')}
+                        sx={{ mb: 2 }}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                        Field Definitions
+                    </Typography>
+                    <Box sx={{ p: 2, border: '1px solid #E5E7EB', borderRadius: 1, bgcolor: '#F9FAFB' }}>
+                        {data.fields.map((field, index) => (
+                            <Grid container spacing={2} alignItems="center" sx={{ mb: index !== data.fields.length - 1 ? 2 : 0 }} key={index}>
+                                <Grid item xs={4}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        label="Field Name"
+                                        value={field.name}
+                                        onChange={(e) => handleFieldChange(index, 'name', e.target.value)}
+                                    />
+                                </Grid>
+                                <Grid item xs={3}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        select
+                                        label="Type"
+                                        value={field.type}
+                                        onChange={(e) => handleFieldChange(index, 'type', e.target.value)}
+                                    >
+                                        <MenuItem value="string">String</MenuItem>
+                                        <MenuItem value="number">Number</MenuItem>
+                                        <MenuItem value="boolean">Boolean</MenuItem>
+                                        <MenuItem value="object">Object</MenuItem>
+                                        <MenuItem value="array">Array</MenuItem>
+                                    </TextField>
+                                </Grid>
+                                <Grid item xs={3}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={field.required}
+                                                onChange={(e) => handleFieldChange(index, 'required', e.target.checked)}
+                                            />
+                                        }
+                                        label="Required"
+                                    />
+                                </Grid>
+                                <Grid item xs={2} sx={{ textAlign: 'center' }}>
+                                    <Button
+                                        color="error"
+                                        size="small"
+                                        onClick={() => handleDeleteField(index)}
+                                        disabled={data.fields.length <= 1}
+                                    >
+                                        ✕
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        ))}
+                    </Box>
+                    <Button variant="outlined" sx={{ mt: 1 }} onClick={handleAddField}>
+                        + Add Field
+                    </Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+};
+
+export const FieldMapping = ({ data, onChange }: { data: FieldMappingState, onChange: (data: FieldMappingState) => void }) => {
+    const handleMappingChange = (index: number, field: 'source' | 'destination', value: string) => {
+        const updatedMappings = [...data.mappings];
+        updatedMappings[index] = {
+            ...updatedMappings[index],
+            [field]: value
+        };
+        onChange({
+            ...data,
+            mappings: updatedMappings
+        });
+    };
+
+    const handleAddMapping = () => {
+        onChange({
+            ...data,
+            mappings: [...data.mappings, { source: '', destination: '' }]
+        });
     };
 
     const handleDeleteMapping = (index: number) => {
-        const updatedMappings = [...mappings];
+        const updatedMappings = [...data.mappings];
         updatedMappings.splice(index, 1);
-        setMappings(updatedMappings);
+        onChange({
+            ...data,
+            mappings: updatedMappings
+        });
     };
 
     return (
@@ -213,15 +330,15 @@ export const FieldMapping = () => {
                         Source to Destination Mapping
                     </Typography>
                     <Box sx={{ p: 2, border: '1px solid #E5E7EB', borderRadius: 1, bgcolor: '#F9FAFB', mb: 2 }}>
-                        {mappings.map((mapping, index) => (
-                            <Grid container spacing={2} alignItems="center" sx={{ mb: index !== mappings.length - 1 ? 2 : 0 }} key={index}>
+                        {data.mappings.map((mapping, index) => (
+                            <Grid container spacing={2} alignItems="center" sx={{ mb: index !== data.mappings.length - 1 ? 2 : 0 }} key={index}>
                                 <Grid item xs={5}>
                                     <TextField
                                         fullWidth
                                         size="small"
                                         label="Source Field"
-                                        value={mapping.sourceField}
-                                        onChange={(e) => handleMappingChange(index, 'sourceField', e.target.value)}
+                                        value={mapping.source}
+                                        onChange={(e) => handleMappingChange(index, 'source', e.target.value)}
                                     />
                                 </Grid>
                                 <Grid item xs={2} sx={{ textAlign: 'center' }}>
@@ -232,8 +349,8 @@ export const FieldMapping = () => {
                                         fullWidth
                                         size="small"
                                         label="Destination Field"
-                                        value={mapping.destinationField}
-                                        onChange={(e) => handleMappingChange(index, 'destinationField', e.target.value)}
+                                        value={mapping.destination}
+                                        onChange={(e) => handleMappingChange(index, 'destination', e.target.value)}
                                     />
                                 </Grid>
                                 <Grid item xs={1} sx={{ textAlign: 'center' }}>
@@ -241,7 +358,7 @@ export const FieldMapping = () => {
                                         color="error"
                                         size="small"
                                         onClick={() => handleDeleteMapping(index)}
-                                        disabled={mappings.length <= 1}
+                                        disabled={data.mappings.length <= 1}
                                     >
                                         ✕
                                     </Button>
@@ -252,18 +369,6 @@ export const FieldMapping = () => {
                     <Button variant="outlined" sx={{ mt: 1 }} onClick={handleAddMapping}>
                         + Add Field Mapping
                     </Button>
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                        Transformation Rules
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        multiline
-                        rows={4}
-                        placeholder="// Optional: Add transformation rules or logic"
-                        sx={{ mb: 2 }}
-                    />
                 </Grid>
             </Grid>
         </Box>
@@ -332,6 +437,16 @@ const RestApiIntegration = () => {
     const [activeStep, setActiveStep] = useState(0);
     const [selectedEnvironment, setSelectedEnvironment] = useState('dev');
     const [selectedProduct, setSelectedProduct] = useState('');
+    const [dataSchema, setDataSchema] = useState<DataSchemaState>({
+        schemaName: '',
+        endpoint: '',
+        fields: [],
+    });
+    const [fieldMapping, setFieldMapping] = useState<FieldMappingState>({
+        sourceFields: [],
+        destinationFields: [],
+        mappings: [],
+    });
 
     useEffect(() => {
         // Get environment and product from URL query params
@@ -361,9 +476,15 @@ const RestApiIntegration = () => {
             case 1:
                 return <Authentication />;
             case 2:
-                return <DataSchema />;
+                return <DataSchema
+                    data={dataSchema}
+                    onChange={setDataSchema}
+                />;
             case 3:
-                return <FieldMapping />;
+                return <FieldMapping
+                    data={fieldMapping}
+                    onChange={setFieldMapping}
+                />;
             case 4:
                 return <Review setActiveStep={setActiveStep} selectedEnvironment={selectedEnvironment} />;
             default:

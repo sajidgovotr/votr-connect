@@ -12,11 +12,38 @@ import {
     Grid,
 } from '@mui/material';
 import { DataSchema, FieldMapping } from '@/pages/IntegrationCatalog/RestApiIntegration';
+import { useRestApiIntegrationMutation } from '@/services/express-integration';
+import useMessage from '@/hooks/useMessage';
 
 interface RestApiIntegrationStepsProps {
     selectedProduct: string;
     selectedEnvironment: string;
     onStepComplete: (completed: boolean) => void;
+}
+
+interface DataSchemaState {
+    schemaName: string;
+    endpoint: string;
+    fields: Array<{
+        name: string;
+        type: string;
+        required: boolean;
+    }>;
+}
+
+interface FieldMappingState {
+    sourceFields: Array<{
+        name: string;
+        type: string;
+    }>;
+    destinationFields: Array<{
+        name: string;
+        type: string;
+    }>;
+    mappings: Array<{
+        source: string;
+        destination: string;
+    }>;
 }
 
 const steps = [
@@ -32,10 +59,10 @@ const steps = [
         label: 'Data Schema',
         description: 'Define the data structure for your integration',
     },
-    {
-        label: 'Field Mapping',
-        description: 'Map source fields to destination fields',
-    },
+    // {
+    //     label: 'Field Mapping',
+    //     description: 'Map source fields to destination fields',
+    // },
     {
         label: 'Review',
         description: 'Review your configuration before proceeding',
@@ -43,22 +70,34 @@ const steps = [
 ];
 
 const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiIntegrationStepsProps) => {
+    const [restApiIntegrationMutation, { isLoading: isRestApiIntegrationLoading }] = useRestApiIntegrationMutation();
+    const { showSnackbar } = useMessage();
     const [activeStep, setActiveStep] = useState(0);
     const [formData, setFormData] = useState({
         integrationName: '',
+        baseURL: '',
+        method: 'GET',
         environment: 'dev',
         dataFormat: 'json',
-        authMethod: 'oauth2',
-        grantType: 'client_credentials',
-        scopes: '',
-        tokenUrl: '',
+        authMethod: 'apikey',
+        apiKey: '',
+        dataSchema: {
+            schemaName: '',
+            endpoint: '',
+            fields: [],
+        } as DataSchemaState,
+        fieldMapping: {
+            sourceFields: [],
+            destinationFields: [],
+            mappings: [],
+        } as FieldMappingState,
     });
 
-    const handleNext = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    const handleNext = async () => {
         if (activeStep === steps.length - 1) {
-            onStepComplete(true);
+            return await handleSubmit();
         }
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
 
     const handleBack = () => {
@@ -79,18 +118,62 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
             case 0:
                 return !!formData.integrationName && !!formData.environment;
             case 1:
-                return !!formData.authMethod && !!formData.tokenUrl;
+                return !!formData.authMethod && !!formData.apiKey;
             case 2:
-                return true;
+                return !!formData.dataSchema.schemaName && formData.dataSchema.fields.length > 0;
+            // case 3:
+            //     return formData.fieldMapping.mappings.length > 0;
             case 3:
-                return true;
-            case 4:
                 return true;
             default:
                 return false;
         }
     };
 
+    const handleDataSchemaChange = (newDataSchema: DataSchemaState) => {
+        setFormData(prev => ({
+            ...prev,
+            dataSchema: newDataSchema
+        }));
+    };
+
+    const handleFieldMappingChange = (newFieldMapping: FieldMappingState) => {
+        setFormData(prev => ({
+            ...prev,
+            fieldMapping: newFieldMapping
+        }));
+    };
+
+    const handleSubmit = async () => {
+        const payload = {
+            name: formData.integrationName,
+            environment: formData.environment,
+            dataFormat: formData.dataFormat,
+            method: formData.method,
+            url: formData.baseURL,
+            authentication: {
+                authenticationType: formData.authMethod,
+                apiKey: formData.apiKey,
+            },
+            schema: {
+                resourceName: formData.dataSchema.schemaName,
+                endpointPath: formData.dataSchema.endpoint,
+                fieldDetails: formData.dataSchema.fields.map((field) => ({
+                    name: field.name,
+                    type: field.type,
+                    isRequired: field.required,
+                })),
+            }
+        }
+        const response = await restApiIntegrationMutation(payload);
+        if (response.error) {
+            showSnackbar('Error', 'Failed to create integration', 'error', 10000);
+        } else {
+            showSnackbar('Success', 'Integration created successfully', 'success', 10000);
+            onStepComplete(true);
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
+    }
     const renderStepContent = (step: number) => {
         switch (step) {
             case 0:
@@ -104,6 +187,30 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                                 value={formData.integrationName}
                                 onChange={handleInputChange('integrationName')}
                             />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                fullWidth
+                                label="Base URL"
+                                required
+                                value={formData.baseURL}
+                                onChange={handleInputChange('baseURL')}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                fullWidth
+                                label="Method"
+                                required
+                                select
+                                value={formData.method}
+                                onChange={handleInputChange('method')}
+                            >
+                                <MenuItem value="GET">GET</MenuItem>
+                                <MenuItem value="POST">POST</MenuItem>
+                                <MenuItem value="PUT">PUT</MenuItem>
+                                <MenuItem value="DELETE">DELETE</MenuItem>
+                            </TextField>
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <TextField
@@ -145,11 +252,22 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                                 value={formData.authMethod}
                                 onChange={handleInputChange('authMethod')}
                             >
-                                <MenuItem value="oauth2">OAuth 2.0</MenuItem>
+                                {/* <MenuItem value="oauth2">OAuth 2.0</MenuItem> */}
                                 <MenuItem value="apikey">API Key</MenuItem>
                             </TextField>
                         </Grid>
-                        {formData.authMethod === 'oauth2' && (
+                        {
+                            formData.authMethod === 'apikey' && (
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        label="API Key"
+                                        value={formData.apiKey}
+                                        onChange={handleInputChange('apiKey')}
+                                    />
+                                </Grid>
+                            )}
+                        {/* {formData.authMethod === 'oauth2' && (
                             <>
                                 <Grid item xs={12} md={6}>
                                     <TextField
@@ -181,21 +299,27 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                                     />
                                 </Grid>
                             </>
-                        )}
+                        )} */}
                     </Grid>
                 );
 
             case 2:
                 return (
-                    <DataSchema />
+                    <DataSchema
+                        data={formData.dataSchema}
+                        onChange={handleDataSchemaChange}
+                    />
                 );
+
+            // case 3:
+            //     return (
+            //         <FieldMapping
+            //             data={formData.fieldMapping}
+            //             onChange={handleFieldMappingChange}
+            //         />
+            //     );
 
             case 3:
-                return (
-                    <FieldMapping />
-                );
-
-            case 4:
                 return (
                     <Box>
                         <Typography variant="subtitle1" gutterBottom>
@@ -210,7 +334,7 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                         <Typography variant="body2">
                             Authentication Method: {formData.authMethod}
                         </Typography>
-                        {formData.authMethod === 'oauth2' && (
+                        {/* {formData.authMethod === 'oauth2' && (
                             <>
                                 <Typography variant="body2">
                                     Grant Type: {formData.grantType}
@@ -219,7 +343,13 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                                     Token URL: {formData.tokenUrl}
                                 </Typography>
                             </>
-                        )}
+                        )} */}
+                        <Typography variant="body2">
+                            Data Schema: {formData.dataSchema.schemaName}
+                        </Typography>
+                        <Typography variant="body2">
+                            Field Mappings: {formData.fieldMapping.mappings.length} mappings configured
+                        </Typography>
                     </Box>
                 );
 
@@ -250,6 +380,7 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                                     onClick={handleNext}
                                     sx={{ mt: 1, mr: 1 }}
                                     disabled={!isStepValid(index)}
+                                    loading={isRestApiIntegrationLoading}
                                 >
                                     {index === steps.length - 1 ? 'Finish' : 'Continue'}
                                 </Button>
@@ -269,4 +400,4 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
     );
 };
 
-export default RestApiIntegrationSteps; 
+export default RestApiIntegrationSteps;
