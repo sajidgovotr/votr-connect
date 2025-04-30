@@ -14,8 +14,19 @@ import {
     Button,
     Grid,
     IconButton,
+    Card,
+    Divider,
+    Paper,
+    InputAdornment,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import HttpIcon from '@mui/icons-material/Http';
+import SecurityIcon from '@mui/icons-material/Security';
+import SchemaIcon from '@mui/icons-material/Schema';
+import InfoIcon from '@mui/icons-material/Info';
+import CloudIcon from '@mui/icons-material/Cloud';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
 interface RestApiIntegrationStepsProps {
     selectedProduct: string;
@@ -36,6 +47,7 @@ interface RestApiIntegrationStepsProps {
                 name: string;
                 type: string;
                 required: boolean;
+                mapping: string;
             }>;
         };
         activeSection?: number;
@@ -73,6 +85,7 @@ interface FormValues {
             name: string;
             type: string;
             required: boolean;
+            mapping: string;
         }>;
     };
 }
@@ -93,6 +106,7 @@ const schema = yup.object().shape({
                 name: yup.string().required('Field name is required'),
                 type: yup.string().required('Field type is required'),
                 required: yup.boolean().required('Required field selection is required'),
+                mapping: yup.string().required('Mapping is required'),
             })
         ).min(1, 'At least one field is required').required('Fields are required'),
     }).required('Data schema is required'),
@@ -243,328 +257,368 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
         trigger('dataSchema');
     };
 
-    // const reviewData = [
-    //     {
-    //         section: 'Basic Info',
-    //         fields: [
-    //             { name: 'Integration Name', value: watch('integrationName') },
-    //             { name: 'Base URL', value: watch('baseURL') },
-    //             { name: 'Method', value: watch('method') },
-    //             { name: 'Environment', value: watch('environment') },
-    //             { name: 'Data Format', value: watch('dataFormat') },
-    //         ]
-    //     },
-    //     {
-    //         section: 'Authentication',
-    //         fields: [
-    //             { name: 'Authentication Method', value: watch('authMethod') },
-    //             { name: 'API Key', value: watch('apiKey') },
-    //         ]
-    //     },
-    //     {
-    //         section: 'Data Schema',
-    //         fields: [
-    //             { name: 'Schema Name', value: watch('dataSchema.schemaName') },
-    //             { name: 'Endpoint', value: watch('dataSchema.endpoint') },
-    //             ...(watch('dataSchema.fields')?.map((field, index) => ({
-    //                 name: `Field ${index + 1}`,
-    //                 value: `${field.name} (${field.type}, ${field.required ? 'Required' : 'Optional'})`
-    //             })) || [])
-    //         ]
-    //     }
-    // ];
-
-    // const reviewColumns = [
-    //     {
-    //         name: 'Section',
-    //         key: 'section',
-    //         align: 'left' as const,
-    //     },
-    //     {
-    //         name: 'Field',
-    //         key: 'name',
-    //         align: 'left' as const,
-    //     },
-    //     {
-    //         name: 'Value',
-    //         key: 'value',
-    //         align: 'left' as const,
-    //     },
-    //     {
-    //         name: 'Actions',
-    //         key: 'actions',
-    //         align: 'right' as const,
-    //         component: (item: any, index: number) => (
-    //             <IconButton
-    //                 size="small"
-    //                 onClick={() => {
-    //                     // Find which step contains this field
-    //                     const stepIndex = reviewData.findIndex(section =>
-    //                         section.fields.some(field => field.name === item.name)
-    //                     );
-    //                     setActiveStep(stepIndex);
-    //                 }}
-    //             >
-    //                 <EditIcon />
-    //             </IconButton>
-    //         ),
-    //     }
-    // ];
-
-    // const flattenedReviewData = reviewData.flatMap(section =>
-    //     section.fields.map(field => ({
-    //         section: section.section,
-    //         name: field.name,
-    //         value: field.value,
-    //     }))
-    // );
-
     const renderStepContent = (step: number) => {
         switch (step) {
             case 0:
                 return (
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <Controller
-                                name="integrationName"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="Integration Name"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Controller
-                                name="baseURL"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="Base URL"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Controller
-                                name="method"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="Method"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                    >
-                                        <MenuItem value="GET">GET</MenuItem>
-                                        <MenuItem value="POST">POST</MenuItem>
-                                        <MenuItem value="PUT">PUT</MenuItem>
-                                        <MenuItem value="DELETE">DELETE</MenuItem>
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="environment"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="Environment"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                    >
-                                        <MenuItem value="dev">Development</MenuItem>
-                                        <MenuItem value="staging">Staging</MenuItem>
-                                        <MenuItem value="prod">Production</MenuItem>
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="dataFormat"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="Data Format"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                    >
-                                        <MenuItem value="json">JSON</MenuItem>
-                                        <MenuItem value="xml">XML</MenuItem>
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
-                    </Grid>
-                );
-
-            case 1:
-                return (
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <Controller
-                                name="authMethod"
-                                control={control}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="Authentication Method"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                    >
-                                        <MenuItem value="apikey">API Key</MenuItem>
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
-                        {watch('authMethod') === 'apikey' && (
+                    <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <InfoIcon color="primary" sx={{ mr: 1 }} />
+                            <Typography variant="h6">Basic Information</Typography>
+                        </Box>
+                        <Grid container spacing={3}>
                             <Grid item xs={12}>
                                 <Controller
-                                    name="apiKey"
+                                    name="integrationName"
                                     control={control}
                                     render={({ field, fieldState: { error } }) => (
                                         <TextField
                                             {...field}
                                             fullWidth
-                                            label="API Key"
+                                            label="Integration Name"
                                             error={!!error}
                                             helperText={error?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <CloudIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
                                         />
                                     )}
                                 />
                             </Grid>
-                        )}
-                    </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="baseURL"
+                                    control={control}
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            label="Base URL"
+                                            error={!!error}
+                                            helperText={error?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <HttpIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="method"
+                                    control={control}
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="Method"
+                                            error={!!error}
+                                            helperText={error?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <HttpIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="GET">GET</MenuItem>
+                                            <MenuItem value="POST">POST</MenuItem>
+                                            <MenuItem value="PUT">PUT</MenuItem>
+                                            <MenuItem value="DELETE">DELETE</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="environment"
+                                    control={control}
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="Environment"
+                                            error={!!error}
+                                            helperText={error?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <CloudIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="dev">Development</MenuItem>
+                                            <MenuItem value="staging">Staging</MenuItem>
+                                            <MenuItem value="prod">Production</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="dataFormat"
+                                    control={control}
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="Data Format"
+                                            error={!!error}
+                                            helperText={error?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <FormatListBulletedIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="json">JSON</MenuItem>
+                                            <MenuItem value="xml">XML</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Card>
+                );
+
+            case 1:
+                return (
+                    <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <SecurityIcon color="primary" sx={{ mr: 1 }} />
+                            <Typography variant="h6">Authentication Settings</Typography>
+                        </Box>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                                <Controller
+                                    name="authMethod"
+                                    control={control}
+                                    render={({ field, fieldState: { error } }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="Authentication Method"
+                                            error={!!error}
+                                            helperText={error?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <SecurityIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="apikey">API Key</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
+                            {watch('authMethod') === 'apikey' && (
+                                <Grid item xs={12}>
+                                    <Controller
+                                        name="apiKey"
+                                        control={control}
+                                        render={({ field, fieldState: { error } }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="API Key"
+                                                error={!!error}
+                                                helperText={error?.message}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <VpnKeyIcon color="action" />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Grid>
+                            )}
+                        </Grid>
+                    </Card>
                 );
 
             case 2:
                 return (
-                    <Box>
-                        <Controller
-                            name="dataSchema.schemaName"
-                            control={control}
-                            render={({ field, fieldState: { error } }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    label="Schema Name"
-                                    error={!!error}
-                                    helperText={error?.message}
-                                    sx={{ mb: 2 }}
-                                />
-                            )}
-                        />
-                        <Controller
-                            name="dataSchema.endpoint"
-                            control={control}
-                            render={({ field, fieldState: { error } }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    label="Endpoint"
-                                    error={!!error}
-                                    helperText={error?.message}
-                                    sx={{ mb: 2 }}
-                                />
-                            )}
-                        />
-                        <Box>
-                            {watch('dataSchema.fields')?.map((_field, index) => (
-                                <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                                    <Controller
-                                        name={`dataSchema.fields.${index}.name`}
-                                        control={control}
-                                        render={({ field, fieldState: { error } }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Field Name"
-                                                error={!!error}
-                                                helperText={error?.message}
-                                                required
-                                            />
-                                        )}
-                                    />
-                                    <Controller
-                                        name={`dataSchema.fields.${index}.type`}
-                                        control={control}
-                                        render={({ field, fieldState: { error } }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                select
-                                                label="Type"
-                                                error={!!error}
-                                                helperText={error?.message}
-                                                required
-                                            >
-                                                <MenuItem value="string">String</MenuItem>
-                                                <MenuItem value="number">Number</MenuItem>
-                                                <MenuItem value="boolean">Boolean</MenuItem>
-                                            </TextField>
-                                        )}
-                                    />
-                                    <Controller
-                                        name={`dataSchema.fields.${index}.required`}
-                                        control={control}
-                                        render={({ field, fieldState: { error } }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                select
-                                                label="Required"
-                                                error={!!error}
-                                                helperText={error?.message}
-                                                required
-                                            >
-                                                <MenuItem value="true">Yes</MenuItem>
-                                                <MenuItem value="false">No</MenuItem>
-                                            </TextField>
-                                        )}
-                                    />
-                                    <IconButton
-                                        onClick={() => handleRemoveField(index)}
-                                        color="error"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </Box>
-                            ))}
-                            <Button
-                                variant="outlined"
-                                onClick={() => {
-                                    const currentFields = watch('dataSchema.fields') || [];
-                                    setValue('dataSchema.fields', [
-                                        ...currentFields,
-                                        { name: '', type: 'string', required: false }
-                                    ], { shouldValidate: true });
-                                }}
-                            >
-                                Add Field
-                            </Button>
+                    <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <SchemaIcon color="primary" sx={{ mr: 1 }} />
+                            <Typography variant="h6">Data Schema Configuration</Typography>
                         </Box>
-                    </Box>
+                        <Box>
+                            <Controller
+                                name="dataSchema.schemaName"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        label="Schema Name"
+                                        error={!!error}
+                                        helperText={error?.message}
+                                        sx={{ mb: 3 }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SchemaIcon color="action" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
+                            <Controller
+                                name="dataSchema.endpoint"
+                                control={control}
+                                render={({ field, fieldState: { error } }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        label="Endpoint"
+                                        error={!!error}
+                                        helperText={error?.message}
+                                        sx={{ mb: 3 }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <HttpIcon color="action" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
+                            <Divider sx={{ my: 3 }} />
+                            <Typography variant="subtitle1" sx={{ mb: 2 }}>Fields</Typography>
+                            <Box>
+                                {watch('dataSchema.fields')?.map((_field, index) => (
+                                    <Paper
+                                        key={index}
+                                        elevation={1}
+                                        sx={{
+                                            p: 2,
+                                            mb: 2,
+                                            display: 'flex',
+                                            gap: 2,
+                                            alignItems: 'center',
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        <Controller
+                                            name={`dataSchema.fields.${index}.mapping`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    select
+                                                    label="Mapping"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                >
+                                                    <MenuItem value="cusipID">CUSIP ID</MenuItem>
+                                                    <MenuItem value="email">Email</MenuItem>
+                                                    <MenuItem value="firstname">First Name</MenuItem>
+                                                    <MenuItem value="lastname">Last Name</MenuItem>
+                                                </TextField>
+                                            )}
+                                        />
+                                        <Controller
+                                            name={`dataSchema.fields.${index}.name`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Field Name"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                />
+                                            )}
+                                        />
+                                        <Controller
+                                            name={`dataSchema.fields.${index}.type`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    select
+                                                    label="Type"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                >
+                                                    <MenuItem value="string">String</MenuItem>
+                                                    <MenuItem value="number">Number</MenuItem>
+                                                    <MenuItem value="boolean">Boolean</MenuItem>
+                                                </TextField>
+                                            )}
+                                        />
+                                        <Controller
+                                            name={`dataSchema.fields.${index}.required`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    select
+                                                    label="Required"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                >
+                                                    <MenuItem value="true">Yes</MenuItem>
+                                                    <MenuItem value="false">No</MenuItem>
+                                                </TextField>
+                                            )}
+                                        />
+                                        <IconButton
+                                            onClick={() => handleRemoveField(index)}
+                                            color="error"
+                                            sx={{ ml: 1 }}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Paper>
+                                ))}
+                                <Button
+                                    variant="outlined"
+                                    onClick={() => {
+                                        const currentFields = watch('dataSchema.fields') || [];
+                                        setValue('dataSchema.fields', [
+                                            ...currentFields,
+                                            { name: '', type: 'string', required: false, mapping: '' }
+                                        ], { shouldValidate: true });
+                                    }}
+                                    sx={{ mt: 2 }}
+                                >
+                                    Add Field
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Card>
                 );
 
             default:
@@ -574,33 +628,35 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
 
     return (
         <Box>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h5" gutterBottom sx={{ mb: 4, fontWeight: 'bold' }}>
                 Configure REST API Integration for {selectedProduct}
             </Typography>
-            <Stepper activeStep={activeStep} orientation="vertical">
+            <Stepper activeStep={activeStep} orientation="vertical" sx={{ '& .MuiStepLabel-root': { py: 1 } }}>
                 {steps.map((step, index) => (
                     <Step key={step.label}>
                         <StepLabel>
-                            <Typography variant="subtitle1">{step.label}</Typography>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                                {step.label}
+                            </Typography>
                         </StepLabel>
                         <StepContent>
-                            <Typography color="text.secondary" sx={{ mb: 2 }}>
+                            <Typography color="text.secondary" sx={{ mb: 3 }}>
                                 {step.description}
                             </Typography>
                             {renderStepContent(index)}
-                            <Box sx={{ mt: 2 }}>
+                            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
                                 <Button
                                     variant="contained"
                                     onClick={handleNext}
-                                    sx={{ mt: 1, mr: 1 }}
                                     disabled={!isStepValid(index)}
+                                    sx={{ minWidth: 120 }}
                                 >
                                     {'Save & Continue'}
                                 </Button>
                                 <Button
                                     disabled={index === 0}
                                     onClick={handleBack}
-                                    sx={{ mt: 1, mr: 1 }}
+                                    sx={{ minWidth: 120 }}
                                 >
                                     Back
                                 </Button>
