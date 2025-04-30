@@ -34,10 +34,10 @@ interface ProductSelectionProps {
 const products = [
     {
         id: 'srm',
-        name: 'SRM (Supplier Relationship Management)',
-        description: 'Manage and optimize your supplier relationships with our comprehensive SRM solution.',
+        name: 'SRM (Shareholder Relationship Management)',
+        description: 'Manage and optimize your shareholder relationships with our comprehensive SRM solution.',
         features: [
-            'Supplier onboarding and management',
+            'Shareholder onboarding and management',
             'Performance tracking',
             'Risk assessment',
             'Contract management'

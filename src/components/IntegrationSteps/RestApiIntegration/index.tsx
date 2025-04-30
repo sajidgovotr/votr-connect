@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -15,14 +15,32 @@ import {
     Grid,
     IconButton,
 } from '@mui/material';
-import { useRestApiIntegrationMutation } from '@/services/express-integration';
-import useMessage from '@/hooks/useMessage';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 interface RestApiIntegrationStepsProps {
     selectedProduct: string;
     selectedEnvironment: string;
-    onStepComplete: (completed: boolean) => void;
+    onStepComplete: (completed: boolean, reviewData?: Array<{ section: string; fields: Array<{ name: string; value: string }> }>, formValues?: any) => void;
+    initialValues?: {
+        integrationName: string;
+        baseURL: string;
+        method: string;
+        environment: string;
+        dataFormat: string;
+        authMethod: string;
+        apiKey: string;
+        dataSchema: {
+            schemaName: string;
+            endpoint: string;
+            fields: Array<{
+                name: string;
+                type: string;
+                required: boolean;
+            }>;
+        };
+        activeSection?: number;
+        isEditingFromReview?: boolean;
+    };
 }
 
 const steps = [
@@ -37,14 +55,6 @@ const steps = [
     {
         label: 'Data Schema',
         description: 'Define the data structure for your integration',
-    },
-    // {
-    //     label: 'Field Mapping',
-    //     description: 'Map source fields to destination fields',
-    // },
-    {
-        label: 'Review',
-        description: 'Review your configuration before proceeding',
     },
 ];
 
@@ -88,23 +98,21 @@ const schema = yup.object().shape({
     }).required('Data schema is required'),
 });
 
-const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiIntegrationStepsProps) => {
-    const [restApiIntegrationMutation, { isLoading: isRestApiIntegrationLoading }] = useRestApiIntegrationMutation();
-    const { showSnackbar } = useMessage();
+const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValues }: RestApiIntegrationStepsProps) => {
     const [activeStep, setActiveStep] = useState(0);
 
     const {
         control,
-        handleSubmit,
         formState: { errors },
         watch,
         setValue,
         trigger,
+        reset,
     } = useForm<FormValues>({
         resolver: yupResolver(schema),
         mode: 'onChange',
         reValidateMode: 'onChange',
-        defaultValues: {
+        defaultValues: initialValues || {
             integrationName: '',
             baseURL: '',
             method: 'GET',
@@ -119,6 +127,18 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
             },
         },
     });
+
+    // Reset form when initialValues change
+    useEffect(() => {
+        if (initialValues) {
+            reset(initialValues);
+            if (initialValues.isEditingFromReview && initialValues.activeSection !== undefined) {
+                // Map the section index to the correct step
+                // 0: Basic Info, 1: Authentication, 2: Data Schema
+                setActiveStep(initialValues.activeSection);
+            }
+        }
+    }, [initialValues, reset]);
 
     const getStepFields = (step: number): (keyof FormValues)[] => {
         switch (step) {
@@ -145,39 +165,15 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
     };
 
     const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
-
-    const onSubmit = async (data: FormValues) => {
-        const payload = {
-            name: data.integrationName,
-            environment: data.environment,
-            dataFormat: data.dataFormat,
-            method: data.method,
-            url: data.baseURL,
-            authentication: {
-                authenticationType: data.authMethod,
-                apiKey: data.apiKey,
-            },
-            schema: {
-                resourceName: data.dataSchema.schemaName,
-                endpointPath: data.dataSchema.endpoint,
-                fieldDetails: data.dataSchema.fields.map((field) => ({
-                    name: field.name,
-                    type: field.type,
-                    isRequired: field.required,
-                })),
-            }
-        };
-
-        const response = await restApiIntegrationMutation(payload);
-        if (response.error) {
-            showSnackbar('Error', 'Failed to create integration', 'error', 10000);
-        } else {
-            showSnackbar('Success', 'Integration created successfully', 'success', 10000);
-            onStepComplete(true);
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        // If editing from review, go back to review step
+        if (initialValues?.isEditingFromReview) {
+            onStepComplete(true, undefined, {
+                ...initialValues,
+                isEditingFromReview: false
+            });
+            return;
         }
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
     const handleNext = async () => {
@@ -190,7 +186,52 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
         }
 
         if (activeStep === steps.length - 1) {
-            return await handleSubmit(onSubmit)();
+            const reviewData = [
+                {
+                    section: 'Basic Info',
+                    fields: [
+                        { name: 'Integration Name', value: watch('integrationName') },
+                        { name: 'Base URL', value: watch('baseURL') },
+                        { name: 'Method', value: watch('method') },
+                        { name: 'Environment', value: watch('environment') },
+                        { name: 'Data Format', value: watch('dataFormat') },
+                    ]
+                },
+                {
+                    section: 'Authentication',
+                    fields: [
+                        { name: 'Authentication Method', value: watch('authMethod') },
+                        { name: 'API Key', value: watch('apiKey') },
+                    ]
+                },
+                {
+                    section: 'Data Schema',
+                    fields: [
+                        { name: 'Schema Name', value: watch('dataSchema.schemaName') },
+                        { name: 'Endpoint', value: watch('dataSchema.endpoint') },
+                        ...(watch('dataSchema.fields')?.map((field, index) => ({
+                            name: `Field ${index + 1}`,
+                            value: `${field.name} (${field.type}, ${field.required ? 'Required' : 'Optional'})`
+                        })) || [])
+                    ]
+                }
+            ];
+            const formValues = {
+                integrationName: watch('integrationName'),
+                baseURL: watch('baseURL'),
+                method: watch('method'),
+                environment: watch('environment'),
+                dataFormat: watch('dataFormat'),
+                authMethod: watch('authMethod'),
+                apiKey: watch('apiKey'),
+                dataSchema: {
+                    schemaName: watch('dataSchema.schemaName'),
+                    endpoint: watch('dataSchema.endpoint'),
+                    fields: watch('dataSchema.fields'),
+                }
+            };
+            onStepComplete(true, reviewData, formValues);
+            return;
         }
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
@@ -201,6 +242,82 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
         setValue('dataSchema.fields', newFields, { shouldValidate: true });
         trigger('dataSchema');
     };
+
+    // const reviewData = [
+    //     {
+    //         section: 'Basic Info',
+    //         fields: [
+    //             { name: 'Integration Name', value: watch('integrationName') },
+    //             { name: 'Base URL', value: watch('baseURL') },
+    //             { name: 'Method', value: watch('method') },
+    //             { name: 'Environment', value: watch('environment') },
+    //             { name: 'Data Format', value: watch('dataFormat') },
+    //         ]
+    //     },
+    //     {
+    //         section: 'Authentication',
+    //         fields: [
+    //             { name: 'Authentication Method', value: watch('authMethod') },
+    //             { name: 'API Key', value: watch('apiKey') },
+    //         ]
+    //     },
+    //     {
+    //         section: 'Data Schema',
+    //         fields: [
+    //             { name: 'Schema Name', value: watch('dataSchema.schemaName') },
+    //             { name: 'Endpoint', value: watch('dataSchema.endpoint') },
+    //             ...(watch('dataSchema.fields')?.map((field, index) => ({
+    //                 name: `Field ${index + 1}`,
+    //                 value: `${field.name} (${field.type}, ${field.required ? 'Required' : 'Optional'})`
+    //             })) || [])
+    //         ]
+    //     }
+    // ];
+
+    // const reviewColumns = [
+    //     {
+    //         name: 'Section',
+    //         key: 'section',
+    //         align: 'left' as const,
+    //     },
+    //     {
+    //         name: 'Field',
+    //         key: 'name',
+    //         align: 'left' as const,
+    //     },
+    //     {
+    //         name: 'Value',
+    //         key: 'value',
+    //         align: 'left' as const,
+    //     },
+    //     {
+    //         name: 'Actions',
+    //         key: 'actions',
+    //         align: 'right' as const,
+    //         component: (item: any, index: number) => (
+    //             <IconButton
+    //                 size="small"
+    //                 onClick={() => {
+    //                     // Find which step contains this field
+    //                     const stepIndex = reviewData.findIndex(section =>
+    //                         section.fields.some(field => field.name === item.name)
+    //                     );
+    //                     setActiveStep(stepIndex);
+    //                 }}
+    //             >
+    //                 <EditIcon />
+    //             </IconButton>
+    //         ),
+    //     }
+    // ];
+
+    // const flattenedReviewData = reviewData.flatMap(section =>
+    //     section.fields.map(field => ({
+    //         section: section.section,
+    //         name: field.name,
+    //         value: field.value,
+    //     }))
+    // );
 
     const renderStepContent = (step: number) => {
         switch (step) {
@@ -450,27 +567,6 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                     </Box>
                 );
 
-            case 3:
-                return (
-                    <Box>
-                        <Typography variant="subtitle1" gutterBottom>
-                            Configuration Summary
-                        </Typography>
-                        <Typography variant="body2">
-                            Integration Name: {watch('integrationName')}
-                        </Typography>
-                        <Typography variant="body2">
-                            Environment: {watch('environment')}
-                        </Typography>
-                        <Typography variant="body2">
-                            Authentication Method: {watch('authMethod')}
-                        </Typography>
-                        <Typography variant="body2">
-                            Data Schema: {watch('dataSchema.schemaName')}
-                        </Typography>
-                    </Box>
-                );
-
             default:
                 return null;
         }
@@ -498,9 +594,8 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete }: RestApiInt
                                     onClick={handleNext}
                                     sx={{ mt: 1, mr: 1 }}
                                     disabled={!isStepValid(index)}
-                                    loading={isRestApiIntegrationLoading}
                                 >
-                                    {index === steps.length - 1 ? 'Finish' : 'Continue'}
+                                    {'Save & Continue'}
                                 </Button>
                                 <Button
                                     disabled={index === 0}
