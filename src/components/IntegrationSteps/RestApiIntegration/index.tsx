@@ -47,6 +47,7 @@ interface RestApiIntegrationStepsProps {
                 name: string;
                 type: string;
                 required: boolean;
+                mapping: string;
             }>;
         };
         activeSection?: number;
@@ -84,6 +85,7 @@ interface FormValues {
             name: string;
             type: string;
             required: boolean;
+            mapping: string;
         }>;
     };
 }
@@ -104,6 +106,7 @@ const schema = yup.object().shape({
                 name: yup.string().required('Field name is required'),
                 type: yup.string().required('Field type is required'),
                 required: yup.boolean().required('Required field selection is required'),
+                mapping: yup.string().required('Mapping is required'),
             })
         ).min(1, 'At least one field is required').required('Fields are required'),
     }).required('Data schema is required'),
@@ -521,6 +524,26 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
                                         }}
                                     >
                                         <Controller
+                                            name={`dataSchema.fields.${index}.mapping`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    select
+                                                    label="Mapping"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                >
+                                                    <MenuItem value="cusipID">CUSIP ID</MenuItem>
+                                                    <MenuItem value="email">Email</MenuItem>
+                                                    <MenuItem value="firstname">First Name</MenuItem>
+                                                    <MenuItem value="lastname">Last Name</MenuItem>
+                                                </TextField>
+                                            )}
+                                        />
+                                        <Controller
                                             name={`dataSchema.fields.${index}.name`}
                                             control={control}
                                             render={({ field, fieldState: { error } }) => (
@@ -586,7 +609,7 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
                                         const currentFields = watch('dataSchema.fields') || [];
                                         setValue('dataSchema.fields', [
                                             ...currentFields,
-                                            { name: '', type: 'string', required: false }
+                                            { name: '', type: 'string', required: false, mapping: '' }
                                         ], { shouldValidate: true });
                                     }}
                                     sx={{ mt: 2 }}
