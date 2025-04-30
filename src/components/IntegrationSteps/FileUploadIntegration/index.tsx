@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -14,8 +14,6 @@ import {
     FormControlLabel,
 } from '@mui/material';
 import TimePicker from '@/components/TimePicker';
-import { useFileUploadIntegrationMutation } from '@/services/express-integration';
-import useMessage from '@/hooks/useMessage';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -23,7 +21,8 @@ import * as yup from 'yup';
 interface FileUploadIntegrationStepsProps {
     selectedProduct: string;
     selectedEnvironment: string;
-    onStepComplete: (completed: boolean) => void;
+    onStepComplete: (completed: boolean, data?: any, formValues?: any) => void;
+    initialValues?: any;
 }
 
 const steps = [
@@ -38,10 +37,6 @@ const steps = [
     {
         label: 'Transfer Settings',
         description: 'Configure file transfer settings and schedules',
-    },
-    {
-        label: 'Review',
-        description: 'Review your configuration before proceeding',
     },
 ];
 
@@ -108,21 +103,24 @@ const schema = yup.object().shape({
 
 type FormData = yup.InferType<typeof schema>;
 
-const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUploadIntegrationStepsProps) => {
-    const [activeStep, setActiveStep] = React.useState(0);
-    const [fileUploadIntegration] = useFileUploadIntegrationMutation();
-    const { showSnackbar } = useMessage();
+const FileUploadIntegrationSteps = ({
+    selectedProduct,
+    selectedEnvironment,
+    onStepComplete,
+    initialValues
+}: FileUploadIntegrationStepsProps) => {
+    const [activeStep, setActiveStep] = useState(0);
 
     const {
         control,
-        handleSubmit,
         watch,
         formState: { errors, isSubmitting },
         trigger,
+        reset,
     } = useForm<FormData>({
         resolver: yupResolver(schema),
-        defaultValues: {
-            environment: 'dev',
+        defaultValues: initialValues || {
+            environment: selectedEnvironment,
             protocol: 'ftp',
             ftpType: 'ftp',
             fileFormat: 'xlsx',
@@ -137,17 +135,78 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
     const protocol = watch('protocol');
     const ftpType = watch('ftpType');
 
+    useEffect(() => {
+        if (initialValues) {
+            reset(initialValues);
+            if (initialValues.isEditingFromReview && initialValues.activeSection !== undefined) {
+                // Map the section index to the correct step
+                // 0: Basic Info, 1: File Configuration, 2: Transfer Settings
+                setActiveStep(initialValues.activeSection);
+            }
+        }
+    }, [initialValues, reset]);
+
     const handleNext = async () => {
         if (activeStep === steps.length - 1) {
-            return await handleSubmit(onSubmit)();
-        }
+            const currentStepFields = getStepFields(activeStep);
+            const isValid = await trigger(currentStepFields);
 
-        // Validate current step before proceeding
-        const currentStepFields = getStepFields(activeStep);
-        const isValid = await trigger(currentStepFields);
+            if (isValid) {
+                const data = watch();
+                const reviewData = [
+                    {
+                        section: 'Basic Info',
+                        fields: [
+                            { name: 'Integration Name', value: data.integrationName },
+                            { name: 'Environment', value: data.environment },
+                            { name: 'Time Zone', value: data.timeZone },
+                        ]
+                    },
+                    {
+                        section: 'File Configuration',
+                        fields: [
+                            { name: 'File Format', value: data.fileFormat?.toUpperCase() },
+                            { name: 'File Name Pattern', value: data.fileNamePattern },
+                            { name: 'Max File Size', value: `${data.maxFileSize} MB` },
+                            { name: 'Has Header', value: data.hasHeader ? 'Yes' : 'No' },
+                        ]
+                    },
+                    {
+                        section: 'Transfer Settings',
+                        fields: [
+                            { name: 'Protocol', value: data.protocol?.toUpperCase() },
+                            ...(data.protocol === 'ftp' ? [
+                                { name: 'Type', value: data.ftpType?.toUpperCase() },
+                                { name: 'Host', value: data.host },
+                                { name: 'Port', value: data.port },
+                                { name: 'Username', value: data.username },
+                                { name: data.ftpType === 'ftp' ? 'Password' : 'SSH Key', value: '********' },
+                                ...(data.ftpType === 'sftp' ? [
+                                    { name: 'Passphrase', value: data.passphrase ? 'Set' : 'Not Set' }
+                                ] : [])
+                            ] : [
+                                { name: 'Region', value: data.region },
+                                { name: 'Bucket Name', value: data.bucketName },
+                                { name: 'Folder Path', value: data.folderPath || 'Root' },
+                                { name: 'ARN', value: data.arn },
+                                { name: 'Access Key', value: data.accessKey },
+                                { name: 'Secret Key', value: '********' }
+                            ]),
+                            { name: 'Schedule', value: data.schedule },
+                            { name: 'Time of Day', value: data.timeOfDay },
+                        ]
+                    }
+                ];
 
-        if (isValid) {
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                onStepComplete(true, reviewData, data);
+            }
+        } else {
+            const currentStepFields = getStepFields(activeStep);
+            const isValid = await trigger(currentStepFields);
+
+            if (isValid) {
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            }
         }
     };
 
@@ -171,98 +230,6 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
 
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
-
-    const onSubmit = async (data: FormData) => {
-        try {
-            let payload;
-
-            if (data.protocol === 'ftp') {
-                if (data.ftpType === 'ftp') {
-                    payload = {
-                        name: data.integrationName,
-                        fileFormat: data.fileFormat.toUpperCase(),
-                        fileNamePattern: data.fileNamePattern,
-                        isHeaderRowIncluded: data.hasHeader,
-                        transferFrequency: data.schedule,
-                        timeOfDay: data.timeOfDay || '',
-                        timeZone: data.timeZone,
-                        afterSuccessfulTransferAction: "archive",
-                        afterFailedTransferAction: "retry",
-                        url: data.host,
-                        ftp: {
-                            host: data.host,
-                            port: parseInt(data.port || ''),
-                            type: data.ftpType,
-                            ftpAuthentication: {
-                                type: "password",
-                                username: data.username,
-                                password: data.password
-                            }
-                        }
-                    };
-                } else {
-                    payload = {
-                        name: data.integrationName,
-                        fileFormat: data.fileFormat.toUpperCase(),
-                        fileNamePattern: data.fileNamePattern,
-                        isHeaderRowIncluded: data.hasHeader,
-                        transferFrequency: data.schedule,
-                        timeOfDay: data.timeOfDay || '',
-                        timeZone: data.timeZone,
-                        afterSuccessfulTransferAction: "archive",
-                        afterFailedTransferAction: "retry",
-                        url: data.host,
-                        ftp: {
-                            host: data.host,
-                            port: parseInt(data.port || ''),
-                            type: data.ftpType,
-                            ftpAuthentication: {
-                                type: "sshKey",
-                                username: data.username,
-                                sshKey: data.sshKey,
-                                passphrase: data.passphrase
-                            }
-                        }
-                    };
-                }
-            } else {
-                payload = {
-                    name: data.integrationName,
-                    fileFormat: data.fileFormat.toUpperCase(),
-                    fileNamePattern: data.fileNamePattern,
-                    isHeaderRowIncluded: data.hasHeader,
-                    transferFrequency: data.schedule,
-                    timeOfDay: data.timeOfDay || '',
-                    timeZone: data.timeZone,
-                    afterSuccessfulTransferAction: "archive",
-                    afterFailedTransferAction: "retry",
-                    url: `s3://${data.bucketName}.s3.${data.region}.amazonaws.com${data.folderPath || ''}`,
-                    amazonS3Details: {
-                        region: data.region,
-                        bucketName: data.bucketName,
-                        folderPath: data.folderPath || '',
-                        amazonS3Authentication: {
-                            authenticationMethod: "accessKey",
-                            ARN: data.arn,
-                            accessKey: data.accessKey,
-                            secretKey: data.secretKey
-                        }
-                    }
-                };
-            }
-
-            const response = await fileUploadIntegration(payload);
-            if (response.error) {
-                showSnackbar('Failed to create integration', '', 'error');
-            } else {
-                showSnackbar('Integration created successfully', '', 'success');
-                onStepComplete(true);
-                setActiveStep((prevActiveStep) => prevActiveStep + 1);
-            }
-        } catch (error) {
-            showSnackbar('An error occurred while creating the integration', '', 'error');
-        }
     };
 
     const isStepValid = (step: number) => {
@@ -722,97 +689,6 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                     </Grid>
                 );
 
-            case 3:
-                const formValues = watch();
-                return (
-                    <Box>
-                        <Typography variant="subtitle1" gutterBottom>
-                            Configuration Summary
-                        </Typography>
-                        <Typography variant="body2">
-                            Integration Name: {formValues.integrationName}
-                        </Typography>
-                        <Typography variant="body2">
-                            Environment: {formValues.environment}
-                        </Typography>
-                        <Typography variant="body2">
-                            File Format: {formValues.fileFormat?.toUpperCase()}
-                        </Typography>
-                        <Typography variant="body2">
-                            File Name Pattern: {formValues.fileNamePattern}
-                        </Typography>
-                        <Typography variant="body2">
-                            Has Header: {formValues.hasHeader ? 'Yes' : 'No'}
-                        </Typography>
-                        <Typography variant="body2">
-                            Max File Size: {formValues.maxFileSize} MB
-                        </Typography>
-                        <Typography variant="body2">
-                            Protocol: {formValues.protocol?.toUpperCase()}
-                        </Typography>
-                        {formValues.protocol === 'ftp' && (
-                            <>
-                                <Typography variant="body2">
-                                    Type: {formValues.ftpType?.toUpperCase()}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Host: {formValues.host}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Port: {formValues.port}
-                                </Typography>
-                                {formValues.ftpType === 'ftp' ? (
-                                    <>
-                                        <Typography variant="body2">
-                                            Username: {formValues.username}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            Password: ********
-                                        </Typography>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Typography variant="body2">
-                                            SSH Key: ********
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            Passphrase: {formValues.passphrase ? 'Set' : 'Not Set'}
-                                        </Typography>
-                                    </>
-                                )}
-                            </>
-                        )}
-                        {formValues.protocol === 's3' && (
-                            <>
-                                <Typography variant="body2">
-                                    Region: {formValues.region}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Bucket Name: {formValues.bucketName}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Folder Path: {formValues.folderPath || 'Root'}
-                                </Typography>
-                                <Typography variant="body2">
-                                    ARN: {formValues.arn}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Access Key: {formValues.accessKey}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Secret Key: ********
-                                </Typography>
-                            </>
-                        )}
-                        <Typography variant="body2">
-                            Schedule: {formValues.schedule}
-                        </Typography>
-                        <Typography variant="body2">
-                            Time of Day: {formValues.timeOfDay}
-                        </Typography>
-                    </Box>
-                );
-
             default:
                 return null;
         }
@@ -841,7 +717,7 @@ const FileUploadIntegrationSteps = ({ selectedProduct, onStepComplete }: FileUpl
                                     sx={{ mt: 1, mr: 1 }}
                                     disabled={!isStepValid(index) || isSubmitting}
                                 >
-                                    {index === steps.length - 1 ? 'Finish' : 'Continue'}
+                                    Save & Continue
                                 </Button>
                                 <Button
                                     disabled={index === 0}

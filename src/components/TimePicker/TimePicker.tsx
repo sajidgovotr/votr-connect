@@ -21,7 +21,6 @@ const TimePicker: React.FC<IProps> = ({
     label,
     value: propValue,
     onChangeValue,
-    required = false,
     disabled = false,
     error = false,
     helperText
