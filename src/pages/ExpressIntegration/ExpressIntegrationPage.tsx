@@ -356,9 +356,14 @@ const ExpressIntegrationPage = () => {
                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
                             Confirm Integration
                         </Typography>
-                        <Typography variant="body2" >
+                        {/* <Typography variant="body2" >
                             Please review your integration details carefully. Once confirmed, the integration will be saved.
-                        </Typography>
+                        </Typography> */}
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                            <Typography variant="body1" color="info.main">
+                                Please review your integration details carefully. Once confirmed, the integration will be saved.
+                            </Typography>
+                        </Alert>
                     </Box>
                     <Stack spacing={2} direction="row" justifyContent="flex-end">
                         <CustomButton

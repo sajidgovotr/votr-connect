@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton } from '@mui/material';
+import { Box, Typography, IconButton, Alert } from '@mui/material';
 import { EditIcon } from '@/assets/svgs/custom-icons';
 
 interface ReviewField {
@@ -19,9 +19,12 @@ interface ReviewSectionProps {
 const ReviewSection = ({ data, onEdit }: ReviewSectionProps) => {
     return (
         <Box>
-            <Typography variant="subtitle1" gutterBottom sx={{ mb: 3 }}>
-                Final Review: Please carefully review all your integration details below. Once you click 'Save', the integration will be saved.
-            </Typography>
+
+            <Alert severity="warning" sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" color="warning.main" gutterBottom sx={{ mb: 3 }}>
+                    Final Review: Please carefully review all your integration details below. Once you click 'Save', the integration will be saved.
+                </Typography>
+            </Alert>
             {data && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     {data.map((section) => (

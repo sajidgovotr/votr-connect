@@ -12,11 +12,22 @@ import {
     Grid,
     Switch,
     FormControlLabel,
+    Card,
+    InputAdornment,
 } from '@mui/material';
 import TimePicker from '@/components/TimePicker';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import InfoIcon from '@mui/icons-material/Info';
+import CloudIcon from '@mui/icons-material/Cloud';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import StorageIcon from '@mui/icons-material/Storage';
+import SecurityIcon from '@mui/icons-material/Security';
+import FolderIcon from '@mui/icons-material/Folder';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import LanguageIcon from '@mui/icons-material/Language';
 
 interface FileUploadIntegrationStepsProps {
     selectedProduct: string;
@@ -241,452 +252,625 @@ const FileUploadIntegrationSteps = ({
         switch (step) {
             case 0:
                 return (
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <Controller
-                                name="integrationName"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="Integration Name"
-                                        error={!!errors.integrationName}
-                                        helperText={errors.integrationName?.message}
-                                    />
-                                )}
-                            />
+                    <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <InfoIcon color="primary" sx={{ mr: 1 }} />
+                            <Typography variant="h6">Basic Information</Typography>
+                        </Box>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                                <Controller
+                                    name="integrationName"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            label="Integration Name"
+                                            error={!!errors.integrationName}
+                                            helperText={errors.integrationName?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <CloudIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="environment"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="Environment"
+                                            error={!!errors.environment}
+                                            helperText={errors.environment?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <CloudIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="dev">Development</MenuItem>
+                                            <MenuItem value="staging">Staging</MenuItem>
+                                            <MenuItem value="prod">Production</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="timeZone"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="Time Zone"
+                                            error={!!errors.timeZone}
+                                            helperText={errors.timeZone?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <LanguageIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="UTC">UTC</MenuItem>
+                                            <MenuItem value="America/New_York">America/New_York</MenuItem>
+                                            <MenuItem value="Europe/London">Europe/London</MenuItem>
+                                            <MenuItem value="Asia/Tokyo">Asia/Tokyo</MenuItem>
+                                            <MenuItem value="Australia/Sydney">Australia/Sydney</MenuItem>
+                                            <MenuItem value="Asia/Dubai">Asia/Dubai</MenuItem>
+                                            <MenuItem value="Asia/Kolkata">Asia/Kolkata</MenuItem>
+                                            <MenuItem value="Europe/Paris">Europe/Paris</MenuItem>
+                                            <MenuItem value="America/Los_Angeles">America/Los_Angeles</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="environment"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="Environment"
-                                        error={!!errors.environment}
-                                        helperText={errors.environment?.message}
-                                    >
-                                        <MenuItem value="dev">Development</MenuItem>
-                                        <MenuItem value="staging">Staging</MenuItem>
-                                        <MenuItem value="prod">Production</MenuItem>
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="timeZone"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="Time Zone"
-                                        error={!!errors.timeZone}
-                                        helperText={errors.timeZone?.message}
-                                    >
-                                        <MenuItem value="UTC">UTC</MenuItem>
-                                        <MenuItem value="America/New_York">America/New_York</MenuItem>
-                                        <MenuItem value="Europe/London">Europe/London</MenuItem>
-                                        <MenuItem value="Asia/Tokyo">Asia/Tokyo</MenuItem>
-                                        <MenuItem value="Australia/Sydney">Australia/Sydney</MenuItem>
-                                        <MenuItem value="Asia/Dubai">Asia/Dubai</MenuItem>
-                                        <MenuItem value="Asia/Kolkata">Asia/Kolkata</MenuItem>
-                                        <MenuItem value="Europe/Paris">Europe/Paris</MenuItem>
-                                        <MenuItem value="America/Los_Angeles">America/Los_Angeles</MenuItem>
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
-                    </Grid>
+                    </Card>
                 );
 
             case 1:
                 return (
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="fileFormat"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="File Format"
-                                        error={!!errors.fileFormat}
-                                        helperText={errors.fileFormat?.message}
-                                    >
-                                        <MenuItem value="xlsx">XLSX</MenuItem>
-                                        <MenuItem value="csv">CSV</MenuItem>
-                                        <MenuItem value="txt">TXT</MenuItem>
-                                        <MenuItem value="json">JSON</MenuItem>
-                                    </TextField>
-                                )}
-                            />
+                    <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <StorageIcon color="primary" sx={{ mr: 1 }} />
+                            <Typography variant="h6">File Configuration</Typography>
+                        </Box>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="fileFormat"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="File Format"
+                                            error={!!errors.fileFormat}
+                                            helperText={errors.fileFormat?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <StorageIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="xlsx">XLSX</MenuItem>
+                                            <MenuItem value="csv">CSV</MenuItem>
+                                            <MenuItem value="txt">TXT</MenuItem>
+                                            <MenuItem value="json">JSON</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="fileNamePattern"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            label="File Name Pattern"
+                                            error={!!errors.fileNamePattern}
+                                            helperText={errors.fileNamePattern?.message || "e.g., data_*.xlsx, report_*.csv"}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <FolderIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="maxFileSize"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            label="Max File Size (MB)"
+                                            type="number"
+                                            error={!!errors.maxFileSize}
+                                            helperText={errors.maxFileSize?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <StorageIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Controller
+                                    name="hasHeader"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    checked={field.value}
+                                                    onChange={field.onChange}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="File Contains Header Row"
+                                        />
+                                    )}
+                                />
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="fileNamePattern"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="File Name Pattern"
-                                        error={!!errors.fileNamePattern}
-                                        helperText={errors.fileNamePattern?.message || "e.g., data_*.xlsx, report_*.csv"}
-                                    />
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="maxFileSize"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="Max File Size (MB)"
-                                        type="number"
-                                        error={!!errors.maxFileSize}
-                                        helperText={errors.maxFileSize?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Controller
-                                name="hasHeader"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={field.value}
-                                                onChange={field.onChange}
-                                            />
-                                        }
-                                        label="File Contains Header Row"
-                                    />
-                                )}
-                            />
-                        </Grid>
-                    </Grid>
+                    </Card>
                 );
 
             case 2:
                 return (
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="protocol"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="Transfer Protocol"
-                                        error={!!errors.protocol}
-                                        helperText={errors.protocol?.message}
-                                    >
-                                        <MenuItem value="ftp">FTP/SFTP</MenuItem>
-                                        <MenuItem value="s3">Amazon S3</MenuItem>
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
+                    <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <CloudUploadIcon color="primary" sx={{ mr: 1 }} />
+                            <Typography variant="h6">Transfer Settings</Typography>
+                        </Box>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="protocol"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="Transfer Protocol"
+                                            error={!!errors.protocol}
+                                            helperText={errors.protocol?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <CloudUploadIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="ftp">FTP/SFTP</MenuItem>
+                                            <MenuItem value="s3">Amazon S3</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
 
-                        {protocol === 'ftp' && (
-                            <>
-                                <Grid item xs={12} md={6}>
-                                    <Controller
-                                        name="ftpType"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                select
-                                                label="Type"
-                                                error={!!errors.ftpType}
-                                                helperText={errors.ftpType?.message}
-                                            >
-                                                <MenuItem value="ftp">FTP</MenuItem>
-                                                <MenuItem value="sftp">SFTP</MenuItem>
-                                            </TextField>
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <Controller
-                                        name="host"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Host"
-                                                error={!!errors.host}
-                                                helperText={errors.host?.message}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <Controller
-                                        name="port"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Port"
-                                                type="number"
-                                                error={!!errors.port}
-                                                helperText={errors.port?.message}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                                        Authentication
-                                    </Typography>
-                                </Grid>
-                                {ftpType === 'ftp' ? (
-                                    <>
-                                        <Grid item xs={12} md={6}>
-                                            <Controller
-                                                name="username"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <TextField
-                                                        {...field}
-                                                        fullWidth
-                                                        label="Username"
-                                                        error={!!errors.username}
-                                                        helperText={errors.username?.message}
-                                                    />
-                                                )}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <Controller
-                                                name="password"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <TextField
-                                                        {...field}
-                                                        fullWidth
-                                                        label="Password"
-                                                        type="password"
-                                                        error={!!errors.password}
-                                                        helperText={errors.password?.message}
-                                                    />
-                                                )}
-                                            />
-                                        </Grid>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Grid item xs={12} md={6}>
-                                            <Controller
-                                                name="username"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <TextField
-                                                        {...field}
-                                                        fullWidth
-                                                        label="Username"
-                                                        error={!!errors.username}
-                                                        helperText={errors.username?.message}
-                                                    />
-                                                )}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Controller
-                                                name="sshKey"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <TextField
-                                                        {...field}
-                                                        fullWidth
-                                                        label="SSH Key"
-                                                        multiline
-                                                        rows={4}
-                                                        error={!!errors.sshKey}
-                                                        helperText={errors.sshKey?.message || "Paste your SSH private key here"}
-                                                    />
-                                                )}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Controller
-                                                name="passphrase"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <TextField
-                                                        {...field}
-                                                        fullWidth
-                                                        label="Passphrase (Optional)"
-                                                        type="password"
-                                                    />
-                                                )}
-                                            />
-                                        </Grid>
-                                    </>
-                                )}
-                            </>
-                        )}
-
-                        {protocol === 's3' && (
-                            <>
-                                <Grid item xs={12} md={6}>
-                                    <Controller
-                                        name="region"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Region"
-                                                error={!!errors.region}
-                                                helperText={errors.region?.message || "e.g., us-east-1"}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Controller
-                                        name="bucketName"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Bucket Name"
-                                                error={!!errors.bucketName}
-                                                helperText={errors.bucketName?.message}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Controller
-                                        name="folderPath"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Folder Path"
-                                                helperText="Optional path within the bucket"
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                                        Authentication
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Controller
-                                        name="arn"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="ARN"
-                                                error={!!errors.arn}
-                                                helperText={errors.arn?.message || "Amazon Resource Name"}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <Controller
-                                        name="accessKey"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Access Key"
-                                                error={!!errors.accessKey}
-                                                helperText={errors.accessKey?.message}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <Controller
-                                        name="secretKey"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                fullWidth
-                                                label="Secret Key"
-                                                type="password"
-                                                error={!!errors.secretKey}
-                                                helperText={errors.secretKey?.message}
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                            </>
-                        )}
-
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="schedule"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        select
-                                        label="Schedule"
-                                        error={!!errors.schedule}
-                                        helperText={errors.schedule?.message}
-                                    >
-                                        <MenuItem value="daily">Daily</MenuItem>
-                                        <MenuItem value="weekly">Weekly</MenuItem>
-                                        <MenuItem value="monthly">Monthly</MenuItem>
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Controller
-                                name="timeOfDay"
-                                control={control}
-                                render={({ field }) => (
-                                    <Box sx={{ position: 'relative' }}>
-                                        <TimePicker
-                                            required={true}
-                                            label="Time of Day"
-                                            value={field.value}
-                                            onChangeValue={field.onChange}
-                                            error={!!errors.timeOfDay}
-                                            helperText={errors.timeOfDay?.message}
+                            {protocol === 'ftp' && (
+                                <>
+                                    <Grid item xs={12} md={6}>
+                                        <Controller
+                                            name="ftpType"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    select
+                                                    label="Type"
+                                                    error={!!errors.ftpType}
+                                                    helperText={errors.ftpType?.message}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <SecurityIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                >
+                                                    <MenuItem value="ftp">FTP</MenuItem>
+                                                    <MenuItem value="sftp">SFTP</MenuItem>
+                                                </TextField>
+                                            )}
                                         />
-                                    </Box>
-                                )}
-                            />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <Controller
+                                            name="host"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Host"
+                                                    error={!!errors.host}
+                                                    helperText={errors.host?.message}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <CloudIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <Controller
+                                            name="port"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Port"
+                                                    type="number"
+                                                    error={!!errors.port}
+                                                    helperText={errors.port?.message}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <CloudIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                                            Authentication
+                                        </Typography>
+                                    </Grid>
+                                    {ftpType === 'ftp' ? (
+                                        <>
+                                            <Grid item xs={12} md={6}>
+                                                <Controller
+                                                    name="username"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <TextField
+                                                            {...field}
+                                                            fullWidth
+                                                            label="Username"
+                                                            error={!!errors.username}
+                                                            helperText={errors.username?.message}
+                                                            InputProps={{
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <VpnKeyIcon color="action" />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <Controller
+                                                    name="password"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <TextField
+                                                            {...field}
+                                                            fullWidth
+                                                            label="Password"
+                                                            type="password"
+                                                            error={!!errors.password}
+                                                            helperText={errors.password?.message}
+                                                            InputProps={{
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <VpnKeyIcon color="action" />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </Grid>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Grid item xs={12} md={6}>
+                                                <Controller
+                                                    name="username"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <TextField
+                                                            {...field}
+                                                            fullWidth
+                                                            label="Username"
+                                                            error={!!errors.username}
+                                                            helperText={errors.username?.message}
+                                                            InputProps={{
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <VpnKeyIcon color="action" />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Controller
+                                                    name="sshKey"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <TextField
+                                                            {...field}
+                                                            fullWidth
+                                                            label="SSH Key"
+                                                            multiline
+                                                            rows={4}
+                                                            error={!!errors.sshKey}
+                                                            helperText={errors.sshKey?.message || "Paste your SSH private key here"}
+                                                            InputProps={{
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <VpnKeyIcon color="action" />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Controller
+                                                    name="passphrase"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <TextField
+                                                            {...field}
+                                                            fullWidth
+                                                            label="Passphrase (Optional)"
+                                                            type="password"
+                                                            InputProps={{
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <VpnKeyIcon color="action" />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </Grid>
+                                        </>
+                                    )}
+                                </>
+                            )}
+
+                            {protocol === 's3' && (
+                                <>
+                                    <Grid item xs={12} md={6}>
+                                        <Controller
+                                            name="region"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Region"
+                                                    error={!!errors.region}
+                                                    helperText={errors.region?.message || "e.g., us-east-1"}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <CloudIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Controller
+                                            name="bucketName"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Bucket Name"
+                                                    error={!!errors.bucketName}
+                                                    helperText={errors.bucketName?.message}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <StorageIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Controller
+                                            name="folderPath"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Folder Path"
+                                                    helperText="Optional path within the bucket"
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <FolderIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                                            Authentication
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Controller
+                                            name="arn"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="ARN"
+                                                    error={!!errors.arn}
+                                                    helperText={errors.arn?.message || "Amazon Resource Name"}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <SecurityIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <Controller
+                                            name="accessKey"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Access Key"
+                                                    error={!!errors.accessKey}
+                                                    helperText={errors.accessKey?.message}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <VpnKeyIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <Controller
+                                            name="secretKey"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Secret Key"
+                                                    type="password"
+                                                    error={!!errors.secretKey}
+                                                    helperText={errors.secretKey?.message}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <VpnKeyIcon color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                </>
+                            )}
+
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="schedule"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            select
+                                            label="Schedule"
+                                            error={!!errors.schedule}
+                                            helperText={errors.schedule?.message}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <ScheduleIcon color="action" />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        >
+                                            <MenuItem value="daily">Daily</MenuItem>
+                                            <MenuItem value="weekly">Weekly</MenuItem>
+                                            <MenuItem value="monthly">Monthly</MenuItem>
+                                        </TextField>
+                                    )}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <Controller
+                                    name="timeOfDay"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Box sx={{ position: 'relative' }}>
+                                            <TimePicker
+                                                required={true}
+                                                label="Time of Day"
+                                                value={field.value}
+                                                onChangeValue={field.onChange}
+                                                error={!!errors.timeOfDay}
+                                                helperText={errors.timeOfDay?.message}
+                                            />
+                                        </Box>
+                                    )}
+                                />
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    </Card>
                 );
 
             default:
@@ -696,25 +880,27 @@ const FileUploadIntegrationSteps = ({
 
     return (
         <Box>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h5" gutterBottom sx={{ mb: 4, fontWeight: 'bold' }}>
                 Configure File Upload Integration for {selectedProduct}
             </Typography>
-            <Stepper activeStep={activeStep} orientation="vertical">
+            <Stepper activeStep={activeStep} orientation="vertical" sx={{ '& .MuiStepLabel-root': { py: 1 } }}>
                 {steps.map((step, index) => (
                     <Step key={step.label}>
                         <StepLabel>
-                            <Typography variant="subtitle1">{step.label}</Typography>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                                {step.label}
+                            </Typography>
                         </StepLabel>
                         <StepContent>
-                            <Typography color="text.secondary" sx={{ mb: 2 }}>
+                            <Typography color="text.secondary" sx={{ mb: 3 }}>
                                 {step.description}
                             </Typography>
                             {renderStepContent(index)}
-                            <Box sx={{ mt: 2 }}>
+                            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
                                 <Button
                                     variant="contained"
                                     onClick={handleNext}
-                                    sx={{ mt: 1, mr: 1 }}
+                                    sx={{ minWidth: 120 }}
                                     disabled={!isStepValid(index) || isSubmitting}
                                 >
                                     Save & Continue
@@ -722,7 +908,7 @@ const FileUploadIntegrationSteps = ({
                                 <Button
                                     disabled={index === 0}
                                     onClick={handleBack}
-                                    sx={{ mt: 1, mr: 1 }}
+                                    sx={{ minWidth: 120 }}
                                 >
                                     Back
                                 </Button>
