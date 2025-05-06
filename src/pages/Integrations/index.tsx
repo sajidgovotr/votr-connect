@@ -199,7 +199,7 @@ const Integrations = () => {
 
                 <DynamicTable
                     columns={columns}
-                    data={filteredIntegrations}
+                    data={filteredIntegrations || []}
                     hidePagination={true}
                     isLoading={isLoading}
                 />
