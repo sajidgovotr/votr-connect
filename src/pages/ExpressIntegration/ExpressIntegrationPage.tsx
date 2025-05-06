@@ -197,6 +197,7 @@ const ExpressIntegrationPage = () => {
                             name: field.name,
                             type: field.type,
                             isRequired: field.required,
+                            mapFeildName: field.mapFeildName,
                         })),
                     }
                 };
@@ -276,6 +277,7 @@ const ExpressIntegrationPage = () => {
                         }
                     };
                 }
+                console.log(formData, "dataschema values");
                 await fileUploadIntegrationMutation(payload);
             }
 

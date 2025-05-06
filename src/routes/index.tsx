@@ -33,6 +33,7 @@ import EmailTemplatesPage from "@/pages/EmailTemplates/EmailTemplatesPage";
 import EmailTemplateFormPage from "@/pages/EmailTemplates/EmailTemplateFormPage";
 import ExpressIntegrationPage from "@/pages/ExpressIntegration/ExpressIntegrationPage";
 import ConfiguredProducts from "@/pages/ConfiguredProducts";
+import Integrations from "@/pages/Integrations";
 
 
 const Routes = () => {
@@ -54,6 +55,16 @@ const Routes = () => {
         {
           path: "",
           element: <ExpressIntegrationPage />
+        }
+      ]
+    },
+    {
+      path: '/integrations',
+      element: <PrivateRoute navLink="/integrations" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <Integrations />
         }
       ]
     },

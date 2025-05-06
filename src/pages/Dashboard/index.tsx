@@ -1,33 +1,36 @@
-import { Box, Grid2, Typography } from "@mui/material";
+import { Box, Grid2, Skeleton, Typography } from "@mui/material";
 import { Card } from "@/components";
 import StatusIndicator from "@/components/StatusIndicator";
 import StatusBadge from "@/components/StatusBadge";
 import ActivityList from "@/components/ActivityList";
+import FileUploadsList from "@/components/FileUploadsList";
+import { useGetUploadedCSVFilesQuery } from "@/services/express-integration";
+
+const activities = [
+    {
+        title: "API Test Successful",
+        timestamp: "Today, 10:45 AM",
+        description: "All API endpoints are functioning correctly"
+    },
+    {
+        title: "Production Readiness Requested",
+        timestamp: "Today, 09:30 AM",
+        description: "Awaiting review from the admin team"
+    },
+    {
+        title: "GraphQL Schema Updated",
+        timestamp: "Yesterday, 4:15 PM",
+        description: "Added new types and resolvers for user management"
+    },
+    {
+        title: "REST API Endpoint Configuration",
+        timestamp: "Yesterday, 2:30 PM",
+        description: "Updated authentication endpoints"
+    }
+];
 
 const Dashboard = () => {
-    const activities = [
-        {
-            title: "API Test Successful",
-            timestamp: "Today, 10:45 AM",
-            description: "All API endpoints are functioning correctly"
-        },
-        {
-            title: "Production Readiness Requested",
-            timestamp: "Today, 09:30 AM",
-            description: "Awaiting review from the admin team"
-        },
-        {
-            title: "GraphQL Schema Updated",
-            timestamp: "Yesterday, 4:15 PM",
-            description: "Added new types and resolvers for user management"
-        },
-        {
-            title: "REST API Endpoint Configuration",
-            timestamp: "Yesterday, 2:30 PM",
-            description: "Updated authentication endpoints"
-        }
-    ];
-
+    const { data: files, isLoading: isLoadingFiles } = useGetUploadedCSVFilesQuery(null);
     return (
         <Box className="p-6">
             <Typography
@@ -115,8 +118,9 @@ const Dashboard = () => {
                     </Card>
                 </Grid2>
 
+
                 {/* Recent Activity Card */}
-                <Grid2 component="div" size={{ xs: 12 }}>
+                <Grid2 component="div" size={{ xs: 6 }}>
                     <Card>
                         <Typography
                             variant="h6"
@@ -131,6 +135,9 @@ const Dashboard = () => {
                         </Typography>
                         <ActivityList activities={activities} />
                     </Card>
+                </Grid2>
+                <Grid2 component="div" size={{ xs: 6 }}>
+                    {isLoadingFiles ? <Skeleton variant="rectangular" height={400} /> : <FileUploadsList files={files} />}
                 </Grid2>
             </Grid2>
         </Box>
