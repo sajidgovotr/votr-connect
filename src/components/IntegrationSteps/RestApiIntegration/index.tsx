@@ -27,6 +27,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import CloudIcon from '@mui/icons-material/Cloud';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import AddIcon from '@mui/icons-material/Add';
+import CustomButton from '@/components/CustomButton';
 
 interface RestApiIntegrationStepsProps {
     selectedProduct: string;
@@ -47,7 +49,7 @@ interface RestApiIntegrationStepsProps {
                 name: string;
                 type: string;
                 required: boolean;
-                mapping: string;
+                mapFeildName: string;
             }>;
         };
         activeSection?: number;
@@ -85,7 +87,7 @@ interface FormValues {
             name: string;
             type: string;
             required: boolean;
-            mapping: string;
+            mapFeildName: string;
         }>;
     };
 }
@@ -106,7 +108,7 @@ const schema = yup.object().shape({
                 name: yup.string().required('Field name is required'),
                 type: yup.string().required('Field type is required'),
                 required: yup.boolean().required('Required field selection is required'),
-                mapping: yup.string().required('Mapping is required'),
+                mapFeildName: yup.string().required('Mapping is required'),
             })
         ).min(1, 'At least one field is required').required('Fields are required'),
     }).required('Data schema is required'),
@@ -472,6 +474,7 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
                                     <TextField
                                         {...field}
                                         fullWidth
+                                        select
                                         label="Schema Name"
                                         error={!!error}
                                         helperText={error?.message}
@@ -483,7 +486,9 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
                                                 </InputAdornment>
                                             ),
                                         }}
-                                    />
+                                    >
+                                        <MenuItem value="shareholder">Shareholder</MenuItem>
+                                    </TextField>
                                 )}
                             />
                             <Controller
@@ -524,7 +529,7 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
                                         }}
                                     >
                                         <Controller
-                                            name={`dataSchema.fields.${index}.mapping`}
+                                            name={`dataSchema.fields.${index}.mapFeildName`}
                                             control={control}
                                             render={({ field, fieldState: { error } }) => (
                                                 <TextField
@@ -537,9 +542,11 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
                                                     required
                                                 >
                                                     <MenuItem value="cusipID">CUSIP ID</MenuItem>
-                                                    <MenuItem value="email">Email</MenuItem>
+                                                    <MenuItem value="accountNumber">Account Number</MenuItem>
+                                                    <MenuItem value="email">Email Address</MenuItem>
                                                     <MenuItem value="firstname">First Name</MenuItem>
-                                                    <MenuItem value="lastname">Last Name</MenuItem>
+                                                    <MenuItem value="shares">Number of Shares (fully settled)</MenuItem>
+                                                    <MenuItem value="recordDate">Record Date</MenuItem>
                                                 </TextField>
                                             )}
                                         />
@@ -603,19 +610,19 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
                                         </IconButton>
                                     </Paper>
                                 ))}
-                                <Button
+                                <CustomButton
                                     variant="outlined"
                                     onClick={() => {
                                         const currentFields = watch('dataSchema.fields') || [];
                                         setValue('dataSchema.fields', [
                                             ...currentFields,
-                                            { name: '', type: 'string', required: false, mapping: '' }
+                                            { name: '', type: 'string', required: false, mapFeildName: '' }
                                         ], { shouldValidate: true });
                                     }}
+                                    title="Add Field"
+                                    endIcon={<AddIcon />}
                                     sx={{ mt: 2 }}
-                                >
-                                    Add Field
-                                </Button>
+                                />
                             </Box>
                         </Box>
                     </Card>

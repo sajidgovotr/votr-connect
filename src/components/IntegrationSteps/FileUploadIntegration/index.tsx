@@ -14,6 +14,8 @@ import {
     FormControlLabel,
     Card,
     InputAdornment,
+    Paper,
+    IconButton,
 } from '@mui/material';
 import TimePicker from '@/components/TimePicker';
 import { useForm, Controller } from 'react-hook-form';
@@ -28,6 +30,10 @@ import FolderIcon from '@mui/icons-material/Folder';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import LanguageIcon from '@mui/icons-material/Language';
+import SchemaIcon from '@mui/icons-material/Schema';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import CustomButton from '@/components/CustomButton';
 
 interface FileUploadIntegrationStepsProps {
     selectedProduct: string;
@@ -46,6 +52,10 @@ const steps = [
         description: 'Define file types and validation rules',
     },
     {
+        label: 'Data Schema',
+        description: 'Configure field mappings for your file data',
+    },
+    {
         label: 'Transfer Settings',
         description: 'Configure file transfer settings and schedules',
     },
@@ -59,6 +69,16 @@ const schema = yup.object().shape({
     fileNamePattern: yup.string().required('File name pattern is required'),
     maxFileSize: yup.string().required('Max file size is required'),
     hasHeader: yup.boolean(),
+    dataSchema: yup.object().shape({
+        fields: yup.array().of(
+            yup.object().shape({
+                name: yup.string().required('Field name is required'),
+                type: yup.string().required('Field type is required'),
+                required: yup.boolean().required('Required field selection is required'),
+                mapFeildName: yup.string().required('Mapping is required'),
+            })
+        ).min(1, 'At least one field is required').required('Fields are required'),
+    }).required('Data schema is required'),
     protocol: yup.string().required('Protocol is required'),
     schedule: yup.string().required('Schedule is required'),
     timeOfDay: yup.string().required('Time of day is required'),
@@ -128,6 +148,7 @@ const FileUploadIntegrationSteps = ({
         formState: { errors, isSubmitting },
         trigger,
         reset,
+        setValue,
     } = useForm<FormData>({
         resolver: yupResolver(schema),
         defaultValues: initialValues || {
@@ -151,7 +172,7 @@ const FileUploadIntegrationSteps = ({
             reset(initialValues);
             if (initialValues.isEditingFromReview && initialValues.activeSection !== undefined) {
                 // Map the section index to the correct step
-                // 0: Basic Info, 1: File Configuration, 2: Transfer Settings
+                // 0: Basic Info, 1: File Configuration, 2: Data Schema, 3: Transfer Settings
                 setActiveStep(initialValues.activeSection);
             }
         }
@@ -180,6 +201,15 @@ const FileUploadIntegrationSteps = ({
                             { name: 'File Name Pattern', value: data.fileNamePattern },
                             { name: 'Max File Size', value: `${data.maxFileSize} MB` },
                             { name: 'Has Header', value: data.hasHeader ? 'Yes' : 'No' },
+                        ]
+                    },
+                    {
+                        section: 'Data Schema',
+                        fields: [
+                            ...(data.dataSchema.fields?.map((field, index) => ({
+                                name: `Field ${index + 1}`,
+                                value: `${field.name} (${field.type}, ${field.required ? 'Required' : 'Optional'}) - Mapped to: ${field.mapFeildName}`
+                            })) || [])
                         ]
                     },
                     {
@@ -228,6 +258,8 @@ const FileUploadIntegrationSteps = ({
             case 1:
                 return ['fileFormat', 'fileNamePattern', 'maxFileSize'];
             case 2:
+                return ['dataSchema'];
+            case 3:
                 if (protocol === 'ftp') {
                     return ['protocol', 'ftpType', 'host', 'port', 'username',
                         ftpType === 'ftp' ? 'password' : 'sshKey', 'schedule', 'timeOfDay'];
@@ -246,6 +278,13 @@ const FileUploadIntegrationSteps = ({
     const isStepValid = (step: number) => {
         const stepFields = getStepFields(step);
         return stepFields.every(field => !errors[field]);
+    };
+
+    const handleRemoveField = (index: number) => {
+        const currentFields = watch('dataSchema.fields');
+        const newFields = currentFields.filter((_, i) => i !== index);
+        setValue('dataSchema.fields', newFields, { shouldValidate: true });
+        trigger('dataSchema');
     };
 
     const renderStepContent = (step: number) => {
@@ -448,6 +487,130 @@ const FileUploadIntegrationSteps = ({
                 );
 
             case 2:
+                return (
+                    <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <SchemaIcon color="primary" sx={{ mr: 1 }} />
+                            <Typography variant="h6">Data Schema Configuration</Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="subtitle1" sx={{ mb: 2 }}>Fields</Typography>
+                            <Box>
+                                {watch('dataSchema.fields')?.map((_field, index) => (
+                                    <Paper
+                                        key={index}
+                                        elevation={1}
+                                        sx={{
+                                            p: 2,
+                                            mb: 2,
+                                            display: 'flex',
+                                            gap: 2,
+                                            alignItems: 'center',
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        <Controller
+                                            name={`dataSchema.fields.${index}.mapFeildName`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    select
+                                                    label="Mapping"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                >
+                                                    <MenuItem value="cusipID">CUSIP ID</MenuItem>
+                                                    <MenuItem value="accountNumber">Account Number</MenuItem>
+                                                    <MenuItem value="email">Email Address</MenuItem>
+                                                    <MenuItem value="firstname">First Name</MenuItem>
+                                                    <MenuItem value="shares">Number of Shares (fully settled)</MenuItem>
+                                                    <MenuItem value="recordDate">Record Date</MenuItem>
+                                                </TextField>
+                                            )}
+                                        />
+                                        <Controller
+                                            name={`dataSchema.fields.${index}.name`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    label="Field Name"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                />
+                                            )}
+                                        />
+                                        <Controller
+                                            name={`dataSchema.fields.${index}.type`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    select
+                                                    label="Type"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                >
+                                                    <MenuItem value="string">String</MenuItem>
+                                                    <MenuItem value="number">Number</MenuItem>
+                                                    <MenuItem value="boolean">Boolean</MenuItem>
+                                                    <MenuItem value="date">Date</MenuItem>
+                                                </TextField>
+                                            )}
+                                        />
+                                        <Controller
+                                            name={`dataSchema.fields.${index}.required`}
+                                            control={control}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <TextField
+                                                    {...field}
+                                                    fullWidth
+                                                    select
+                                                    label="Required"
+                                                    error={!!error}
+                                                    helperText={error?.message}
+                                                    required
+                                                >
+                                                    <MenuItem value="true">Yes</MenuItem>
+                                                    <MenuItem value="false">No</MenuItem>
+                                                </TextField>
+                                            )}
+                                        />
+                                        <IconButton
+                                            onClick={() => handleRemoveField(index)}
+                                            color="error"
+                                            sx={{ ml: 1 }}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Paper>
+                                ))}
+                                <CustomButton
+                                    variant="outlined"
+                                    onClick={() => {
+                                        const currentFields = watch('dataSchema.fields') || [];
+                                        setValue('dataSchema.fields', [
+                                            ...currentFields,
+                                            { name: '', type: 'string', required: false, mapFeildName: '' }
+                                        ], { shouldValidate: true });
+                                    }}
+                                    title="Add Field"
+                                    endIcon={<AddIcon />}
+                                    sx={{ mt: 2 }}
+                                />
+                            </Box>
+                        </Box>
+                    </Card>
+                );
+
+            case 3:
                 return (
                     <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>

@@ -3,7 +3,7 @@ import {
     HelpCenterIcon,
     SettingsIcon,
 } from "@/assets/images/sidebar/svg-icons";
-import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, Assessment, Email, Settings } from "@mui/icons-material";
+import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, Assessment, Email, Settings, Window } from "@mui/icons-material";
 
 const UserItems = {
     home: [
@@ -18,6 +18,12 @@ const UserItems = {
             icon: <IntegrationInstructions sx={{ color: "#5263FF" }} />,
             iconInactive: <IntegrationInstructions sx={{ color: "#8C8E9C" }} />,
             title: "Express Integration"
+        },
+        {
+            href: '/integrations',
+            icon: <Window sx={{ color: "#5263FF" }} />,
+            iconInactive: <Window sx={{ color: "#8C8E9C" }} />,
+            title: "Integrations"
         },
         {
             href: '/account-management',

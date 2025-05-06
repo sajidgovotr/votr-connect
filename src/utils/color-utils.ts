@@ -37,12 +37,40 @@ const getRequiredChipsColor = (color: string = "Success") => {
 const getMapColor = (name: string, highlightedCountries: Record<string, number>): string =>
     highlightedCountries[name] ? "#5263FF" : "#E0E0E0";
 
-
+const getEnvironmentColor = (environment: string) => {
+    switch (environment.toLowerCase()) {
+        case 'development':
+            return {
+                bg: '#E0F2FE',
+                text: '#0369A1',
+                border: '#BAE6FD'
+            };
+        case 'staging':
+            return {
+                bg: '#FEF3C7',
+                text: '#92400E',
+                border: '#FDE68A'
+            };
+        case 'production':
+            return {
+                bg: '#DCFCE7',
+                text: '#166534',
+                border: '#BBF7D0'
+            };
+        default:
+            return {
+                bg: '#F3F4F6',
+                text: '#374151',
+                border: '#E5E7EB'
+            };
+    }
+};
 
 
 export {
     getStatusColor,
     getFontColor,
     getRequiredChipsColor,
-    getMapColor
+    getMapColor,
+    getEnvironmentColor
 }
