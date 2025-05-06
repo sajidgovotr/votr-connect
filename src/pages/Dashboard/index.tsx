@@ -137,7 +137,7 @@ const Dashboard = () => {
                     </Card>
                 </Grid2>
                 <Grid2 component="div" size={{ xs: 6 }}>
-                    {isLoadingFiles ? <Skeleton variant="rectangular" height={400} /> : <FileUploadsList files={files} />}
+                    {isLoadingFiles ? <Skeleton variant="rectangular" height={400} /> : <FileUploadsList files={files || []} />}
                 </Grid2>
             </Grid2>
         </Box>
