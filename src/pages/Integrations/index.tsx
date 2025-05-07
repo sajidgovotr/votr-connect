@@ -1,42 +1,43 @@
 import { CustomButton } from "@/components";
 import DynamicTable from "@/components/DynamicTable";
-import { Box, TextField, Typography, Paper, InputAdornment, Chip, Stack, Select, MenuItem, FormControl, InputLabel, Tooltip } from "@mui/material";
+import { Box, TextField, Typography, Paper, InputAdornment, Chip, Stack, Select, MenuItem, FormControl, InputLabel, Tooltip, Alert, CircularProgress } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { useGetAllIntegrationsQuery, usePullDataFromIntegrationQuery } from "@/services/express-integration";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import IntegrationDetails from "@/components/Modal/IntegrationDetails";
-
-// const EnvironmentBadge = ({ environment }: { environment: string }) => {
-//     const colors = getEnvironmentColor(environment);
-//     return (
-//         <Chip
-//             label={environment}
-//             size="small"
-//             sx={{
-//                 backgroundColor: colors.bg,
-//                 color: colors.text,
-//                 border: `1px solid ${colors.border}`,
-//                 fontWeight: 500,
-//                 fontSize: '0.75rem',
-//                 height: '24px',
-//                 '& .MuiChip-label': {
-//                     px: 1
-//                 }
-//             }}
-//         />
-//     );
-// };
 
 const Integrations = () => {
     const [pullingDataId, setPullingDataId] = useState<string | null>(null);
-    const { data: integrations, isLoading } = useGetAllIntegrationsQuery(null);
-    const { isLoading: isPullingData } = usePullDataFromIntegrationQuery(pullingDataId || '', { skip: !pullingDataId });
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const { data: integrations, isLoading, isError, error } = useGetAllIntegrationsQuery(null);
+    const { isLoading: isPullingData, isError: isPullError, error: pullError, isSuccess: isPullSuccess } = usePullDataFromIntegrationQuery(
+        pullingDataId || '',
+        {
+            skip: !pullingDataId,
+            refetchOnMountOrArgChange: true,
+            refetchOnFocus: false,
+            refetchOnReconnect: false
+        }
+    );
     const [selectedType, setSelectedType] = useState<string>('all');
     const [search, setSearch] = useState<string>('');
     const [selectedIntegration, setSelectedIntegration] = useState<any>(null);
 
-    const columns = [
+    useEffect(() => {
+        if (isPullSuccess) {
+            setShowSuccessMessage(true);
+            // Reset pullingDataId after successful pull
+            setPullingDataId(null);
+            // Hide success message after 5 seconds
+            const timer = setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [isPullSuccess]);
+
+    const columns = useMemo(() => [
         {
             key: ["name"],
             name: "Name",
@@ -88,7 +89,7 @@ const Integrations = () => {
                                         sx={{ p: 2 }}
                                         loading={isPullingData && pullingDataId === data?.id}
                                         onClick={() => {
-                                            setPullingDataId(data?.id);
+                                            setPullingDataId(data?.ftp?.id);
                                         }}
                                     />
                                 </Tooltip>
@@ -98,7 +99,7 @@ const Integrations = () => {
                 )
             }
         },
-    ];
+    ], [isPullingData, pullingDataId]);
 
     const filterByType = (integration: any) => {
         return selectedType === 'all' ? integrations : integration.integrationType === selectedType;
@@ -108,7 +109,66 @@ const Integrations = () => {
         return integration.name.toLowerCase().includes(search.toLowerCase());
     }
 
-    const filteredIntegrations = useMemo(() => integrations?.filter(filterByType).filter(filterBySearch), [selectedType, search, integrations]);
+    const sortByCreatedAt = (integrations: any[]) => {
+        return integrations.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    const filteredIntegrations = useMemo(() => {
+        const filtered = integrations?.filter(filterByType).filter(filterBySearch) || [];
+        return sortByCreatedAt(filtered);
+    }, [selectedType, search, integrations]);
+
+    // Handle loading state
+    if (isLoading) {
+        return (
+            <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    // Handle error state
+    if (isError) {
+        const errorMessage = error && 'data' in error
+            ? (error.data as { message?: string })?.message
+            : 'Failed to fetch integrations. Please try again later.';
+
+        return (
+            <Box sx={{ p: 3 }}>
+                <Alert
+                    severity="error"
+                    sx={{
+                        mb: 2,
+                        '& .MuiAlert-message': {
+                            color: '#991B1B'
+                        }
+                    }}
+                >
+                    {errorMessage}
+                </Alert>
+                <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: '#1F2937' }}>
+                    Error Loading Integrations
+                </Typography>
+                <Typography variant="body1" sx={{ color: '#6B7280' }}>
+                    There was a problem loading your integrations. Please check your connection and try again.
+                </Typography>
+            </Box>
+        );
+    }
+
+    // Handle empty state
+    if (!integrations || integrations.length === 0) {
+        return (
+            <Box sx={{ p: 3 }}>
+                <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: '#1F2937' }}>
+                    No Integrations Found
+                </Typography>
+                <Typography variant="body1" sx={{ color: '#6B7280' }}>
+                    You haven't created any integrations yet. Get started by creating your first integration.
+                </Typography>
+            </Box>
+        );
+    }
 
     return (
         <Box sx={{ p: 3 }}>
@@ -120,6 +180,38 @@ const Integrations = () => {
                     Manage and monitor your API integrations and file uploads
                 </Typography>
             </Box>
+
+            {/* Show pull data error if any */}
+            {isPullError && (
+                <Alert
+                    severity="error"
+                    sx={{
+                        mb: 3,
+                        '& .MuiAlert-message': {
+                            color: '#991B1B'
+                        }
+                    }}
+                >
+                    {pullError && 'data' in pullError
+                        ? (pullError.data as { message?: string })?.message
+                        : 'Failed to pull data. Please try again.'}
+                </Alert>
+            )}
+
+            {/* Show success message */}
+            {showSuccessMessage && (
+                <Alert
+                    severity="success"
+                    sx={{
+                        mb: 3,
+                        '& .MuiAlert-message': {
+                            color: '#065F46'
+                        }
+                    }}
+                >
+                    Data pulled successfully! The integration is now processing your data.
+                </Alert>
+            )}
 
             <Paper
                 elevation={0}
@@ -197,12 +289,21 @@ const Integrations = () => {
                     </Stack>
                 </Box>
 
-                <DynamicTable
-                    columns={columns}
-                    data={filteredIntegrations || []}
-                    hidePagination={true}
-                    isLoading={isLoading}
-                />
+                {/* Show no results message if filtered list is empty */}
+                {filteredIntegrations.length === 0 ? (
+                    <Box sx={{ py: 4, textAlign: 'center' }}>
+                        <Typography variant="body1" sx={{ color: '#6B7280' }}>
+                            No integrations found matching your search criteria.
+                        </Typography>
+                    </Box>
+                ) : (
+                    <DynamicTable
+                        columns={columns}
+                        data={filteredIntegrations}
+                        hidePagination={true}
+                        isLoading={isLoading}
+                    />
+                )}
             </Paper>
 
             <IntegrationDetails

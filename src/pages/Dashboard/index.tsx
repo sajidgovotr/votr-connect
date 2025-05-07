@@ -1,4 +1,4 @@
-import { Box, Grid2, Skeleton, Typography } from "@mui/material";
+import { Box, Grid2, Skeleton, Typography, Alert } from "@mui/material";
 import { Card } from "@/components";
 import StatusIndicator from "@/components/StatusIndicator";
 import StatusBadge from "@/components/StatusBadge";
@@ -30,7 +30,61 @@ const activities = [
 ];
 
 const Dashboard = () => {
-    const { data: files, isLoading: isLoadingFiles } = useGetUploadedCSVFilesQuery(null);
+    const { data: files, isLoading: isLoadingFiles, isError: isFilesError, error: filesError } = useGetUploadedCSVFilesQuery(null);
+
+    const renderFilesList = () => {
+        if (isLoadingFiles) {
+            return <Skeleton variant="rectangular" height={400} />;
+        }
+
+        if (isFilesError) {
+            const errorMessage = filesError && 'data' in filesError
+                ? (filesError.data as { message?: string })?.message
+                : 'Failed to fetch files. Please try again later.';
+
+            return (
+                <Card>
+                    <Box sx={{ p: 3 }}>
+                        <Alert
+                            severity="error"
+                            sx={{
+                                mb: 2,
+                                '& .MuiAlert-message': {
+                                    color: '#991B1B'
+                                }
+                            }}
+                        >
+                            {errorMessage}
+                        </Alert>
+                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1F2937' }}>
+                            Error Loading Files
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                            There was a problem loading your files. Please check your connection and try again.
+                        </Typography>
+                    </Box>
+                </Card>
+            );
+        }
+
+        if (!files || files.length === 0) {
+            return (
+                <Card>
+                    <Box sx={{ p: 3 }}>
+                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1F2937' }}>
+                            No Files Found
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                            You haven't uploaded any files yet. Get started by uploading your first file.
+                        </Typography>
+                    </Box>
+                </Card>
+            );
+        }
+
+        return <FileUploadsList files={files} />;
+    };
+
     return (
         <Box className="p-6">
             <Typography
@@ -118,7 +172,6 @@ const Dashboard = () => {
                     </Card>
                 </Grid2>
 
-
                 {/* Recent Activity Card */}
                 <Grid2 component="div" size={{ xs: 6 }}>
                     <Card>
@@ -136,8 +189,10 @@ const Dashboard = () => {
                         <ActivityList activities={activities} />
                     </Card>
                 </Grid2>
+
+                {/* Files List Card */}
                 <Grid2 component="div" size={{ xs: 6 }}>
-                    {isLoadingFiles ? <Skeleton variant="rectangular" height={400} /> : <FileUploadsList files={files || []} />}
+                    {renderFilesList()}
                 </Grid2>
             </Grid2>
         </Box>
