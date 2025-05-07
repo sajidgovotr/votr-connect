@@ -180,7 +180,7 @@ const DynamicTable = <T extends IBase>({
                                 ? renderSkeletonRows()
                                 : sortedData?.map((item: any, index: number) => (
                                     <TableRow
-                                        key={`table-content-${item?.[contentIdKey ?? ""] ?? item._id
+                                        key={`table-content-${item?.[contentIdKey ?? ""] ?? item.id
                                             }`}
                                         sx={{
                                             cursor: onRowClick ? "pointer" : "default",
