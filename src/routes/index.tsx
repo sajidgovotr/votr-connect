@@ -34,6 +34,8 @@ import EmailTemplateFormPage from "@/pages/EmailTemplates/EmailTemplateFormPage"
 import ExpressIntegrationPage from "@/pages/ExpressIntegration/ExpressIntegrationPage";
 import ConfiguredProducts from "@/pages/ConfiguredProducts";
 import Integrations from "@/pages/Integrations";
+import OnBoarding from "@/pages/OnBoarding/Welcom";
+import OnboardLayout from "@/layout/onboard";
 
 
 const Routes = () => {
@@ -45,6 +47,16 @@ const Routes = () => {
         {
           path: "",
           element: <Dashboard />
+        }
+      ]
+    },
+    {
+      path: "/onboarding",
+      element: <PrivateRoute navLink="/onboarding" component={OnboardLayout} />,
+      children: [
+        {
+          path: "",
+          element: <OnBoarding />
         }
       ]
     },

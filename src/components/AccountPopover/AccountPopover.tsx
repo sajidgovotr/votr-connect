@@ -14,9 +14,9 @@ const AccountPopover = () => {
                 data-testid="account-popover-button"
                 ref={anchorRef}
                 onClick={handleOpen}
-                className={`relative flex items-center p-0 !w-8 !h-8 ${open ? 'before:content-[\'\'] before:absolute before:w-full before:h-full before:rounded-md before:bg-muted' : ''}`}
+                className={`relative flex items-center p-0 !w-4 !h-4 ${open ? 'before:content-[\'\'] before:absolute before:w-full before:h-full before:rounded-md before:bg-muted' : ''}`}
             >
-                <Avatar>T</Avatar>
+                <Avatar sx={{ width: 32, height: 32 }}>T</Avatar>
                 <Box ml={0.8}>
                     <KeyboardArrowDownIcon />
                 </Box>
