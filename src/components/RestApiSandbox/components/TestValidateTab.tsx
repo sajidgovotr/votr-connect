@@ -1,28 +1,10 @@
 import { useState } from 'react';
 import { Box, Button, TextField, Typography, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Tab, IconButton, CircularProgress } from "@mui/material";
 import { useFormContext, useFieldArray } from 'react-hook-form';
-import CustomButton from '../../CustomButton';
 import SelectBox from '../../SelectBox';
 import CloseIcon from '@mui/icons-material/Close';
 
-interface RequestParameter {
-    name: string;
-    value: string;
-}
 
-interface FormDataTextItem {
-    name: string;
-    value: string;
-    type: 'text';
-}
-
-interface FormDataFileItem {
-    name: string;
-    value: File | string;
-    type: 'file';
-}
-
-type FormDataItem = FormDataTextItem | FormDataFileItem;
 
 interface TabPanelProps {
     children?: React.ReactNode;
