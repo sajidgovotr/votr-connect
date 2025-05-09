@@ -1,27 +1,10 @@
 import { useState } from 'react';
-import { Box, Button, TextField, Typography, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Tab, IconButton } from "@mui/material";
-import CustomButton from '../../CustomButton';
+import { Box, Button, TextField, Typography, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Tab, IconButton, CircularProgress } from "@mui/material";
+import { useFormContext, useFieldArray } from 'react-hook-form';
 import SelectBox from '../../SelectBox';
 import CloseIcon from '@mui/icons-material/Close';
 
-interface RequestParameter {
-    name: string;
-    value: string;
-}
 
-interface FormDataTextItem {
-    name: string;
-    value: string;
-    type: 'text';
-}
-
-interface FormDataFileItem {
-    name: string;
-    value: File | string;
-    type: 'file';
-}
-
-type FormDataItem = FormDataTextItem | FormDataFileItem;
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -50,67 +33,35 @@ function CustomTabPanel(props: TabPanelProps) {
 }
 
 interface TestValidateTabProps {
-    endpoint: string;
-    setEndpoint: (value: string) => void;
-    method: string;
-    setMethod: (value: string) => void;
-    parameters: RequestParameter[];
-    setParameters: (params: RequestParameter[]) => void;
     responseStatus: string;
     responseTime: string;
+    responseBody: any;
     onExecute: () => void;
+    isLoading: boolean;
 }
 
 const TestValidateTab = ({
-    endpoint,
-    setEndpoint,
-    method,
-    setMethod,
-    parameters,
-    setParameters,
     responseStatus,
     responseTime,
-    onExecute
+    responseBody,
+    onExecute,
+    isLoading
 }: TestValidateTabProps) => {
-    const [requestBody, setRequestBody] = useState('{\n    \n}');
+    const { register, control, watch, setValue } = useFormContext();
     const [selectedTab, setSelectedTab] = useState(0);
-    const [formData, setFormData] = useState<FormDataItem[]>([]);
 
-    const handleAddParameter = () => {
-        setParameters([...parameters, { name: '', value: '' }]);
-    };
+    const { fields: parameterFields, append: appendParameter, remove: removeParameter } = useFieldArray({
+        control,
+        name: "parameters"
+    });
 
-    const handleRemoveParameter = (index: number) => {
-        setParameters(parameters.filter((_, i) => i !== index));
-    };
+    const { fields: formDataFields, append: appendFormData, remove: removeFormData } = useFieldArray({
+        control,
+        name: "formData"
+    });
 
-    const handleParameterChange = (index: number, field: 'name' | 'value', value: string) => {
-        const newParameters = [...parameters];
-        newParameters[index][field] = value;
-        setParameters(newParameters);
-    };
-
-    const handleAddFormData = () => {
-        setFormData([...formData, { name: '', value: '', type: 'text' }]);
-    };
-
-    const handleRemoveFormData = (index: number) => {
-        setFormData(formData.filter((_, i) => i !== index));
-    };
-
-    const handleFormDataChange = (index: number, field: keyof FormDataItem, value: string | File) => {
-        const newFormData = [...formData];
-        if (field === 'type') {
-            if (value === 'text') {
-                newFormData[index] = { ...newFormData[index], type: 'text', value: '' };
-            } else if (value === 'file') {
-                newFormData[index] = { ...newFormData[index], type: 'file', value: '' };
-            }
-        } else {
-            (newFormData[index] as FormDataItem)[field] = value as string;
-        }
-        setFormData(newFormData);
-    };
+    const method = watch("method");
+    const isRequestBodyMethod = method === 'POST' || method === 'PUT';
 
     const methodOptions = [
         { value: 'GET', label: 'GET' },
@@ -118,8 +69,6 @@ const TestValidateTab = ({
         { value: 'PUT', label: 'PUT' },
         { value: 'DELETE', label: 'DELETE' }
     ];
-
-    const isRequestBodyMethod = method === 'POST' || method === 'PUT';
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setSelectedTab(newValue);
@@ -151,8 +100,7 @@ const TestValidateTab = ({
                     </Typography>
                     <TextField
                         fullWidth
-                        value={endpoint}
-                        onChange={(e) => setEndpoint(e.target.value)}
+                        {...register("endpoint", { required: "Endpoint is required" })}
                         size="small"
                         sx={{
                             '& .MuiOutlinedInput-root': {
@@ -170,7 +118,7 @@ const TestValidateTab = ({
                     <SelectBox
                         value={method}
                         options={methodOptions}
-                        handleChangeValue={(value) => setMethod(value)}
+                        handleChangeValue={(value) => setValue("method", value)}
                         size="small"
                         sx={{ minWidth: 120 }}
                     />
@@ -181,18 +129,17 @@ const TestValidateTab = ({
                 <Box>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <Tabs value={selectedTab} onChange={handleTabChange}>
-                            <Tab label="Request Body" />
+                            {/* <Tab label="Request Body" /> */}
                             <Tab label="Form Data" />
                         </Tabs>
                     </Box>
 
-                    <CustomTabPanel value={selectedTab} index={0}>
+                    {/* <CustomTabPanel value={selectedTab} index={0}>
                         <TextField
                             fullWidth
                             multiline
                             rows={8}
-                            value={requestBody}
-                            onChange={(e) => setRequestBody(e.target.value)}
+                            {...register("requestBody")}
                             sx={{
                                 fontFamily: 'monospace',
                                 '& .MuiOutlinedInput-root': {
@@ -202,9 +149,9 @@ const TestValidateTab = ({
                                 },
                             }}
                         />
-                    </CustomTabPanel>
+                    </CustomTabPanel> */}
 
-                    <CustomTabPanel value={selectedTab} index={1}>
+                    <CustomTabPanel value={selectedTab} index={0}>
                         <Table>
                             <TableHead>
                                 <TableRow>
@@ -215,13 +162,12 @@ const TestValidateTab = ({
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {formData.map((item, index) => (
-                                    <TableRow key={index}>
+                                {formDataFields.map((field, index) => (
+                                    <TableRow key={field.id}>
                                         <TableCell sx={{ pl: 0 }}>
                                             <TextField
                                                 size="small"
-                                                value={item.name}
-                                                onChange={(e) => handleFormDataChange(index, 'name', e.target.value)}
+                                                {...register(`formData.${index}.name`)}
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         '& fieldset': { borderColor: '#E5E7EB' },
@@ -231,21 +177,23 @@ const TestValidateTab = ({
                                         </TableCell>
                                         <TableCell>
                                             <SelectBox
-                                                value={item.type}
+                                                value={watch(`formData.${index}.type`)}
                                                 options={[
                                                     { value: 'text', label: 'Text' },
                                                     { value: 'file', label: 'File' }
                                                 ]}
-                                                handleChangeValue={(value) => handleFormDataChange(index, 'type', value)}
+                                                handleChangeValue={(value) => {
+                                                    setValue(`formData.${index}.type`, value);
+                                                    setValue(`formData.${index}.value`, '');
+                                                }}
                                                 size="small"
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            {item.type === 'text' ? (
+                                            {watch(`formData.${index}.type`) === 'text' ? (
                                                 <TextField
                                                     size="small"
-                                                    value={item.value}
-                                                    onChange={(e) => handleFormDataChange(index, 'value', e.target.value)}
+                                                    {...register(`formData.${index}.value`)}
                                                     sx={{
                                                         '& .MuiOutlinedInput-root': {
                                                             '& fieldset': { borderColor: '#E5E7EB' },
@@ -254,7 +202,7 @@ const TestValidateTab = ({
                                                 />
                                             ) : (
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    {item.value instanceof File ? (
+                                                    {watch(`formData.${index}.value`) instanceof File ? (
                                                         <Box sx={{
                                                             display: 'flex',
                                                             alignItems: 'center',
@@ -265,11 +213,11 @@ const TestValidateTab = ({
                                                             px: 1
                                                         }}>
                                                             <Typography sx={{ fontSize: '0.875rem' }}>
-                                                                {item.value.name}
+                                                                {watch(`formData.${index}.value`).name}
                                                             </Typography>
                                                             <IconButton
                                                                 size="small"
-                                                                onClick={() => handleFormDataChange(index, 'value', '')}
+                                                                onClick={() => setValue(`formData.${index}.value`, '')}
                                                                 sx={{ p: 0.5 }}
                                                             >
                                                                 <CloseIcon sx={{ fontSize: 16 }} />
@@ -297,7 +245,7 @@ const TestValidateTab = ({
                                                                 onChange={(e) => {
                                                                     const file = e.target.files?.[0];
                                                                     if (file) {
-                                                                        handleFormDataChange(index, 'value', file);
+                                                                        setValue(`formData.${index}.value`, file);
                                                                     }
                                                                 }}
                                                             />
@@ -308,7 +256,7 @@ const TestValidateTab = ({
                                         </TableCell>
                                         <TableCell>
                                             <Button
-                                                onClick={() => handleRemoveFormData(index)}
+                                                onClick={() => removeFormData(index)}
                                                 sx={{
                                                     color: '#EF4444',
                                                     textTransform: 'none',
@@ -327,7 +275,7 @@ const TestValidateTab = ({
                         </Table>
 
                         <Button
-                            onClick={handleAddFormData}
+                            onClick={() => appendFormData({ name: '', value: '', type: 'text' })}
                             sx={{
                                 mt: 2,
                                 color: '#3B82F6',
@@ -366,13 +314,12 @@ const TestValidateTab = ({
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {parameters.map((param, index) => (
-                                    <TableRow key={index}>
+                                {parameterFields.map((field, index) => (
+                                    <TableRow key={field.id}>
                                         <TableCell sx={{ pl: 0 }}>
                                             <TextField
                                                 size="small"
-                                                value={param.name}
-                                                onChange={(e) => handleParameterChange(index, 'name', e.target.value)}
+                                                {...register(`parameters.${index}.name`)}
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         '& fieldset': { borderColor: '#E5E7EB' },
@@ -383,8 +330,7 @@ const TestValidateTab = ({
                                         <TableCell>
                                             <TextField
                                                 size="small"
-                                                value={param.value}
-                                                onChange={(e) => handleParameterChange(index, 'value', e.target.value)}
+                                                {...register(`parameters.${index}.value`)}
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         '& fieldset': { borderColor: '#E5E7EB' },
@@ -394,7 +340,7 @@ const TestValidateTab = ({
                                         </TableCell>
                                         <TableCell>
                                             <Button
-                                                onClick={() => handleRemoveParameter(index)}
+                                                onClick={() => removeParameter(index)}
                                                 sx={{
                                                     color: '#EF4444',
                                                     textTransform: 'none',
@@ -413,7 +359,7 @@ const TestValidateTab = ({
                         </Table>
 
                         <Button
-                            onClick={handleAddParameter}
+                            onClick={() => appendParameter({ name: '', value: '' })}
                             sx={{
                                 mt: 2,
                                 color: '#3B82F6',
@@ -431,12 +377,33 @@ const TestValidateTab = ({
             )}
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
-                <CustomButton
+                <Button
                     variant="contained"
                     onClick={onExecute}
-                    sx={{ color: 'white', textTransform: 'none', px: 4 }}
-                    title="Execute"
-                />
+                    disabled={isLoading}
+                    sx={{
+                        color: 'white',
+                        textTransform: 'none',
+                        px: 4,
+                        minWidth: '100px',
+                        position: 'relative',
+                        bgcolor: '#3B82F6',
+                        '&:hover': {
+                            bgcolor: '#2563EB'
+                        }
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {isLoading ? (
+                            <>
+                                <CircularProgress size={20} color="inherit" />
+                                <span>Loading...</span>
+                            </>
+                        ) : (
+                            'Execute'
+                        )}
+                    </Box>
+                </Button>
             </Box>
 
             <Typography
@@ -456,11 +423,39 @@ const TestValidateTab = ({
                 p: 2,
                 borderRadius: '6px',
                 display: 'flex',
-                gap: 3
+                gap: 3,
+                mb: 2
             }}>
-                <Typography sx={{ color: '#059669' }}>{responseStatus}</Typography>
+                <Typography sx={{
+                    color: responseStatus.includes('200') ? '#059669' : '#DC2626',
+                    fontWeight: 500
+                }}>
+                    {responseStatus}
+                </Typography>
                 <Typography sx={{ color: '#374151' }}>{responseTime}</Typography>
             </Box>
+
+            {responseBody && (
+                <Box sx={{
+                    bgcolor: '#F9FAFB',
+                    p: 2,
+                    borderRadius: '6px',
+                    maxHeight: '400px',
+                    overflow: 'auto'
+                }}>
+                    <pre style={{
+                        margin: 0,
+                        fontFamily: 'monospace',
+                        fontSize: '0.875rem',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word'
+                    }}>
+                        {typeof responseBody === 'string'
+                            ? responseBody
+                            : JSON.stringify(responseBody, null, 2)}
+                    </pre>
+                </Box>
+            )}
         </Box>
     );
 };

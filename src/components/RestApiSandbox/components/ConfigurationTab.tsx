@@ -1,37 +1,17 @@
 import { Box, TextField, Typography, MenuItem } from "@mui/material";
+import { useFormContext } from 'react-hook-form';
 import CustomButton from '../../CustomButton';
 
 interface ConfigurationTabProps {
-    baseUrl: string;
-    setBaseUrl: (value: string) => void;
-    authType: string;
-    setAuthType: (value: string) => void;
-    grantType: string;
-    setGrantType: (value: string) => void;
-    clientId: string;
-    setClientId: (value: string) => void;
-    clientSecret: string;
-    setClientSecret: (value: string) => void;
-    tokenUrl: string;
-    setTokenUrl: (value: string) => void;
     onSave: () => void;
 }
 
 const ConfigurationTab = ({
-    baseUrl,
-    setBaseUrl,
-    authType,
-    setAuthType,
-    grantType,
-    setGrantType,
-    clientId,
-    setClientId,
-    clientSecret,
-    setClientSecret,
-    tokenUrl,
-    setTokenUrl,
     onSave
 }: ConfigurationTabProps) => {
+    const { register, setValue, watch } = useFormContext();
+    const authType = watch("authType");
+
     return (
         <Box sx={{
             bgcolor: 'white',
@@ -57,8 +37,7 @@ const ConfigurationTab = ({
                 </Typography>
                 <TextField
                     fullWidth
-                    value={baseUrl}
-                    onChange={(e) => setBaseUrl(e.target.value)}
+                    {...register("baseUrl", { required: "Base URL is required" })}
                     size="small"
                     sx={{
                         '& .MuiOutlinedInput-root': {
@@ -82,7 +61,7 @@ const ConfigurationTab = ({
                 Authentication
             </Typography>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, mb: 3 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 3, mb: 3 }}>
                 <Box>
                     <Typography sx={{ fontSize: '0.875rem', color: '#374151', mb: 1 }}>
                         Authentication Type
@@ -91,7 +70,7 @@ const ConfigurationTab = ({
                         select
                         fullWidth
                         value={authType}
-                        onChange={(e) => setAuthType(e.target.value)}
+                        onChange={(e) => setValue("authType", e.target.value)}
                         size="small"
                         sx={{
                             '& .MuiOutlinedInput-root': {
@@ -101,91 +80,30 @@ const ConfigurationTab = ({
                             },
                         }}
                     >
-                        <MenuItem value="OAuth 2.0">OAuth 2.0</MenuItem>
                         <MenuItem value="API Key">API Key</MenuItem>
                     </TextField>
                 </Box>
 
-                <Box>
-                    <Typography sx={{ fontSize: '0.875rem', color: '#374151', mb: 1 }}>
-                        Grant Type
-                    </Typography>
-                    <TextField
-                        select
-                        fullWidth
-                        value={grantType}
-                        onChange={(e) => setGrantType(e.target.value)}
-                        size="small"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                bgcolor: 'white',
-                                '& fieldset': { borderColor: '#E5E7EB' },
-                                '&:hover fieldset': { borderColor: '#D1D5DB' },
-                            },
-                        }}
-                    >
-                        <MenuItem value="Client Credentials">Client Credentials</MenuItem>
-                        <MenuItem value="Authorization Code">Authorization Code</MenuItem>
-                    </TextField>
-                </Box>
-
-                <Box>
-                    <Typography sx={{ fontSize: '0.875rem', color: '#374151', mb: 1 }}>
-                        Client ID
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        value={clientId}
-                        onChange={(e) => setClientId(e.target.value)}
-                        size="small"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                bgcolor: 'white',
-                                '& fieldset': { borderColor: '#E5E7EB' },
-                                '&:hover fieldset': { borderColor: '#D1D5DB' },
-                            },
-                        }}
-                    />
-                </Box>
-
-                <Box>
-                    <Typography sx={{ fontSize: '0.875rem', color: '#374151', mb: 1 }}>
-                        Client Secret
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        type="password"
-                        value={clientSecret}
-                        onChange={(e) => setClientSecret(e.target.value)}
-                        size="small"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                bgcolor: 'white',
-                                '& fieldset': { borderColor: '#E5E7EB' },
-                                '&:hover fieldset': { borderColor: '#D1D5DB' },
-                            },
-                        }}
-                    />
-                </Box>
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-                <Typography sx={{ fontSize: '0.875rem', color: '#374151', mb: 1 }}>
-                    Token URL
-                </Typography>
-                <TextField
-                    fullWidth
-                    value={tokenUrl}
-                    onChange={(e) => setTokenUrl(e.target.value)}
-                    size="small"
-                    sx={{
-                        '& .MuiOutlinedInput-root': {
-                            bgcolor: 'white',
-                            '& fieldset': { borderColor: '#E5E7EB' },
-                            '&:hover fieldset': { borderColor: '#D1D5DB' },
-                        },
-                    }}
-                />
+                {authType === "API Key" && (
+                    <Box>
+                        <Typography sx={{ fontSize: '0.875rem', color: '#374151', mb: 1 }}>
+                            API Key
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            type="password"
+                            {...register("apiKey", { required: "API Key is required" })}
+                            size="small"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    bgcolor: 'white',
+                                    '& fieldset': { borderColor: '#E5E7EB' },
+                                    '&:hover fieldset': { borderColor: '#D1D5DB' },
+                                },
+                            }}
+                        />
+                    </Box>
+                )}
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
