@@ -53,11 +53,13 @@ export const callEndpoint = async (formData: FormValues): Promise<ApiResponse> =
     // Prepare headers
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        'cors': 'no-cors',
+        'Access-Control-Allow-Origin': '*',
     };
 
     // Add API Key if present
     if (formData.authType === 'API Key' && formData.apiKey) {
-        headers['Authorization'] = `Bearer ${formData.apiKey}`;
+        headers['x-api-key'] = formData.apiKey;
     }
 
     // Prepare request config
