@@ -29,6 +29,10 @@ const getRequiredChipsColor = (color: string = "Success") => {
             background: "#FBD8D5",
             color: "#EA4334",
         },
+        Warning: {
+            background: "#eb8634",
+            color: "#eb8634",
+        },
     };
 
     return colorStyles[color] || colorStyles["Success"];

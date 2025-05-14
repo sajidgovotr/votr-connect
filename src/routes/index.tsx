@@ -34,6 +34,13 @@ import EmailTemplateFormPage from "@/pages/EmailTemplates/EmailTemplateFormPage"
 import ExpressIntegrationPage from "@/pages/ExpressIntegration/ExpressIntegrationPage";
 import ConfiguredProducts from "@/pages/ConfiguredProducts";
 import Integrations from "@/pages/Integrations";
+import OnBoarding from "@/pages/OnBoarding/Welcom";
+import OnboardLayout from "@/layout/onboard";
+import StepBrokerDealer from "@/pages/OnBoarding/StepBrokerDealer";
+import StepAdminUser from "@/pages/OnBoarding/StepAdminUser";
+import StepBranding from "@/pages/OnBoarding/StepBanding";
+import AccountSetup from "@/pages/AccountSetup";
+import EmailTemplate from "@/pages/EmailTempalate";
 
 
 const Routes = () => {
@@ -46,6 +53,19 @@ const Routes = () => {
           path: "",
           element: <Dashboard />
         }
+      ]
+    },
+    {
+      path: "/onboarding",
+      element: <PrivateRoute navLink="/onboarding" component={OnboardLayout} />,
+      children: [
+        {
+          path: "",
+          element: <OnBoarding />
+        },
+        { path: "step-1", element: <StepBrokerDealer /> },
+        { path: "step-2", element: <StepAdminUser /> },
+        { path: "step-3", element: <StepBranding /> },
       ]
     },
     {
@@ -212,6 +232,26 @@ const Routes = () => {
           path: ":logId",
           element: <AuditLogDetails />
         }
+      ]
+    },
+    {
+      path: "/account-setup",
+      element: <PrivateRoute navLink="/audit-logs" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <AccountSetup />
+        },
+      ]
+    },
+    {
+      path: "/email-template",
+      element: <PrivateRoute navLink="/email-template" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <EmailTemplate />
+        },
       ]
     },
     {

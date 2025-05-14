@@ -6,9 +6,11 @@ import useBreakPoint from "../../hooks/useBreakPoint";
 const Logo = ({
     size,
     full,
+    src,
 }: {
     size?: number;
     full?: boolean;
+    src?: string;
 }): React.ReactNode => {
     const isMdUp = useBreakPoint('md')
     return (
@@ -19,9 +21,9 @@ const Logo = ({
             className="cursor-pointer flex"
         >
             {full && isMdUp ? (
-                <img src={logoFull} width={size || 160} />
+                <img src={src || logoFull} width={size || 160} />
             ) : (
-                <img src={logo} width={size || 36} height={size || 36} />
+                <img src={src || logo} width={size || 36} height={size || 36} />
             )}
         </Box>
     );

@@ -3,7 +3,7 @@ import { Box, SxProps, Typography } from "@mui/material";
 
 interface Props {
     text: string;
-    color: "Success" | "Danger";
+    color: "Success" | "Danger" | "Warning";
     containerSx?: SxProps;
     sx?: SxProps;
 }
