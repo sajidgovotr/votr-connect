@@ -1,7 +1,18 @@
-import { Card, CustomButton, Avatar, Chip, ActiveStatusChip, RequiredChip } from '@/components';
+import { useState } from 'react';
+import { Card, CustomButton, Avatar } from '@/components';
+import PhoneIcon from '@mui/icons-material/Phone';
 import { Box, Typography, Stack } from '@mui/material';
-import { EditIcon, ViewIcon, EmailIcon } from '@/assets/svgs/custom-icons';
+import { EditIcon, EmailIcon } from '@/assets/svgs/custom-icons';
+import ErrorIcon from '@mui/icons-material/Error';
 import CompanyLogo from '@/assets/svgs/votr-icon.svg';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import BlockIcon from '@mui/icons-material/Block';
+import SendIcon from '@mui/icons-material/Send';
+import AdminUserModal from '@/components/AccountSetup/AdminUserModal/AdminUserModal';
+import VerticalDivider from '@/components/AccountSetup/VerticalDIvider';
+import StatusChipInline from '@/components/AccountSetup/StatusChipInline';
+import TagChip from '@/components/AccountSetup/TagChip';
 
 const company = {
     name: 'Interactive Brokers LLC',
@@ -22,11 +33,58 @@ const adminUsers = [
         tags: ['VOTR Connect'],
         actions: ['edit', 'resend'],
         avatar: '',
+        statusColor: '#eb8634',
+        statusBg: '#FFF7ED',
+        statusIcon: <ErrorIcon sx={{ color: '#eb8634', fontSize: 16 }} />,
+        button: {
+            title: 'Resend Invitation',
+            color: '#5263FF',
+            icon: <SendIcon sx={{ fontSize: 18 }} />,
+        },
     },
-    // Add more users as needed
+    {
+        name: 'Charles M. Lafleur',
+        role: 'Chief Executive Officer',
+        email: 'charlesmlfleur@interactive.com',
+        status: 'Active',
+        statusType: 'success',
+        phone: '(202) 555-0199',
+        permissions: 'ACCESS (4)',
+        permissionType: 'info',
+        tags: ['Clearing Broker Portal'],
+        actions: ['edit', 'revoke'],
+        avatar: '',
+        statusColor: '#27BE69',
+        statusBg: '#ECFDF3',
+        statusIcon: <CheckCircleIcon sx={{ color: '#27BE69', fontSize: 16 }} />,
+        button: {
+            title: 'Revoke Access',
+            color: '#EA4334',
+            icon: <BlockIcon sx={{ fontSize: 18 }} />,
+        },
+    },
 ];
 
+
 const AccountSetup = () => {
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<any | null>(null);
+
+    // Helper to split name for initial values
+    const getInitialValues = (user: any) => {
+        if (!user) return undefined;
+        const nameParts = user.name ? user.name.split(' ') : ['', ''];
+        return {
+            firstName: nameParts[0] || '',
+            lastName: nameParts.slice(1).join(' ') || '',
+            title: user.role || '',
+            role: '', // Map if you have role value
+            email: user.email || '',
+            phone: user.phone || '',
+            permissions: [], // Map if you have permission data
+        };
+    };
+
     return (
         <Box className="w-full min-h-screen">
             {/* Company Card */}
@@ -41,8 +99,8 @@ const AccountSetup = () => {
                 <CustomButton
                     title="Request Update"
                     variant="outlined"
-                    className='rounded-full'
-                    startIcon={<EditIcon />}
+                    sx={{ borderRadius: '30px', minWidth: 180, fontWeight: 500, color: '#5263FF', borderColor: '#5263FF' }}
+                    className="rounded-full"
                 />
             </Card>
 
@@ -51,53 +109,75 @@ const AccountSetup = () => {
                 Admin User
             </Typography>
             <Stack spacing={2}>
-                {/* Example Admin User Card */}
-                <Card className="!flex !items-center !justify-between !p-6 !bg-white !shadow-sm">
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Avatar width={48} height={48} url={adminUsers[0].avatar} />
-                        <Box>
-                            <Stack direction="row" alignItems="center" spacing={1}>
-                                <Typography fontWeight={600} fontSize={18}>
-                                    {adminUsers[0].name}
+                {adminUsers.map((user, _idx) => (
+                    <Card
+                        key={user.email}
+                        className="!flex !items-center !justify-between !p-4 !bg-white !shadow-sm !rounded-xl !border !border-[#E6E6E9]"
+                    >
+                        <Stack direction="row" spacing={2} alignItems="center">
+                            <Avatar width={48} height={48} url={user.avatar} />
+                            <Box>
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                    <Typography fontWeight={600} fontSize={18}>
+                                        {user.name}
+                                    </Typography>
+                                    {user.tags.map((tag, tIdx) => (
+                                        <TagChip
+                                            key={tIdx}
+                                            text={tag}
+                                            color={tag === 'VOTR Connect' ? '#7C3AED' : '#EB8634'}
+                                            bg={tag === 'VOTR Connect' ? '#F3F0FF' : '#FFF7ED'}
+                                        />
+                                    ))}
+                                </Stack>
+                                <Typography fontSize={14} color="#8C8E9C">
+                                    {user.role}
                                 </Typography>
-                                {adminUsers[0].tags.map((tag, idx) => (
-                                    <Chip key={idx} name={tag} className="!bg-[#E5E7EB] !text-[#5263FF] !text-xs !font-semibold" />
-                                ))}
-                            </Stack>
-                            <Typography fontSize={14} color="#8C8E9C">
-                                {adminUsers[0].role}
-                            </Typography>
-                            <Stack direction="row" alignItems="center" spacing={1} className="!mt-1">
-                                {/* Email */}
-                                <EmailIcon />
-                                <Typography fontSize={14}>{adminUsers[0].email}</Typography>
-                                {/* Status Chip */}
-                                <RequiredChip text={adminUsers[0].status} color={adminUsers[0].statusType === 'warning' ? 'Danger' : 'Success'} />
-                                {/* Phone */}
-                                <span className="material-icons !text-[#8C8E9C] !text-base">call</span>
-                                <Typography fontSize={14}>{adminUsers[0].phone}</Typography>
-                                {/* Permissions */}
-                                <Typography fontSize={14}>
-                                    Permissions : <span className="!text-[#27BE69] !font-semibold">{adminUsers[0].permissions}</span>
-                                </Typography>
-                            </Stack>
-                        </Box>
-                    </Stack>
-                    <Stack direction="row" spacing={2}>
-                        <CustomButton
-                            title="Edit"
-                            icon={<EditIcon />}
-                            variant="outlined"
-                            sx={{ minWidth: 100, color: '#5263FF', borderColor: '#5263FF' }}
-                        />
-                        <CustomButton
-                            title="Resend Invitation"
-                            variant="contained"
-                            sx={{ minWidth: 180, bgcolor: '#5263FF', color: '#fff' }}
-                        />
-                    </Stack>
-                </Card>
+                                <Stack direction="row" alignItems="center" spacing={1} className="!mt-1">
+                                    <EmailIcon strokeColor="#8C8E9C" />
+                                    <Typography fontSize={14}>{user.email}</Typography>
+                                    <StatusChipInline icon={user.statusIcon} text={user.status} color={user.statusColor} bg={user.statusBg} />
+                                    <VerticalDivider />
+                                    <PhoneIcon sx={{ color: '#8C8E9C', fontSize: 18 }} />
+                                    <Typography fontSize={14}>{user.phone}</Typography>
+                                    <VerticalDivider />
+                                    <AdminPanelSettingsIcon sx={{ color: '#8C8E9C', fontSize: 18 }} />
+                                    <Typography fontSize={14}>
+                                        Permissions : <span className="!text-[#27BE69] !font-semibold">{user.permissions}</span>
+                                    </Typography>
+                                </Stack>
+                            </Box>
+                        </Stack>
+                        <Stack direction="row" spacing={2}>
+                            <CustomButton
+                                title="Edit"
+                                startIcon={<EditIcon />}
+                                variant="outlined"
+                                sx={{ minWidth: 100, color: '#5263FF', borderColor: '#5263FF' }}
+                                onClick={() => {
+                                    setSelectedUser(user);
+                                    setModalOpen(true);
+                                }}
+                            />
+                            <CustomButton
+                                title={user.button.title}
+                                startIcon={user.button.icon}
+                                variant="contained"
+                                sx={{ minWidth: 180, bgcolor: user.button.color, color: '#fff', '&:hover': { bgcolor: user.button.color } }}
+                            />
+                        </Stack>
+                    </Card>
+                ))}
             </Stack>
+            <AdminUserModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                initialValues={getInitialValues(selectedUser)}
+                onSubmit={(_data) => {
+                    // TODO: handle save logic
+                    setModalOpen(false);
+                }}
+            />
         </Box>
     );
 };

@@ -1,6 +1,5 @@
 import OnboardingNavbar from "@/components/OnboardingNavbar";
 import { Box } from "@mui/material";
-import OnboardingBg from "@/assets/images/oboarding-bg.png";
 
 const WelcomeContainer = ({ children }: { children: React.ReactNode }) => {
     return (

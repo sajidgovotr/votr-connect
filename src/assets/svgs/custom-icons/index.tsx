@@ -1054,10 +1054,10 @@ export const NotificationIcon = () => (
     </svg>
 );
 
-export const EmailIcon = () => (
+export const EmailIcon = ({ fillColor = "#F3F4F6", strokeColor = "#6366F1" }) => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17 21H7c-4 0-5-1-5-5V8c0-4 1-5 5-5h10c4 0 5 1 5 5v8c0 4-1 5-5 5Z" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="m17 9-3.13 2.5c-1.03.82-2.72.82-3.75 0L7 9" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M17 21H7c-4 0-5-1-5-5V8c0-4 1-5 5-5h10c4 0 5 1 5 5v8c0 4-1 5-5 5Z" stroke={strokeColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill={fillColor} />
+        <path d="m17 9-3.13 2.5c-1.03.82-2.72.82-3.75 0L7 9" stroke={strokeColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
 

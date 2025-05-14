@@ -94,7 +94,7 @@ const StepAdminUser = () => {
         }, 0);
     }
 
-    const onSubmit = (data: any) => {
+    const onSubmit = (_data: any) => {
         // handle form data
         navigate("/onboarding/step-3");
     };

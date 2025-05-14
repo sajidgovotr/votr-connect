@@ -124,7 +124,7 @@ const StepBranding = () => {
                         >
                             Extracted from Logo
                         </Button>
-                        {brandColors.slice(1).map((color, idx) => (
+                        {brandColors.slice(1).map((color, _idx) => (
                             <Box
                                 key={color}
                                 onClick={() => setSelectedColor(color)}

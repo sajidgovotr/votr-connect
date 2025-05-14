@@ -40,6 +40,7 @@ import StepBrokerDealer from "@/pages/OnBoarding/StepBrokerDealer";
 import StepAdminUser from "@/pages/OnBoarding/StepAdminUser";
 import StepBranding from "@/pages/OnBoarding/StepBanding";
 import AccountSetup from "@/pages/AccountSetup";
+import EmailTemplate from "@/pages/EmailTempalate";
 
 
 const Routes = () => {
@@ -240,6 +241,16 @@ const Routes = () => {
         {
           path: "",
           element: <AccountSetup />
+        },
+      ]
+    },
+    {
+      path: "/email-template",
+      element: <PrivateRoute navLink="/email-template" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <EmailTemplate />
         },
       ]
     },
