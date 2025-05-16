@@ -9,7 +9,7 @@ import MarketingLanguageInput from './MarketingLanguageInput';
 import SocialLinksInput from './SocialLinksInput';
 import BrandImageUploader from './BrandImageUploader';
 import FormActions from './FormActions';
-import Card from '../Card';
+import Card from '../../Card';
 import EmailPreview from './EmailPreview';
 
 const schema = yup.object().shape({

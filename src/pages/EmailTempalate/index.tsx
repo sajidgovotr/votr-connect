@@ -3,6 +3,8 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import CustomButton from '@/components/CustomButton';
 import BrandingForm from '@/components/EmailTemplates/BrandingForm';
 import { useState } from 'react';
+import SendingEmail from '@/components/EmailTemplates/SendingEmail';
+import AutoReply from '@/components/EmailTemplates/AutoReply';
 
 const breadcrumbData = [
     { name: 'Email Templates', active: false, url: '/email-templates' },
@@ -19,9 +21,7 @@ const EmailTemplate = () => {
     const [activeTab, setActiveTab] = useState(0);
     return (
         <Box className="w-full min-h-screen flex flex-col gap-8  !important p-8">
-            {/* Breadcrumbs */}
             <Breadcrumbs data={breadcrumbData} />
-            {/* Header */}
             <Box className="flex justify-between items-center mt-4 mb-6 !important">
                 <Typography variant="h4" fontWeight={700} className="!text-[2rem] !leading-tight">Regulatory Events</Typography>
                 <Box className="flex gap-3 !important">
@@ -78,8 +78,8 @@ const EmailTemplate = () => {
                         </Box>
                         <Box className="!p-8">
                             {activeTab === 0 && <BrandingForm />}
-                            {activeTab === 1 && <Box>Sending Email Address Form</Box>}
-                            {activeTab === 2 && <Box>Auto-reply Details Form</Box>}
+                            {activeTab === 1 && <SendingEmail />}
+                            {activeTab === 2 && <AutoReply />}
                         </Box>
                     </Card>
                 </Box>

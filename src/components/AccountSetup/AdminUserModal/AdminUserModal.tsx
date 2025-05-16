@@ -185,7 +185,7 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ open, onClose, onSubmit
                                     />
                                 </Grid>
                             </Grid>
-                            <Box className="!mb-4 !mt-2 bg-gray-100 rounded-md !px-6 !py-2">
+                            <Box className="!mb-4 !mt-2 bg-gray-100 rounded-md !px-2 !py-2">
                                 <Typography className="!mb-2 !font-semibold !text-base">Permissions</Typography>
                                 <Grid container spacing={1}>
                                     {permissions.map((perm, idx) => (

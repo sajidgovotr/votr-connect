@@ -29,8 +29,7 @@ import GraphQLIntegration from '../pages/IntegrationCatalog/GraphQLIntegration';
 import FileUploadIntegration from '../pages/IntegrationCatalog/FileUploadIntegration';
 import AuditLogs from "@/pages/AuditLogs";
 import AuditLogDetails from "@/pages/AuditLogs/AuditLogDetails";
-import EmailTemplatesPage from "@/pages/EmailTemplates/EmailTemplatesPage";
-import EmailTemplateFormPage from "@/pages/EmailTemplates/EmailTemplateFormPage";
+
 import ExpressIntegrationPage from "@/pages/ExpressIntegration/ExpressIntegrationPage";
 import ConfiguredProducts from "@/pages/ConfiguredProducts";
 import Integrations from "@/pages/Integrations";
@@ -41,6 +40,7 @@ import StepAdminUser from "@/pages/OnBoarding/StepAdminUser";
 import StepBranding from "@/pages/OnBoarding/StepBanding";
 import AccountSetup from "@/pages/AccountSetup";
 import EmailTemplate from "@/pages/EmailTempalate";
+import ContactsPage from "@/pages/Contacts";
 
 
 const Routes = () => {
@@ -245,8 +245,8 @@ const Routes = () => {
       ]
     },
     {
-      path: "/email-template",
-      element: <PrivateRoute navLink="/email-template" component={AppLayout} />,
+      path: "/email-templates",
+      element: <PrivateRoute navLink="/email-templates" component={AppLayout} />,
       children: [
         {
           path: "",
@@ -255,23 +255,33 @@ const Routes = () => {
       ]
     },
     {
-      path: "/email-templates",
-      element: <PrivateRoute navLink="/email-templates" component={AppLayout} />,
+      path: "/contacts",
+      element: <PrivateRoute navLink="/contacts" component={AppLayout} />,
       children: [
         {
           path: "",
-          element: <EmailTemplatesPage />
+          element: <ContactsPage />
         },
-        {
-          path: "create",
-          element: <EmailTemplateFormPage />
-        },
-        {
-          path: "edit/:templateId",
-          element: <EmailTemplateFormPage />
-        }
       ]
     },
+    // {
+    //   path: "/email-templates",
+    //   element: <PrivateRoute navLink="/email-templates" component={AppLayout} />,
+    //   children: [
+    //     {
+    //       path: "",
+    //       element: <EmailTemplatesPage />
+    //     },
+    //     {
+    //       path: "create",
+    //       element: <EmailTemplateFormPage />
+    //     },
+    //     {
+    //       path: "edit/:templateId",
+    //       element: <EmailTemplateFormPage />
+    //     }
+    //   ]
+    // },
     { path: "404", element: <NotFound /> },
     {
       path: "*",
