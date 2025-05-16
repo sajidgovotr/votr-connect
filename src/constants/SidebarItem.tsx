@@ -3,7 +3,8 @@ import {
     HelpCenterIcon,
     SettingsIcon,
 } from "@/assets/images/sidebar/svg-icons";
-import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, Assessment, Email, Settings, Window } from "@mui/icons-material";
+import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, Assessment, Email, Settings, Window, ContactMail, ContactEmergency, AccountCircle } from "@mui/icons-material";
+import { MdOutlineSnowboarding } from "react-icons/md";
 
 const UserItems = {
     home: [
@@ -55,12 +56,19 @@ const UserItems = {
             iconInactive: <CheckCircle sx={{ color: "#8C8E9C" }} />,
             title: "Production Approvals"
         },
-        // {
-        //     href: "/tradingview",
-        //     icon: <ShowChartOutlined sx={{ color: "#5263FF" }} />,
-        //     iconInactive: <ShowChartOutlined sx={{ color: "#8C8E9C" }} />,
-        //     title: "TradingView Integration"
-        // },
+
+        {
+            href: '/audit-logs',
+            icon: <Assessment sx={{ color: "#5263FF" }} />,
+            iconInactive: <Assessment sx={{ color: "#8C8E9C" }} />,
+            title: "Audit Logs"
+        },
+        {
+            href: "/contacts",
+            icon: <ContactMail sx={{ color: "#5263FF" }} />,
+            iconInactive: <ContactEmergency sx={{ color: "#8C8E9C" }} />,
+            title: "Contact"
+        },
         {
             href: '/email-templates',
             icon: <Email sx={{ color: "#5263FF" }} />,
@@ -68,10 +76,16 @@ const UserItems = {
             title: "Email Templates"
         },
         {
-            href: '/audit-logs',
-            icon: <Assessment sx={{ color: "#5263FF" }} />,
-            iconInactive: <Assessment sx={{ color: "#8C8E9C" }} />,
-            title: "Audit Logs"
+            href: '/onboarding',
+            icon: <MdOutlineSnowboarding />,
+            iconInactive: <MdOutlineSnowboarding />,
+            title: "Onboarding"
+        },
+        {
+            href: '/account-setup',
+            icon: <AccountCircle />,
+            iconInactive: <AccountCircle />,
+            title: "Account Setup"
         },
 
     ],
