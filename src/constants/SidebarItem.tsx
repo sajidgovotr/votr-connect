@@ -3,8 +3,7 @@ import {
     HelpCenterIcon,
     SettingsIcon,
 } from "@/assets/images/sidebar/svg-icons";
-import { ManageAccounts, IntegrationInstructions, Code, CheckCircle, Assessment, Email, Settings, Window, ContactMail, ContactEmergency, AccountCircle } from "@mui/icons-material";
-import { MdOutlineSnowboarding } from "react-icons/md";
+import { IntegrationInstructions, Code, Window } from "@mui/icons-material";
 
 const UserItems = {
     home: [
