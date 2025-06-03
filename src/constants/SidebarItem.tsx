@@ -26,67 +26,67 @@ const UserItems = {
             iconInactive: <Window sx={{ color: "#8C8E9C" }} />,
             title: "Integrations"
         },
-        {
-            href: '/account-management',
-            icon: <ManageAccounts sx={{ color: "#5263FF" }} />,
-            iconInactive: <ManageAccounts sx={{ color: "#8C8E9C" }} />,
-            title: "Account Management"
-        },
-        {
-            href: '/integration-catalog',
-            icon: <IntegrationInstructions sx={{ color: "#5263FF" }} />,
-            iconInactive: <IntegrationInstructions sx={{ color: "#8C8E9C" }} />,
-            title: "Integration Catalog"
-        },
-        {
-            href: '/configured-products',
-            icon: <Settings sx={{ color: "#5263FF" }} />,
-            iconInactive: <Settings sx={{ color: "#8C8E9C" }} />,
-            title: "Configured Products"
-        },
+        // {
+        //     href: '/account-management',
+        //     icon: <ManageAccounts sx={{ color: "#5263FF" }} />,
+        //     iconInactive: <ManageAccounts sx={{ color: "#8C8E9C" }} />,
+        //     title: "Account Management"
+        // },
+        // {
+        //     href: '/integration-catalog',
+        //     icon: <IntegrationInstructions sx={{ color: "#5263FF" }} />,
+        //     iconInactive: <IntegrationInstructions sx={{ color: "#8C8E9C" }} />,
+        //     title: "Integration Catalog"
+        // },
+        // {
+        //     href: '/configured-products',
+        //     icon: <Settings sx={{ color: "#5263FF" }} />,
+        //     iconInactive: <Settings sx={{ color: "#8C8E9C" }} />,
+        //     title: "Configured Products"
+        // },
         {
             href: '/sandbox/rest-api',
             icon: <Code sx={{ color: "#5263FF" }} />,
             iconInactive: <Code sx={{ color: "#8C8E9C" }} />,
             title: "Sandbox Environment"
         },
-        {
-            href: '/production-approvals',
-            icon: <CheckCircle sx={{ color: "#5263FF" }} />,
-            iconInactive: <CheckCircle sx={{ color: "#8C8E9C" }} />,
-            title: "Production Approvals"
-        },
+        // {
+        //     href: '/production-approvals',
+        //     icon: <CheckCircle sx={{ color: "#5263FF" }} />,
+        //     iconInactive: <CheckCircle sx={{ color: "#8C8E9C" }} />,
+        //     title: "Production Approvals"
+        // },
 
-        {
-            href: '/audit-logs',
-            icon: <Assessment sx={{ color: "#5263FF" }} />,
-            iconInactive: <Assessment sx={{ color: "#8C8E9C" }} />,
-            title: "Audit Logs"
-        },
-        {
-            href: "/contacts",
-            icon: <ContactMail sx={{ color: "#5263FF" }} />,
-            iconInactive: <ContactEmergency sx={{ color: "#8C8E9C" }} />,
-            title: "Contact"
-        },
-        {
-            href: '/email-templates',
-            icon: <Email sx={{ color: "#5263FF" }} />,
-            iconInactive: <Email sx={{ color: "#8C8E9C" }} />,
-            title: "Email Templates"
-        },
-        {
-            href: '/onboarding',
-            icon: <MdOutlineSnowboarding />,
-            iconInactive: <MdOutlineSnowboarding />,
-            title: "Onboarding"
-        },
-        {
-            href: '/account-setup',
-            icon: <AccountCircle />,
-            iconInactive: <AccountCircle />,
-            title: "Account Setup"
-        },
+        // {
+        //     href: '/audit-logs',
+        //     icon: <Assessment sx={{ color: "#5263FF" }} />,
+        //     iconInactive: <Assessment sx={{ color: "#8C8E9C" }} />,
+        //     title: "Audit Logs"
+        // },
+        // {
+        //     href: "/contacts",
+        //     icon: <ContactMail sx={{ color: "#5263FF" }} />,
+        //     iconInactive: <ContactEmergency sx={{ color: "#8C8E9C" }} />,
+        //     title: "Contact"
+        // },
+        // {
+        //     href: '/email-templates',
+        //     icon: <Email sx={{ color: "#5263FF" }} />,
+        //     iconInactive: <Email sx={{ color: "#8C8E9C" }} />,
+        //     title: "Email Templates"
+        // },
+        // {
+        //     href: '/onboarding',
+        //     icon: <MdOutlineSnowboarding />,
+        //     iconInactive: <MdOutlineSnowboarding />,
+        //     title: "Onboarding"
+        // },
+        // {
+        //     href: '/account-setup',
+        //     icon: <AccountCircle />,
+        //     iconInactive: <AccountCircle />,
+        //     title: "Account Setup"
+        // },
 
     ],
     others: []
