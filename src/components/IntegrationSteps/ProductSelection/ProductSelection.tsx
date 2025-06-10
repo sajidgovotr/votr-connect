@@ -1,3 +1,4 @@
+import { useGetProductsQuery } from '@/services/express-integration';
 import {
     Box,
     Typography,
@@ -27,36 +28,21 @@ const StyledCard = styled(Card)(({ theme }) => ({
 }));
 
 interface ProductSelectionProps {
-    selectedProduct: string;
-    onProductSelect: (product: string) => void;
+    selectedProduct: string | undefined;
+    onProductSelect: (product: { id: string; name: string }) => void;
 }
 
-const products = [
-    {
-        id: 'srm',
-        name: 'SRM (Shareholder Relationship Management)',
-        description: 'Manage and optimize your shareholder relationships with our comprehensive SRM solution.',
-        features: [
-            'Shareholder onboarding and management',
-            'Performance tracking',
-            'Risk assessment',
-            'Contract management'
-        ]
-    },
-    {
-        id: 'proxy',
-        name: 'Proxy Integration',
-        description: 'Secure and efficient proxy integration for seamless data exchange and API management.',
-        features: [
-            'API security',
-            'Request routing',
-            'Load balancing',
-            'Rate limiting'
-        ]
-    }
-];
-
 const ProductSelection = ({ selectedProduct, onProductSelect }: ProductSelectionProps) => {
+    const { data: productsResponse, isLoading, error } = useGetProductsQuery();
+
+    if (isLoading) {
+        return <Typography>Loading products...</Typography>;
+    }
+
+    if (error) {
+        return <Typography color="error">Error loading products</Typography>;
+    }
+
     return (
         <Box>
             <Typography variant="h6" gutterBottom>
@@ -69,18 +55,23 @@ const ProductSelection = ({ selectedProduct, onProductSelect }: ProductSelection
             <FormControl component="fieldset" sx={{ width: '100%' }}>
                 <RadioGroup
                     value={selectedProduct}
-                    onChange={(e) => onProductSelect(e.target.value)}
+                    onChange={(e) => {
+                        const product = productsResponse?.data.find(p => p.id.toString() === e.target.value);
+                        if (product) {
+                            onProductSelect({ id: product.id.toString(), name: product.name });
+                        }
+                    }}
                 >
                     <Grid container spacing={2}>
-                        {products.map((product) => (
+                        {productsResponse?.data.map((product) => (
                             <Grid item xs={12} key={product.id}>
                                 <StyledCard
-                                    className={selectedProduct === product.id ? 'selected' : ''}
-                                    onClick={() => onProductSelect(product.id)}
+                                    className={selectedProduct === product.id.toString() ? 'selected' : ''}
+                                    onClick={() => onProductSelect({ id: product.id.toString(), name: product.name })}
                                 >
                                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                         <Radio
-                                            checked={selectedProduct === product.id}
+                                            checked={selectedProduct === product.id.toString()}
                                             value={product.id}
                                             name="product-radio"
                                             sx={{ mr: 1 }}
@@ -97,7 +88,7 @@ const ProductSelection = ({ selectedProduct, onProductSelect }: ProductSelection
                                                     Key Features:
                                                 </Typography>
                                                 <Grid container spacing={1}>
-                                                    {product.features.map((feature, index) => (
+                                                    {product.keyFeatures.map((feature, index) => (
                                                         <Grid item xs={12} sm={6} key={index}>
                                                             <Typography
                                                                 variant="body2"

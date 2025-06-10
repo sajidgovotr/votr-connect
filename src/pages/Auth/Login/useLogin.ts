@@ -1,59 +1,59 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-
 import { IMessageContext, MessageContext } from "@/context/message-context";
 import { useDispatch } from "react-redux";
 import { useLoginMutation } from "@/services/auth";
 import { logIn } from "@/store/auth";
-import { USERS } from "@/constants/roles";
+import { storageService } from "@/utils/storage";
+
 const useLogin = () => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const [, { isLoading, }] = useLoginMutation();
-    const { showSnackbar } = useContext(MessageContext) as IMessageContext;
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [login, { isLoading }] = useLoginMutation();
+  const { showSnackbar } = useContext(MessageContext) as IMessageContext;
 
+  const [remember, setRemember] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const [remember, setRemember] = useState<boolean>(false);
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
-
-    const gotoForgetPassword = () => {
-        navigate("/forgot-password")
+  useEffect(() => {
+    const savedData = storageService.getRememberMeData();
+    if (savedData) {
+      setEmail(savedData.email);
+      setRemember(savedData.remember);
     }
-    const handleSubmit = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
+  }, []);
 
-        // If you use API then uncomment this below line and remove the dispatcher;
-        // login({ email, password });
+  const gotoForgetPassword = () => {
+    navigate("/forgot-password");
+  };
 
-        // this is just for dummy purpose;
-        const authenticatedUser = USERS?.find((user) => {
-            return user.password === password && user.email === email;
-        });
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    try {
+      const { token, user } = await login({ email, password }).unwrap();
 
-        if (authenticatedUser) {
-            dispatch(
-                logIn({
-                    token: "xxx",
-                    user: authenticatedUser
-                })
-            );
-        } else {
-            showSnackbar(
-                `Invalid email or password!`,
-                "Please enter correct login details",
-                "error"
-            );
-        }
-    };
+      if (!user || !token) throw new Error();
 
+      dispatch(logIn({ token, user }));
 
+      if (remember) {
+        storageService.setRememberMeData({ email, remember: true });
+      } else {
+        storageService.clearRememberMe();
+      }
 
-    return {
-        state: { email, password, remember, isLoading },
-        setState: { setEmail, setPassword, setRemember },
-        handlers: { handleSubmit, gotoForgetPassword },
-    };
-}
+      navigate("/dashboard");
+    } catch {
+      showSnackbar("Invalid email or password!", "Please enter correct login details", "error");
+    }
+  };
+
+  return {
+    state: { email, password, remember, isLoading },
+    setState: { setEmail, setPassword, setRemember },
+    handlers: { handleSubmit, gotoForgetPassword },
+  };
+};
 
 export default useLogin;

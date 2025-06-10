@@ -1,41 +1,47 @@
-
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQuery from "@/libs/baseQuery";
+import { jwtDecode } from "jwt-decode";
+import { UserDetails } from "@/utils/storage";
 
-interface IUser {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
+
+interface LoginResponse {
+  data: {
+    statusCode: number;
+    message: string;
+    data: {
+      access_token: string;
+    };
+  };
 }
 
 const authApi = createApi({
   reducerPath: "authApi",
   baseQuery,
-
   endpoints: (builder) => ({
-    login: builder.mutation({
-      query: (credentials: { email: string; password: string }) => ({
+    login: builder.mutation<
+      { token: string; user: UserDetails },
+      { email: string; password: string }
+    >({
+      query: (credentials) => ({
         url: "auth/login",
         method: "POST",
-        body: credentials
+        body: credentials,
       }),
-      transformResponse: (response: {
-        data: Partial<IUser> & {
-          tokens: {
-            accessToken: string;
-            idToken: string;
-          };
+      transformResponse: (response: LoginResponse) => {
+        const token = response.data.data.access_token;
+        const decodedUser = jwtDecode<UserDetails>(token);
+        return {
+          token,
+          user: decodedUser
         };
-      }) => response.data
+      },
     }),
-    getUserWithToken: builder.query<Partial<IUser>, void>({
+    getUserWithToken: builder.query<UserDetails, void>({
       query: () => "auth/me",
-      transformResponse: (response: { data: Partial<IUser> }) => response.data
-    })
-  })
+      transformResponse: (response: { data: UserDetails }) => response.data,
+    }),
+  }),
 });
 
 export const { useLoginMutation, useGetUserWithTokenQuery } = authApi;
-
-export default authApi
+export default authApi;
