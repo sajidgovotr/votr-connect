@@ -41,6 +41,8 @@ import StepBranding from "@/pages/OnBoarding/StepBanding";
 import AccountSetup from "@/pages/AccountSetup";
 import EmailTemplate from "@/pages/EmailTempalate";
 import ContactsPage from "@/pages/Contacts";
+import ExpressIntegrationLanding from "@/pages/ExpressIntegrationV2/ExpressIntegrationLanding";
+import SrmIntegrationMethodPage from "@/pages/ExpressIntegrationV2/SrmIntegrationMethodPage";
 
 
 const Routes = () => {
@@ -74,7 +76,11 @@ const Routes = () => {
       children: [
         {
           path: "",
-          element: <ExpressIntegrationPage />
+          element: <ExpressIntegrationLanding />
+        },
+        {
+          path: "integration-methods",
+          element: <SrmIntegrationMethodPage />
         }
       ]
     },

@@ -1,22 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { storageService, UserDetails } from "@/utils/storage";
 // import { authApi } from "../../services";
 
 export interface AuthState {
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        userRole: string;
-        isActive: boolean;
-        password: string;
-        profilePicURL: string;
-    } | null;
+    user: UserDetails | null;
     token: string | null;
 }
 
 const initialState: AuthState = {
-    user: null,
-    token: localStorage.getItem("jwtToken")
+    user: storageService.getUserDetails(),
+    token: storageService.getToken()
 };
 
 const slice = createSlice({
@@ -24,27 +17,19 @@ const slice = createSlice({
     initialState,
     reducers: {
         logout: (state) => {
-            localStorage.removeItem("jwtToken");
+            storageService.clearAuth();
             state.token = null;
             state.user = null;
         },
         logIn: (
             state,
-            action: PayloadAction<{ token: string; user: Partial<AuthState['user']> }>
+            action: PayloadAction<{ token: string; user: UserDetails }>
         ) => {
             const { token, user } = action.payload;
             state.token = token;
-            state.user = {
-                id: user?.id || "",
-                name: user?.name || "",
-                email: user?.email || "",
-                userRole: user?.userRole || "",
-                isActive: user?.isActive || false,
-                password: user?.password || "",
-                profilePicURL: user?.profilePicURL || ""
-            };
-            localStorage.setItem("jwtToken", token);
-            localStorage.setItem("role", user?.userRole || "");
+            state.user = user;
+            storageService.setToken(token);
+            storageService.setUserDetails(user);
         }
     },
     // extraReducers: (builder) => {

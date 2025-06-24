@@ -14,29 +14,29 @@ import {
 import ProductSelection from '@/components/IntegrationSteps/ProductSelection/ProductSelection';
 import IntegrationType from '@/components/IntegrationSteps/IntegrationType/IntegrationType';
 import RestApiIntegrationSteps from '@/components/IntegrationSteps/RestApiIntegration';
-import GraphQLIntegrationSteps from '@/components/IntegrationSteps/GraphQLIntegration';
 import FileUploadIntegrationSteps from '@/components/IntegrationSteps/FileUploadIntegration';
-
-import { useRestApiIntegrationMutation } from '@/services/express-integration';
+import { useCreateIntegrationWithDetailsMutation, useGetIntegrationMethodsQuery } from '@/services/express-integration';
 import useMessage from '@/hooks/useMessage';
 import Modal from '@/components/Modal';
 import { CustomButton } from '@/components';
 import ReviewSection from '@/components/IntegrationSteps/ReviewSection';
-import { useFileUploadIntegrationMutation } from '@/services/express-integration';
+import { EnvironmentEnum } from '@/types/environment';
+import { storageService } from '@/utils/storage';
+
 
 const steps = ['Select a Product', 'Select an Integration Type', 'Configure Integration', 'Review your integration'];
 
 const ExpressIntegrationPage = () => {
     const [activeStep, setActiveStep] = useState(0);
-    const [selectedProduct, setSelectedProduct] = useState('');
-    const [selectedIntegrationType, setSelectedIntegrationType] = useState('');
-    const [selectedEnvironment, setSelectedEnvironment] = useState('');
+    const [selectedProduct, setSelectedProduct] = useState<{ id: string; name: string } | null>(null);
+    const [selectedIntegrationType, setSelectedIntegrationType] = useState<string>('');
+    const [selectedEnvironment, setSelectedEnvironment] = useState<EnvironmentEnum>(EnvironmentEnum.DEVELOPMENT);
     const [integrationStepCompleted, setIntegrationStepCompleted] = useState(false);
     const [integrationData, setIntegrationData] = useState<any>(null);
     const [formData, setFormData] = useState<any>(null);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-    const [restApiIntegrationMutation, { isLoading: isRestApiIntegrationLoading }] = useRestApiIntegrationMutation();
-    const [fileUploadIntegrationMutation, { isLoading: isFileUploadIntegrationLoading }] = useFileUploadIntegrationMutation();
+    const [createIntegrationWithDetails, { isLoading }] = useCreateIntegrationWithDetailsMutation();
+    const { data: methodsResponse } = useGetIntegrationMethodsQuery();
     const { showSnackbar } = useMessage();
 
     const handleNext = () => {
@@ -49,9 +49,9 @@ const ExpressIntegrationPage = () => {
 
     const handleReset = () => {
         setActiveStep(0);
-        setSelectedProduct('');
+        setSelectedProduct(null);
         setSelectedIntegrationType('');
-        setSelectedEnvironment('');
+        setSelectedEnvironment(EnvironmentEnum.DEVELOPMENT);
         setIntegrationStepCompleted(false);
         setIntegrationData(null);
         setFormData(null);
@@ -67,24 +67,25 @@ const ExpressIntegrationPage = () => {
             setIntegrationData(data);
         }
         if (formValues) {
-            setFormData(formValues);
+            setFormData(formValues); 
+            if (formValues.environment) {
+                setSelectedEnvironment(formValues.environment);
+            }
         }
     };
 
     const handleEditFromReview = (item: any) => {
-        // Find which section contains this field
         const sectionIndex = integrationData?.findIndex((section: any) =>
             section.fields.some((field: any) => field.name === item.name)
         );
 
-        // Always go to step 2 (Configure Integration) and pass the section to edit
         setFormData((prev: any) => ({
             ...prev,
             activeSection: sectionIndex,
             isEditingFromReview: true
         }));
 
-        setActiveStep(2); // Always go to Configure Integration step
+        setActiveStep(2);
     };
 
     const isStepValid = (step: number) => {
@@ -102,12 +103,102 @@ const ExpressIntegrationPage = () => {
         }
     };
 
+    const prepareIntegrationPayload = () => {
+        const selectedMethod = methodsResponse?.data.find(method => method.code === selectedIntegrationType);
+        const userDetails = storageService.getUserDetails();
+        
+        if (!selectedMethod || !selectedProduct || !userDetails) {
+            throw new Error('Missing required data');
+        }
+
+        const basePayload = {
+            productId: selectedProduct.id,
+            integrationMethodId: selectedMethod.id,
+            environment: formData.environment,
+            name: formData.integrationName,
+            brokerId: userDetails.brokerId,
+            createdBy: userDetails.userId,
+            configs: [] as any[],
+            auths: [] as any[],
+        };
+
+        if (selectedIntegrationType === 'rest-api') {
+            basePayload.configs = [
+                { configKey: 'dataFormat', configValue: formData.dataFormat },
+                { configKey: 'method', configValue: formData.method },
+                { configKey: 'url', configValue: formData.baseURL },
+                { configKey: 'resourceName', configValue: formData.dataSchema.schemaName },
+                { configKey: 'endpointPath', configValue: formData.dataSchema.endpoint },
+            ];
+            basePayload.auths = [
+                { authKey: 'authenticationType', authValue: formData.authMethod },
+                { authKey: 'apiKey', authValue: formData.apiKey },
+            ];
+        } else if (selectedIntegrationType === 'file-upload') {
+            basePayload.configs = [
+                { configKey: 'fileFormat', configValue: formData.fileFormat.toUpperCase() },
+                { configKey: 'fileNamePattern', configValue: formData.fileNamePattern },
+                { configKey: 'isHeaderRowIncluded', configValue: formData.hasHeader.toString() },
+                { configKey: 'transferFrequency', configValue: formData.schedule },
+                { configKey: 'timeOfDay', configValue: formData.timeOfDay || '' },
+                { configKey: 'timeZone', configValue: formData.timeZone },
+            ];
+
+            if (formData.protocol === 'ftp') {
+                basePayload.configs.push(
+                    { configKey: 'host', configValue: formData.host },
+                    { configKey: 'port', configValue: formData.port },
+                    { configKey: 'type', configValue: formData.ftpType }
+                );
+                basePayload.auths = [
+                    { authKey: 'type', authValue: formData.ftpType === 'ftp' ? 'password' : 'sshKey' },
+                    { authKey: 'username', authValue: formData.username },
+                ];
+                if (formData.ftpType === 'ftp') {
+                    basePayload.auths.push({ authKey: 'password', authValue: formData.password });
+                } else {
+                    basePayload.auths.push(
+                        { authKey: 'sshKey', authValue: formData.sshKey },
+                        { authKey: 'passphrase', authValue: formData.passphrase }
+                    );
+                }
+            } else {
+                basePayload.configs.push(
+                    { configKey: 'region', configValue: formData.region },
+                    { configKey: 'bucketName', configValue: formData.bucketName },
+                    { configKey: 'folderPath', configValue: formData.folderPath || '' }
+                );
+                basePayload.auths = [
+                    { authKey: 'authenticationMethod', authValue: 'accessKey' },
+                    { authKey: 'ARN', authValue: formData.arn },
+                    { authKey: 'accessKey', authValue: formData.accessKey },
+                    { authKey: 'secretKey', authValue: formData.secretKey },
+                ];
+            }
+        }
+
+        return basePayload;
+    };
+
+    const handleSaveIntegration = async () => {
+        try {
+            const payload = prepareIntegrationPayload();
+            await createIntegrationWithDetails(payload).unwrap();
+            showSnackbar('Success', 'Integration saved successfully', 'success', 10000);
+            setShowConfirmationModal(false);
+            setActiveStep((prevStep) => prevStep + 1);
+        } catch (error) {
+            showSnackbar('Error', 'Failed to save integration', 'error', 10000);
+        }
+    };
+
     const renderIntegrationSteps = () => {
         switch (selectedIntegrationType) {
             case 'rest-api':
                 return (
                     <RestApiIntegrationSteps
-                        selectedProduct={selectedProduct}
+                        selectedProduct={selectedProduct?.id}
+                        selectedProductName={selectedProduct?.name}
                         selectedEnvironment={selectedEnvironment}
                         onStepComplete={(completed: boolean, data?: any, formValues?: any) =>
                             handleIntegrationStepComplete('rest-api', completed, data, formValues)
@@ -115,18 +206,11 @@ const ExpressIntegrationPage = () => {
                         initialValues={formData}
                     />
                 );
-            case 'graphql':
-                return (
-                    <GraphQLIntegrationSteps
-                        selectedProduct={selectedProduct}
-                        selectedEnvironment={selectedEnvironment}
-                        onStepComplete={(completed: boolean, data?: any) => handleIntegrationStepComplete('graphql', completed, data)}
-                    />
-                );
             case 'file-upload':
                 return (
                     <FileUploadIntegrationSteps
-                        selectedProduct={selectedProduct}
+                        selectedProduct={selectedProduct?.id}
+                        selectedProductName={selectedProduct?.name}
                         selectedEnvironment={selectedEnvironment}
                         onStepComplete={(completed: boolean, data?: any, formValues?: any) =>
                             handleIntegrationStepComplete('file-upload', completed, data, formValues)
@@ -144,8 +228,8 @@ const ExpressIntegrationPage = () => {
             case 0:
                 return (
                     <ProductSelection
-                        selectedProduct={selectedProduct}
-                        onProductSelect={setSelectedProduct}
+                        selectedProduct={selectedProduct?.id}
+                        onProductSelect={(product: { id: string; name: string }) => setSelectedProduct(product)}
                     />
                 );
 
@@ -154,7 +238,7 @@ const ExpressIntegrationPage = () => {
                     <IntegrationType
                         selectedType={selectedIntegrationType}
                         onTypeSelect={handleIntegrationTypeSelect}
-                        selectedProduct={selectedProduct}
+                        selectedProduct={selectedProduct?.id}
                         onStepComplete={handleIntegrationStepComplete}
                         onNext={handleNext}
                     />
@@ -173,119 +257,6 @@ const ExpressIntegrationPage = () => {
 
             default:
                 return null;
-        }
-    };
-
-    const handleSaveIntegration = async () => {
-        try {
-            let payload;
-            if (selectedIntegrationType === 'rest-api') {
-                payload = {
-                    name: formData.integrationName,
-                    environment: formData.environment,
-                    dataFormat: formData.dataFormat,
-                    method: formData.method,
-                    url: formData.baseURL,
-                    authentication: {
-                        authenticationType: formData.authMethod,
-                        apiKey: formData.apiKey,
-                    },
-                    schema: {
-                        resourceName: formData.dataSchema.schemaName,
-                        endpointPath: formData.dataSchema.endpoint,
-                        fieldDetails: formData.dataSchema.fields.map((field: any) => ({
-                            name: field.name,
-                            type: field.type,
-                            isRequired: field.required,
-                            mapFeildName: field.mapFeildName,
-                        })),
-                    }
-                };
-                await restApiIntegrationMutation(payload);
-            } else if (selectedIntegrationType === 'file-upload') {
-                if (formData.protocol === 'ftp') {
-                    if (formData.ftpType === 'ftp') {
-                        payload = {
-                            name: formData.integrationName,
-                            fileFormat: formData.fileFormat.toUpperCase(),
-                            fileNamePattern: formData.fileNamePattern,
-                            isHeaderRowIncluded: formData.hasHeader,
-                            transferFrequency: formData.schedule,
-                            timeOfDay: formData.timeOfDay || '',
-                            timeZone: formData.timeZone,
-                            afterSuccessfulTransferAction: "archive",
-                            afterFailedTransferAction: "retry",
-                            url: formData.host,
-                            ftp: {
-                                host: formData.host,
-                                port: parseInt(formData.port || ''),
-                                type: formData.ftpType,
-                                ftpAuthentication: {
-                                    type: "password",
-                                    username: formData.username,
-                                    password: formData.password
-                                }
-                            }
-                        };
-                    } else {
-                        payload = {
-                            name: formData.integrationName,
-                            fileFormat: formData.fileFormat.toUpperCase(),
-                            fileNamePattern: formData.fileNamePattern,
-                            isHeaderRowIncluded: formData.hasHeader,
-                            transferFrequency: formData.schedule,
-                            timeOfDay: formData.timeOfDay || '',
-                            timeZone: formData.timeZone,
-                            afterSuccessfulTransferAction: "archive",
-                            afterFailedTransferAction: "retry",
-                            url: formData.host,
-                            ftp: {
-                                host: formData.host,
-                                port: parseInt(formData.port || ''),
-                                type: formData.ftpType,
-                                ftpAuthentication: {
-                                    type: "sshKey",
-                                    username: formData.username,
-                                    sshKey: formData.sshKey,
-                                    passphrase: formData.passphrase
-                                }
-                            }
-                        };
-                    }
-                } else {
-                    payload = {
-                        name: formData.integrationName,
-                        fileFormat: formData.fileFormat.toUpperCase(),
-                        fileNamePattern: formData.fileNamePattern,
-                        isHeaderRowIncluded: formData.hasHeader,
-                        transferFrequency: formData.schedule,
-                        timeOfDay: formData.timeOfDay || '',
-                        timeZone: formData.timeZone,
-                        afterSuccessfulTransferAction: "archive",
-                        afterFailedTransferAction: "retry",
-                        url: `s3://${formData.bucketName}.s3.${formData.region}.amazonaws.com${formData.folderPath || ''}`,
-                        amazonS3Details: {
-                            region: formData.region,
-                            bucketName: formData.bucketName,
-                            folderPath: formData.folderPath || '',
-                            amazonS3Authentication: {
-                                authenticationMethod: "accessKey",
-                                ARN: formData.arn,
-                                accessKey: formData.accessKey,
-                                secretKey: formData.secretKey
-                            }
-                        }
-                    };
-                }
-                console.log(formData, "dataschema values");
-                await fileUploadIntegrationMutation(payload);
-            }
-
-            showSnackbar('Success', 'Integration saved successfully', 'success', 10000);
-            setShowConfirmationModal(false);
-            setActiveStep((prevStep) => prevStep + 1);
-        } catch (error) {
-            showSnackbar('Error', 'Failed to save integration', 'error', 10000);
         }
     };
 
@@ -358,9 +329,6 @@ const ExpressIntegrationPage = () => {
                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
                             Confirm Integration
                         </Typography>
-                        {/* <Typography variant="body2" >
-                            Please review your integration details carefully. Once confirmed, the integration will be saved.
-                        </Typography> */}
                         <Alert severity="info" sx={{ mb: 2 }}>
                             <Typography variant="body1" color="info.main">
                                 Please review your integration details carefully. Once confirmed, the integration will be saved.
@@ -387,7 +355,7 @@ const ExpressIntegrationPage = () => {
                             title="Confirm"
                             color="primary"
                             onClick={handleSaveIntegration}
-                            loading={isRestApiIntegrationLoading || isFileUploadIntegrationLoading}
+                            loading={isLoading}
                             sx={{
                                 color: "#FFFFFF",
                                 '&:hover': {
