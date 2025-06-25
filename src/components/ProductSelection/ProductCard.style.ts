@@ -49,11 +49,11 @@ const useProductCardStyles = makeStyles({
   button: {
     marginTop: 'auto',
     textTransform: 'none',
-    borderRadius: '0 0 20px 20px',
+    borderRadius: '0 0 10px 10px',
     color: '#8C8E9C',
     '&:hover': {
       background: '#DBDFFF',
-      color: '#fff',
+      color: '#5263FF',
     },
   },
   footer: {

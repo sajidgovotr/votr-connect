@@ -25,7 +25,7 @@ const SftpIntegrationStepper = ({ onBackToMethods }: { onBackToMethods?: () => v
   };
 
   return (
-    <Box maxWidth="md" mx="auto" py={4}>
+    <Box maxWidth="md" mx="auto" py={4} width={1}>
       <Box mb={3}>
         <Breadcrumbs
           data={[
@@ -35,7 +35,7 @@ const SftpIntegrationStepper = ({ onBackToMethods }: { onBackToMethods?: () => v
         />
       </Box>
       {/* 2. Header Banner */}
-      <SrmHeaderBanner />
+      <SrmHeaderBanner heading='SFTP File Transfer' subheading='Securely upload daily shareholder position files to the VOTR Connect SFTP server' />
       {/* 3. Custom Step Bar */}
       <StepBar steps={steps} activeStep={activeStep} />
       {/* 4. Step Content */}

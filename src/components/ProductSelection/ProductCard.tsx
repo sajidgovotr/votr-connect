@@ -45,8 +45,7 @@ const ProductCard = ({ image, title, description, onClick, selected, disabled }:
           </Typography>
         </CardContent>
       </CardActionArea>
-      <div className={classes.footer}>
-        <Divider sx={{ my: 1, height: '1px', width: '100%', backgroundColor: 'black', flexShrink: 0 }} />
+      <div className={classes.footer} style={{ borderTop: '1px solid #E6E6E9' }}>
         <Button
           variant="text"
           fullWidth

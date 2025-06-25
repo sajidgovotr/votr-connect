@@ -15,14 +15,13 @@ const SftpStepBasicInfo = ({ onNext, onBack }: { onNext: () => void; onBack?: ()
       <Paper
         elevation={0}
         sx={{
+          width: 1,
           p: 3,
-          borderRadius: 3,
+          borderRadius: 1,
           background: 'rgba(255,255,255,0.9)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
           backdropFilter: 'blur(6px)',
           border: '1px solid #e0e0e0',
-          // maxWidth: 600,
-          mx: 'auto',
           mt: 4,
         }}
       >
@@ -32,7 +31,7 @@ const SftpStepBasicInfo = ({ onNext, onBack }: { onNext: () => void; onBack?: ()
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Typography fontWeight={500} mb={1}>
-              Integration Name*
+              Integration Name<span style={{ color: '#FF4D4F' }}>*</span>
             </Typography>
             <TextField
               fullWidth
@@ -74,27 +73,12 @@ const SftpStepBasicInfo = ({ onNext, onBack }: { onNext: () => void; onBack?: ()
           </Grid>
         </Grid>
       </Paper>
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2,
-          borderRadius: 3,
-          background: 'rgba(255,255,255,0.9)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          backdropFilter: 'blur(6px)',
-          border: '1px solid #e0e0e0',
-          // maxWidth: 600,
-          mx: 'auto',
-          mt: 4,
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Button variant="outlined" sx={{ minWidth: 120 }} onClick={onBack}>Back</Button>
-        <Button variant="contained" sx={{ minWidth: 180 }} onClick={onNext} disabled={!integrationName}>
+      <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
+        <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
+        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={onNext} disabled={!integrationName}>
           Save & Continue
         </Button>
-      </Paper>
+      </Box>
     </>
   );
 };

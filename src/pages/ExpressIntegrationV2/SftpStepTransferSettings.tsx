@@ -1,6 +1,9 @@
 import { Box, Button, Grid, MenuItem, TextField, Paper, Typography } from '@mui/material';
 import { useState } from 'react';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const protocols = ['FTP/SFTP'];
 const types = ['SFTP'];
@@ -22,14 +25,13 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
       <Paper
         elevation={0}
         sx={{
+          width: 1,
           p: 3,
-          borderRadius: 3,
+          borderRadius: 1,
           background: 'rgba(255,255,255,0.9)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
           backdropFilter: 'blur(6px)',
           border: '1px solid #e0e0e0',
-          // maxWidth: 600,
-          mx: 'auto',
           mt: 4,
         }}
       >
@@ -46,6 +48,11 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
               fullWidth
               value={protocol}
               onChange={e => setProtocol(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <CloudUploadIcon sx={{ color: '#AEB0B4', mr: 1 }} />
+                ),
+              }}
             >
               {protocols.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
             </TextField>
@@ -63,7 +70,7 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
               {types.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
             </TextField>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={8}>
             <Typography fontWeight={500} mb={1}>
               Host
             </Typography>
@@ -74,7 +81,7 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
               onChange={e => setHost(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Typography fontWeight={500} mb={1}>
               Port
             </Typography>
@@ -85,7 +92,10 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
               onChange={e => setPort(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
+            <Typography variant="h6" fontWeight={600} mb={3}>
+              Authentication
+            </Typography>
             <Typography fontWeight={500} mb={1}>
               User Name
             </Typography>
@@ -96,7 +106,7 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
               onChange={e => setUserName(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <Typography fontWeight={500} mb={1}>
               SSH Key
             </Typography>
@@ -105,9 +115,11 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
               placeholder="Paste SSH Key here"
               value={sshKey}
               onChange={e => setSshKey(e.target.value)}
+              multiline
+              minRows={4}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <Typography fontWeight={500} mb={1}>
               Passphrase
             </Typography>
@@ -128,6 +140,11 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
               fullWidth
               value={schedule}
               onChange={e => setSchedule(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <CalendarMonthIcon sx={{ color: '#AEB0B4', mr: 1 }} />
+                ),
+              }}
             >
               {schedules.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
             </TextField>
@@ -141,31 +158,21 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
               placeholder="HH:MM/AM/PM"
               value={timeOfDay}
               onChange={e => setTimeOfDay(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <AccessTimeIcon sx={{ color: '#AEB0B4', mr: 1 }} />
+                ),
+              }}
             />
           </Grid>
         </Grid>
       </Paper>
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2,
-          borderRadius: 3,
-          background: 'rgba(255,255,255,0.9)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          backdropFilter: 'blur(6px)',
-          border: '1px solid #e0e0e0',
-          // maxWidth: 600,
-          mx: 'auto',
-          mt: 4,
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Button variant="outlined" sx={{ minWidth: 120 }} onClick={onBack}>Back</Button>
-        <Button variant="contained" sx={{ minWidth: 180 }}>
+      <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
+        <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
+        <Button variant="contained" sx={{ minWidth: 1 / 2 }}>
           Save & Continue
         </Button>
-      </Paper>
+      </Box>
     </>
   );
 };
