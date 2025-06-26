@@ -5,7 +5,6 @@ import {
 } from "@mui/material";
 import LogoutIcon from '@mui/icons-material/Logout';
 // import { LogoutConfirmModal } from "../../components";
-import { useState } from "react";
 import useBreakPoint from "../../hooks/useBreakPoint";
 import { storageService } from "@/utils/storage";
 

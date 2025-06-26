@@ -67,7 +67,7 @@ const ExpressIntegrationPage = () => {
             setIntegrationData(data);
         }
         if (formValues) {
-            setFormData(formValues); 
+            setFormData(formValues);
             if (formValues.environment) {
                 setSelectedEnvironment(formValues.environment);
             }
@@ -106,7 +106,7 @@ const ExpressIntegrationPage = () => {
     const prepareIntegrationPayload = () => {
         const selectedMethod = methodsResponse?.data.find(method => method.code === selectedIntegrationType);
         const userDetails = storageService.getUserDetails();
-        
+
         if (!selectedMethod || !selectedProduct || !userDetails) {
             throw new Error('Missing required data');
         }
@@ -197,7 +197,6 @@ const ExpressIntegrationPage = () => {
             case 'rest-api':
                 return (
                     <RestApiIntegrationSteps
-                        selectedProduct={selectedProduct?.id}
                         selectedProductName={selectedProduct?.name}
                         selectedEnvironment={selectedEnvironment}
                         onStepComplete={(completed: boolean, data?: any, formValues?: any) =>
@@ -209,7 +208,6 @@ const ExpressIntegrationPage = () => {
             case 'file-upload':
                 return (
                     <FileUploadIntegrationSteps
-                        selectedProduct={selectedProduct?.id}
                         selectedProductName={selectedProduct?.name}
                         selectedEnvironment={selectedEnvironment}
                         onStepComplete={(completed: boolean, data?: any, formValues?: any) =>
@@ -238,7 +236,6 @@ const ExpressIntegrationPage = () => {
                     <IntegrationType
                         selectedType={selectedIntegrationType}
                         onTypeSelect={handleIntegrationTypeSelect}
-                        selectedProduct={selectedProduct?.id}
                         onStepComplete={handleIntegrationStepComplete}
                         onNext={handleNext}
                     />
