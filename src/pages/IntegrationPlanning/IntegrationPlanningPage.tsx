@@ -72,8 +72,7 @@ const IntegrationPlanningPage = () => {
                     <IntegrationType
                         selectedType={selectedIntegrationType}
                         onTypeSelect={setSelectedIntegrationType}
-                        selectedProduct={selectedProduct}
-                        onStepComplete={(type, completed) => { /* Optionally handle step completion */ }}
+                        onStepComplete={() => { /* Optionally handle step completion */ }}
                         onNext={handleNext}
                     />
                 );

@@ -32,7 +32,6 @@ import CustomButton from '@/components/CustomButton';
 import { EnvironmentEnum } from '@/types/environment';
 
 interface RestApiIntegrationStepsProps {
-    selectedProduct: string | undefined;
     selectedProductName: string | undefined;
     selectedEnvironment: EnvironmentEnum;
     onStepComplete: (completed: boolean, data?: any, formValues?: any) => void;
@@ -97,7 +96,6 @@ const schema = yup.object().shape({
 });
 
 const RestApiIntegrationSteps = ({
-    selectedProduct,
     selectedProductName,
     selectedEnvironment,
     onStepComplete,

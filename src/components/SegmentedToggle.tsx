@@ -38,7 +38,7 @@ const SegmentedToggle: React.FC<SegmentedToggleProps> = ({
                 ...sx,
             }}
         >
-            {options.map((opt, idx) => {
+            {options.map((opt) => {
                 const selected = value === opt.value;
                 return (
                     <Box

@@ -38,8 +38,8 @@ const IntegrationCatalog = () => {
         console.log('Request clicked');
     };
 
-    const handleProductSelect = (product: string) => {
-        setSelectedProduct(product);
+    const handleProductSelect = (product: { id: string; name: string }) => {
+        setSelectedProduct(product.id);
         // Reset integration type when selecting a new product
         setSelectedIntegrationType("");
     };

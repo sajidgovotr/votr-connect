@@ -37,7 +37,6 @@ import CustomButton from '@/components/CustomButton';
 import { EnvironmentEnum } from '@/types/environment';
 
 interface FileUploadIntegrationStepsProps {
-    selectedProduct: string | undefined;
     selectedProductName: string | undefined;
     selectedEnvironment: EnvironmentEnum;
     onStepComplete: (completed: boolean, data?: any, formValues?: any) => void;
@@ -137,7 +136,6 @@ const schema = yup.object().shape({
 type FormData = yup.InferType<typeof schema>;
 
 const FileUploadIntegrationSteps = ({
-    selectedProduct,
     selectedProductName,
     selectedEnvironment,
     onStepComplete,

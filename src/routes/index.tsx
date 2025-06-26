@@ -30,7 +30,6 @@ import FileUploadIntegration from '../pages/IntegrationCatalog/FileUploadIntegra
 import AuditLogs from "@/pages/AuditLogs";
 import AuditLogDetails from "@/pages/AuditLogs/AuditLogDetails";
 
-import ExpressIntegrationPage from "@/pages/ExpressIntegration/ExpressIntegrationPage";
 import ConfiguredProducts from "@/pages/ConfiguredProducts";
 import Integrations from "@/pages/Integrations";
 import OnBoarding from "@/pages/OnBoarding/Welcom";

@@ -6,7 +6,6 @@ import { ChevronRight } from '@mui/icons-material';
 interface IntegrationTypeProps {
     selectedType: string;
     onTypeSelect: (type: string) => void;
-    selectedProduct: string | undefined;
     onStepComplete: (type: string, completed: boolean) => void;
     onNext: () => void;
 }
@@ -26,7 +25,6 @@ const StyledCard = styled(Card)(({ theme }) => ({
 const IntegrationType = ({
     selectedType,
     onTypeSelect,
-    selectedProduct,
     onStepComplete,
     onNext,
 }: IntegrationTypeProps) => {

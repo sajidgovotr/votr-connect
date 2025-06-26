@@ -1,5 +1,5 @@
 import { Box, Grid, Typography, Chip, Paper } from '@mui/material';
-import { FaCloudDownloadAlt, FaFileUpload } from 'react-icons/fa';
+import { FaCloudDownloadAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
 import NavigationCard from '@/components/NavigationCard/NavigationCard';
 import Breadcrumbs from '@/components/Breadcrumbs';

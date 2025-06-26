@@ -16,8 +16,6 @@ const Logout = ({
     navbar?: boolean;
     isSidebarExtended?: boolean;
 }) => {
-    const [, setIsLogoutConfirmModalOpen] =
-        useState<boolean>(false);
     const isMdUp = useBreakPoint('md');
 
     const extendedSidebar = () => {

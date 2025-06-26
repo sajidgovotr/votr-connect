@@ -1,6 +1,6 @@
 import { CustomButton } from "@/components";
 import DynamicTable from "@/components/DynamicTable";
-import { Box, TextField, Typography, Paper, InputAdornment, Chip, Stack, Select, MenuItem, FormControl, InputLabel, Tooltip, Alert, CircularProgress } from "@mui/material";
+import { Box, TextField, Typography, Paper, InputAdornment, Chip, Stack, Select, MenuItem, FormControl, InputLabel, Alert, CircularProgress } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { useGetAllIntegrationsWithDetailsQuery, usePullDataFromIntegrationQuery } from "@/services/express-integration";
@@ -136,8 +136,8 @@ const Integrations = () => {
 
     const filterBySearch = (integration: any) => {
         return integration.name.toLowerCase().includes(search.toLowerCase()) ||
-               integration.product.name.toLowerCase().includes(search.toLowerCase()) ||
-               integration.environment.toLowerCase().includes(search.toLowerCase())
+            integration.product.name.toLowerCase().includes(search.toLowerCase()) ||
+            integration.environment.toLowerCase().includes(search.toLowerCase())
     }
 
     const sortByCreatedAt = (integrations: any[]) => {

@@ -5,7 +5,6 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import CardActionArea from '@mui/material/CardActionArea';
 import useProductCardStyles from './ProductCard.style';
-import { Divider } from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 interface ProductCardProps {
