@@ -63,7 +63,7 @@ const IntegrationPlanningPage = () => {
                 return (
                     <ProductSelection
                         selectedProduct={selectedProduct}
-                        onProductSelect={setSelectedProduct}
+                        onProductSelect={(product) => setSelectedProduct(product.id)}
                     />
                 );
 
@@ -73,6 +73,8 @@ const IntegrationPlanningPage = () => {
                         selectedType={selectedIntegrationType}
                         onTypeSelect={setSelectedIntegrationType}
                         selectedProduct={selectedProduct}
+                        onStepComplete={(type, completed) => { /* Optionally handle step completion */ }}
+                        onNext={handleNext}
                     />
                 );
 
