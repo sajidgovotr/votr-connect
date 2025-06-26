@@ -172,7 +172,7 @@ const SftpStepDataSchema = ({ onNext, onBack }: { onNext: () => void; onBack: ()
             variant="text"
             color="primary"
             onClick={handleAddField}
-            sx={{ fontWeight: 600, textTransform: 'none', fontSize: 18, pl: 0 }}
+            sx={{ textTransform: 'none', fontSize: 18 }}
             startIcon={<Box component="span" sx={{ color: '#5563F7', fontSize: 28, display: 'flex', alignItems: 'center' }}>+</Box>}
           >
             Add Field

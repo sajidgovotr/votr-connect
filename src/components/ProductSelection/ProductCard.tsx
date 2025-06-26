@@ -25,7 +25,7 @@ const ProductCard = ({ image, title, description, onClick, selected, disabled }:
   ].join(' ');
   return (
     <Card className={cardClass}>
-      <CardActionArea disabled={disabled} onClick={onClick} sx={{ flexGrow: 1 }}>
+      <CardActionArea disabled={disabled} onClick={onClick} sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-start', flexDirection: 'column' }}>
         {image && (
           <CardMedia
             component="img"
