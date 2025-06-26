@@ -36,8 +36,6 @@ const ExpressIntegrationLanding = () => {
   const classes = useExpressIntegrationLandingStyles();
   const navigate = useNavigate();
 
- 
-
   return (
     <Box className={classes.container}>
       <Typography variant="h4" fontWeight={400} className={classes.title}>
@@ -48,13 +46,13 @@ const ExpressIntegrationLanding = () => {
       </Typography>
       <Grid container spacing={3} justifyContent="center">
         {products.map((product) => (
-          <Grid item xs={12} sm={6} md={4} key={product.key}>
+          <Grid item xs={12} sm={6} md={4} key={product.key} sx={{ display: 'flex', justifyContent: 'center' }}>
             <ProductCard
               image={product.image}
               title={product.title}
               description={product.description}
               onClick={() => {
-                  navigate('/express-integration/integration-methods');
+                navigate('/express-integration/integration-methods');
               }}
               disabled={product.disabled}
             />
