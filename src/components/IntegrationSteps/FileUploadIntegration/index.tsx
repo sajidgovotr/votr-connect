@@ -34,10 +34,11 @@ import SchemaIcon from '@mui/icons-material/Schema';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import CustomButton from '@/components/CustomButton';
+import { EnvironmentEnum } from '@/types/environment';
 
 interface FileUploadIntegrationStepsProps {
-    selectedProduct: string;
-    selectedEnvironment: string;
+    selectedProductName: string | undefined;
+    selectedEnvironment: EnvironmentEnum;
     onStepComplete: (completed: boolean, data?: any, formValues?: any) => void;
     initialValues?: any;
 }
@@ -135,7 +136,7 @@ const schema = yup.object().shape({
 type FormData = yup.InferType<typeof schema>;
 
 const FileUploadIntegrationSteps = ({
-    selectedProduct,
+    selectedProductName,
     selectedEnvironment,
     onStepComplete,
     initialValues
@@ -152,6 +153,7 @@ const FileUploadIntegrationSteps = ({
     } = useForm<FormData>({
         resolver: yupResolver(schema),
         defaultValues: initialValues || {
+            integrationName: '',
             environment: selectedEnvironment,
             protocol: 'ftp',
             ftpType: 'ftp',
@@ -339,9 +341,9 @@ const FileUploadIntegrationSteps = ({
                                                 ),
                                             }}
                                         >
-                                            <MenuItem value="dev">Development</MenuItem>
-                                            <MenuItem value="staging">Staging</MenuItem>
-                                            <MenuItem value="prod">Production</MenuItem>
+                                            <MenuItem value={EnvironmentEnum.DEVELOPMENT}>Development</MenuItem>
+                                            <MenuItem value={EnvironmentEnum.STAGING}>Staging</MenuItem>
+                                            <MenuItem value={EnvironmentEnum.PRODUCTION}>Production</MenuItem>
                                         </TextField>
                                     )}
                                 />
@@ -1044,7 +1046,7 @@ const FileUploadIntegrationSteps = ({
     return (
         <Box>
             <Typography variant="h5" gutterBottom sx={{ mb: 4, fontWeight: 'bold' }}>
-                Configure File Upload Integration for {selectedProduct}
+                Configure File Upload Integration for {selectedProductName}
             </Typography>
             <Stepper activeStep={activeStep} orientation="vertical" sx={{ '& .MuiStepLabel-root': { py: 1 } }}>
                 {steps.map((step, index) => (

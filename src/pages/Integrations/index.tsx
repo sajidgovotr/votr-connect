@@ -1,16 +1,16 @@
 import { CustomButton } from "@/components";
 import DynamicTable from "@/components/DynamicTable";
-import { Box, TextField, Typography, Paper, InputAdornment, Chip, Stack, Select, MenuItem, FormControl, InputLabel, Tooltip, Alert, CircularProgress } from "@mui/material";
+import { Box, TextField, Typography, Paper, InputAdornment, Chip, Stack, Select, MenuItem, FormControl, InputLabel, Alert, CircularProgress } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { useGetAllIntegrationsQuery, usePullDataFromIntegrationQuery } from "@/services/express-integration";
+import { useGetAllIntegrationsWithDetailsQuery, usePullDataFromIntegrationQuery } from "@/services/express-integration";
 import { useMemo, useState, useEffect } from "react";
 import IntegrationDetails from "@/components/Modal/IntegrationDetails";
 
 const Integrations = () => {
     const [pullingDataId, setPullingDataId] = useState<string | null>(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-    const { data: integrations, isLoading, isError, error } = useGetAllIntegrationsQuery(null);
+    const { data: integrationsResponse, isLoading, isError, error } = useGetAllIntegrationsWithDetailsQuery();
     const { isLoading: isPullingData, isError: isPullError, error: pullError, isSuccess: isPullSuccess } = usePullDataFromIntegrationQuery(
         pullingDataId || '',
         {
@@ -24,12 +24,12 @@ const Integrations = () => {
     const [search, setSearch] = useState<string>('');
     const [selectedIntegration, setSelectedIntegration] = useState<any>(null);
 
+    const integrations = integrationsResponse?.data || [];
+
     useEffect(() => {
         if (isPullSuccess) {
             setShowSuccessMessage(true);
-            // Reset pullingDataId after successful pull
             setPullingDataId(null);
-            // Hide success message after 5 seconds
             const timer = setTimeout(() => {
                 setShowSuccessMessage(false);
             }, 5000);
@@ -44,17 +44,45 @@ const Integrations = () => {
             align: "left"
         },
         {
-            key: ["integrationType"],
+            key: ["integrationMethod"],
             name: "Type",
             align: "left",
             component: (data: any) => (
                 <Chip
-                    label={data?.integrationType?.toUpperCase()}
+                    label={data?.integrationMethod?.code?.toUpperCase()}
                     size="small"
                     sx={{
-                        backgroundColor: data?.integrationType?.toLowerCase() === 'file' ? '#DCFCE7' : '#FEE2E2',
-                        color: data?.integrationType?.toLowerCase() === 'file' ? '#166534' : '#991B1B',
-                        border: `1px solid ${data?.integrationType?.toLowerCase() === 'file' ? '#BBF7D0' : '#FECACA'}`,
+                        backgroundColor: data?.integrationMethod?.code?.toLowerCase() === 'file-upload' ? '#DCFCE7' : '#FEE2E2',
+                        color: data?.integrationMethod?.code?.toLowerCase() === 'file-upload' ? '#166534' : '#991B1B',
+                        border: `1px solid ${data?.integrationMethod?.code?.toLowerCase() === 'file-upload' ? '#BBF7D0' : '#FECACA'}`,
+                        fontWeight: 500,
+                        fontSize: '0.75rem',
+                        height: '24px',
+                        '& .MuiChip-label': {
+                            px: 1
+                        }
+                    }}
+                />
+            )
+        },
+        {
+            key: ["product"],
+            name: "Product",
+            align: "left",
+            component: (data: any) => data?.product?.name || '-'
+        },
+        {
+            key: ["environment"],
+            name: "Environment",
+            align: "left",
+            component: (data: any) => (
+                <Chip
+                    label={data?.environment}
+                    size="small"
+                    sx={{
+                        backgroundColor: data?.environment === 'PRODUCTION' ? '#FEE2E2' : '#FEF3C7',
+                        color: data?.environment === 'PRODUCTION' ? '#991B1B' : '#92400E',
+                        border: `1px solid ${data?.environment === 'PRODUCTION' ? '#FECACA' : '#FDE68A'}`,
                         fontWeight: 500,
                         fontSize: '0.75rem',
                         height: '24px',
@@ -79,8 +107,8 @@ const Integrations = () => {
                             title="View Details"
                             sx={{ p: 2 }}
                         />
-                        {
-                            data?.integrationType === 'file' && (
+                        {/* {
+                            data?.integrationMethod?.code === 'file-upload' && (
                                 <Tooltip title="Start pulling data from the integration on the server">
                                     <CustomButton
                                         variant="text"
@@ -89,12 +117,12 @@ const Integrations = () => {
                                         sx={{ p: 2 }}
                                         loading={isPullingData && pullingDataId === data?.id}
                                         onClick={() => {
-                                            setPullingDataId(data?.ftp?.id);
+                                            setPullingDataId(data?.id);
                                         }}
                                     />
                                 </Tooltip>
                             )
-                        }
+                        } */}
                     </Stack>
                 )
             }
@@ -102,11 +130,14 @@ const Integrations = () => {
     ], [isPullingData, pullingDataId]);
 
     const filterByType = (integration: any) => {
-        return selectedType === 'all' ? integrations : integration.integrationType === selectedType;
+        if (selectedType === 'all') return true;
+        return integration.integrationMethod.code === selectedType;
     }
 
     const filterBySearch = (integration: any) => {
-        return integration.name.toLowerCase().includes(search.toLowerCase());
+        return integration.name.toLowerCase().includes(search.toLowerCase()) ||
+            integration.product.name.toLowerCase().includes(search.toLowerCase()) ||
+            integration.environment.toLowerCase().includes(search.toLowerCase())
     }
 
     const sortByCreatedAt = (integrations: any[]) => {
@@ -114,7 +145,7 @@ const Integrations = () => {
     }
 
     const filteredIntegrations = useMemo(() => {
-        const filtered = integrations?.filter(filterByType).filter(filterBySearch) || [];
+        const filtered = integrations.filter(filterByType).filter(filterBySearch);
         return sortByCreatedAt(filtered);
     }, [selectedType, search, integrations]);
 
@@ -282,8 +313,8 @@ const Integrations = () => {
                                 }}
                             >
                                 <MenuItem value="all">All Types</MenuItem>
-                                <MenuItem value="rest">Rest Api</MenuItem>
-                                <MenuItem value="file">File Upload</MenuItem>
+                                <MenuItem value="rest-api">Rest Api</MenuItem>
+                                <MenuItem value="file-upload">File Upload</MenuItem>
                             </Select>
                         </FormControl>
                     </Stack>

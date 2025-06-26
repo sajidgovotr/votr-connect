@@ -5,8 +5,8 @@ import {
 } from "@mui/material";
 import LogoutIcon from '@mui/icons-material/Logout';
 // import { LogoutConfirmModal } from "../../components";
-import { useState } from "react";
 import useBreakPoint from "../../hooks/useBreakPoint";
+import { storageService } from "@/utils/storage";
 
 const Logout = ({
     navbar,
@@ -15,8 +15,6 @@ const Logout = ({
     navbar?: boolean;
     isSidebarExtended?: boolean;
 }) => {
-    const [, setIsLogoutConfirmModalOpen] =
-        useState<boolean>(false);
     const isMdUp = useBreakPoint('md');
 
     const extendedSidebar = () => {
@@ -26,9 +24,10 @@ const Logout = ({
         return false;
     };
 
-    // const handleLogout = async (): Promise<void> => {
-    //     console.log('logout')
-    // };
+    const handleLogout = async (): Promise<void> => {
+        storageService.clearAll();
+        window.location.href = '/login';
+    };
 
     if (navbar) {
         return (
@@ -40,7 +39,7 @@ const Logout = ({
                     variant="contained"
                     startIcon={<LogoutIcon />}
                     onClick={() => {
-                        setIsLogoutConfirmModalOpen(true);
+                        handleLogout();
                     }}
                 >
                     Logout
@@ -64,7 +63,7 @@ const Logout = ({
                 className={`rounded-md !mx-auto cursor-pointer ${extendedSidebar() ? "w-[80%] h-12 !pl-1.5 !my-[0.8rem]" : "w-16 h-16 !pl-0.5 !my-0 "}`}
                 spacing={extendedSidebar() ? 1.5 : 0.5}
                 onClick={() => {
-                    setIsLogoutConfirmModalOpen(true);
+                    handleLogout();
                 }}
             >
                 {/* <GoSignOut color="#8C8E9C" size={16} /> */}

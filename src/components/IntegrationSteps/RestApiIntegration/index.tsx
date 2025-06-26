@@ -29,32 +29,13 @@ import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import AddIcon from '@mui/icons-material/Add';
 import CustomButton from '@/components/CustomButton';
+import { EnvironmentEnum } from '@/types/environment';
 
 interface RestApiIntegrationStepsProps {
-    selectedProduct: string;
-    selectedEnvironment: string;
-    onStepComplete: (completed: boolean, reviewData?: Array<{ section: string; fields: Array<{ name: string; value: string }> }>, formValues?: any) => void;
-    initialValues?: {
-        integrationName: string;
-        baseURL: string;
-        method: string;
-        environment: string;
-        dataFormat: string;
-        authMethod: string;
-        apiKey: string;
-        dataSchema: {
-            schemaName: string;
-            endpoint: string;
-            fields: Array<{
-                name: string;
-                type: string;
-                required: boolean;
-                mapFeildName: string;
-            }>;
-        };
-        activeSection?: number;
-        isEditingFromReview?: boolean;
-    };
+    selectedProductName: string | undefined;
+    selectedEnvironment: EnvironmentEnum;
+    onStepComplete: (completed: boolean, data?: any, formValues?: any) => void;
+    initialValues?: any;
 }
 
 const steps = [
@@ -114,7 +95,12 @@ const schema = yup.object().shape({
     }).required('Data schema is required'),
 });
 
-const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValues }: RestApiIntegrationStepsProps) => {
+const RestApiIntegrationSteps = ({
+    selectedProductName,
+    selectedEnvironment,
+    onStepComplete,
+    initialValues
+}: RestApiIntegrationStepsProps) => {
     const [activeStep, setActiveStep] = useState(0);
 
     const {
@@ -132,7 +118,7 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
             integrationName: '',
             baseURL: '',
             method: 'GET',
-            environment: 'dev',
+            environment: selectedEnvironment,
             dataFormat: 'json',
             authMethod: 'apikey',
             apiKey: '',
@@ -361,9 +347,9 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
                                                 ),
                                             }}
                                         >
-                                            <MenuItem value="dev">Development</MenuItem>
-                                            <MenuItem value="staging">Staging</MenuItem>
-                                            <MenuItem value="prod">Production</MenuItem>
+                                            <MenuItem value={EnvironmentEnum.DEVELOPMENT}>Development</MenuItem>
+                                            <MenuItem value={EnvironmentEnum.STAGING}>Staging</MenuItem>
+                                            <MenuItem value={EnvironmentEnum.PRODUCTION}>Production</MenuItem>
                                         </TextField>
                                     )}
                                 />
@@ -635,8 +621,8 @@ const RestApiIntegrationSteps = ({ selectedProduct, onStepComplete, initialValue
 
     return (
         <Box>
-            <Typography variant="h5" gutterBottom sx={{ mb: 4, fontWeight: 'bold' }}>
-                Configure REST API Integration for {selectedProduct}
+            <Typography variant="h6" gutterBottom>
+                Configure REST API Integration for {selectedProductName}
             </Typography>
             <Stepper activeStep={activeStep} orientation="vertical" sx={{ '& .MuiStepLabel-root': { py: 1 } }}>
                 {steps.map((step, index) => (

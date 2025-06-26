@@ -30,7 +30,6 @@ import FileUploadIntegration from '../pages/IntegrationCatalog/FileUploadIntegra
 import AuditLogs from "@/pages/AuditLogs";
 import AuditLogDetails from "@/pages/AuditLogs/AuditLogDetails";
 
-import ExpressIntegrationPage from "@/pages/ExpressIntegration/ExpressIntegrationPage";
 import ConfiguredProducts from "@/pages/ConfiguredProducts";
 import Integrations from "@/pages/Integrations";
 import OnBoarding from "@/pages/OnBoarding/Welcom";
@@ -41,6 +40,8 @@ import StepBranding from "@/pages/OnBoarding/StepBanding";
 import AccountSetup from "@/pages/AccountSetup";
 import EmailTemplate from "@/pages/EmailTempalate";
 import ContactsPage from "@/pages/Contacts";
+import ExpressIntegrationLanding from "@/pages/ExpressIntegrationV2/ExpressIntegrationLanding";
+import SrmIntegrationMethodPage from "@/pages/ExpressIntegrationV2/SrmIntegrationMethodPage";
 
 
 const Routes = () => {
@@ -74,7 +75,11 @@ const Routes = () => {
       children: [
         {
           path: "",
-          element: <ExpressIntegrationPage />
+          element: <ExpressIntegrationLanding />
+        },
+        {
+          path: "integration-methods",
+          element: <SrmIntegrationMethodPage />
         }
       ]
     },

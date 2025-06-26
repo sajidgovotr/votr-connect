@@ -119,7 +119,7 @@ export const theme = createTheme({
                         "& + .MuiSwitch-track": {
                             opacity: 1,
                             border: 0,
-                            backgroundColor: "#2ECA45",
+                            backgroundColor: "#5263FF",
                         },
                         "&.Mui-disabled + .MuiSwitch-track": {
                             opacity: 0.5,
