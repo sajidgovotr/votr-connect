@@ -1,6 +1,6 @@
 import { Box, Grid, Typography, Chip, Paper } from '@mui/material';
 import { FaCloudDownloadAlt } from 'react-icons/fa';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import NavigationCard from '@/components/NavigationCard/NavigationCard';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import summaryBanner from '../../../public/images/SRM_Background.png';
@@ -11,6 +11,7 @@ import { useState } from 'react';
 
 const integrationMethods = [
   {
+    id: "87dd9dba-3d6f-4c32-97cb-e87dcaca8941",
     key: 'api',
     icon: <FaCloudDownloadAlt color="#6366F1" size={40} />,
     title: 'Automated API Integration (Pull Mode)',
@@ -18,6 +19,7 @@ const integrationMethods = [
     badgeText: 'Recommended',
   },
   {
+    id: "a719efa0-b1fe-4064-8ce6-0ef2d79854ca",
     key: 'sftp',
     icon: <CloudUpload />,
     title: 'SFTP File Transfer',
@@ -29,12 +31,18 @@ const integrationMethods = [
 const SrmIntegrationMethodPage = () => {
   const [showSftpStepper, setShowSftpStepper] = useState(false);
   const [showApiStepper, setShowApiStepper] = useState(false);
+  const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const productId = location.state?.productId;
 
   const handleSelect = (key: string) => {
+    const method = integrationMethods.find((m) => m.key === key);
     if (key === 'sftp') {
+      setSelectedMethodId(method?.id || null);
       setShowSftpStepper(true);
     } else if (key === 'api') {
+      setSelectedMethodId(method?.id || null);
       setShowApiStepper(true);
     } else {
       navigate(`/express-integration/srm/${key}`);
@@ -42,11 +50,11 @@ const SrmIntegrationMethodPage = () => {
   };
 
   if (showSftpStepper) {
-    return <SftpIntegrationStepper onBackToMethods={() => setShowSftpStepper(false)} />;
+    return <SftpIntegrationStepper onBackToMethods={() => setShowSftpStepper(false)} integrationMethodId={selectedMethodId} productId={productId} />;
   }
 
   if (showApiStepper) {
-    return <ApiIntegrationStepper onBackToMethods={() => setShowApiStepper(false)} />;
+    return <ApiIntegrationStepper onBackToMethods={() => setShowApiStepper(false)} integrationMethodId={selectedMethodId} productId={productId} />;
   }
 
   return (
@@ -67,7 +75,7 @@ const SrmIntegrationMethodPage = () => {
           sx={{
             mb: 5,
             borderRadius: 1,
-            p: { xs: 1.5, md: 3 }, // reduced padding
+            p: { xs: 1.5, md: 3 },
             textAlign: 'center',
             backgroundColor: 'rgba(255, 255, 255, 0.8)',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',

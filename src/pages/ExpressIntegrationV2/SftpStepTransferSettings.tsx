@@ -3,12 +3,26 @@ import { useState } from 'react';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { useCreateIntegrationWithDetailsMutation } from '@/services/express-integration';
+import useMessage from '@/hooks/useMessage';
+import { EnvironmentEnum } from '@/types/environment';
+import { brokerId, userId } from '@/constants/static';
+import { useNavigate } from 'react-router';
 
 const protocols = ['FTP/SFTP'];
 const types = ['SFTP'];
 const schedules = ['Daily', 'Weekly', 'Monthly'];
 
-const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
+interface SftpStepTransferSettingsProps {
+  onBack: () => void;
+  basicInfo: any;
+  fileConfig: any;
+  dataSchema: any;
+  integrationMethodId?: string | null;
+  productId?: string;
+}
+
+const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, integrationMethodId, productId }: SftpStepTransferSettingsProps) => {
   const [protocol, setProtocol] = useState(protocols[0]);
   const [type, setType] = useState(types[0]);
   const [host, setHost] = useState('');
@@ -18,6 +32,50 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
   const [passphrase, setPassphrase] = useState('');
   const [schedule, setSchedule] = useState(schedules[0]);
   const [timeOfDay, setTimeOfDay] = useState('');
+  const [createIntegrationWithDetails, { isLoading }] = useCreateIntegrationWithDetailsMutation();
+  const { showSnackbar } = useMessage();
+  const navigate = useNavigate();
+
+  const handleSaveAndContinue = async () => {
+    // Build the payload from all step data
+    const payload = {
+      productId: productId ?? '',
+      brokerId: brokerId,
+      integrationMethodId: integrationMethodId ?? "",
+      environment: basicInfo?.environment === 'Development' ? EnvironmentEnum.DEVELOPMENT : basicInfo?.environment === 'Staging' ? EnvironmentEnum.STAGING : EnvironmentEnum.PRODUCTION,
+      name: basicInfo?.integrationName,
+      createdBy: userId,
+      configs: [
+        ...(protocol ? [{ configKey: 'protocol', configValue: protocol }] : []),
+        ...(type ? [{ configKey: 'type', configValue: type }] : []),
+        ...(host ? [{ configKey: 'host', configValue: host }] : []),
+        ...(port ? [{ configKey: 'port', configValue: port }] : []),
+        ...(schedule ? [{ configKey: 'schedule', configValue: schedule }] : []),
+        ...(timeOfDay ? [{ configKey: 'timeOfDay', configValue: timeOfDay }] : []),
+        ...(fileConfig?.fileType ? [{ configKey: 'fileType', configValue: fileConfig.fileType }] : []),
+        ...(fileConfig?.fileNamePattern ? [{ configKey: 'fileNamePattern', configValue: fileConfig.fileNamePattern }] : []),
+        ...(fileConfig?.maxFileSize ? [{ configKey: 'maxFileSize', configValue: fileConfig.maxFileSize.toString() }] : []),
+        ...(fileConfig?.fileSizeUnit ? [{ configKey: 'fileSizeUnit', configValue: fileConfig.fileSizeUnit }] : []),
+        ...(fileConfig?.hasHeader !== undefined ? [{ configKey: 'hasHeader', configValue: fileConfig.hasHeader.toString() }] : []),
+        ...(basicInfo?.timeZone ? [{ configKey: 'timeZone', configValue: basicInfo.timeZone }] : []),
+        ...(dataSchema?.fields ? [{ configKey: 'dataFields', configValue: JSON.stringify(dataSchema.fields) }] : []),
+      ],
+      auths: [
+        ...(userName ? [{ authKey: 'username', authValue: userName }] : []),
+        ...(sshKey ? [{ authKey: 'sshKey', authValue: sshKey }] : []),
+        ...(passphrase ? [{ authKey: 'passphrase', authValue: passphrase }] : []),
+      ],
+    };
+    try {
+      await createIntegrationWithDetails(payload).unwrap();
+      showSnackbar('Success', 'Integration saved successfully', 'success', 2000);
+      setTimeout(() => {
+        navigate('/integrations');
+      }, 500);
+    } catch (error) {
+      showSnackbar('Error', 'Failed to save integration', 'error', 5000);
+    }
+  };
 
   return (
     <>
@@ -168,7 +226,7 @@ const SftpStepTransferSettings = ({ onBack }: { onBack: () => void }) => {
       </Paper>
       <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
         <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
-        <Button variant="contained" sx={{ minWidth: 1 / 2 }}>
+        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleSaveAndContinue} disabled={isLoading}>
           Save & Continue
         </Button>
       </Box>

@@ -3,9 +3,9 @@ import { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const fieldTypes = ['String', 'Number', 'Date'];
-const mappings = ['CUSIP No.', 'Account No.', 'Holder Name'];
+const mappings = ['CUSIP No.', 'Account No.', 'Email', 'First Name', 'Last Name', 'Number of Shares', 'Record Date'];
 
-const SftpStepDataSchema = ({ onNext, onBack }: { onNext: () => void; onBack: () => void }) => {
+const SftpStepDataSchema = ({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => void }) => {
   const [fields, setFields] = useState([
     { mapping: 'CUSIP No.', fieldName: 'CUSIP', type: fieldTypes[0], required: false },
     { mapping: '', fieldName: '', type: '', required: false },
@@ -21,6 +21,10 @@ const SftpStepDataSchema = ({ onNext, onBack }: { onNext: () => void; onBack: ()
 
   const handleDeleteField = (idx: number) => {
     setFields(fields => fields.filter((_, i) => i !== idx));
+  };
+
+  const handleNext = () => {
+    onNext({ fields });
   };
 
   return (
@@ -42,7 +46,7 @@ const SftpStepDataSchema = ({ onNext, onBack }: { onNext: () => void; onBack: ()
             Data Fields
           </Typography>
           <Typography variant="body2" color="#AEB0B4" mb={2}>
-            Duis consectetur labore qui ullamco. Nisi sunt do culpa magna nisi.
+            Data fields are the fields that will be used to map the data from the SFTP file to the data schema.
           </Typography>
         </Box>
         <Box mt={1} mb={2} mx={0} sx={{ borderBottom: '1px solid #E6E7E8' }} />
@@ -181,7 +185,7 @@ const SftpStepDataSchema = ({ onNext, onBack }: { onNext: () => void; onBack: ()
       </Paper>
       <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
         <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
-        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={onNext}>
+        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleNext}>
           Save & Continue
         </Button>
       </Box>

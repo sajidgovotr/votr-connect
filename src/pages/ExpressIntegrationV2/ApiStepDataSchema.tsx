@@ -31,8 +31,11 @@ const schemaOptions = [
 const mappingOptions = [
     { value: 'cusip', label: 'CUSIP No.' },
     { value: 'account', label: 'Account No.' },
-    { value: 'name', label: 'Name' },
-    // Add more mappings as needed
+    { value: 'email', label: 'Email' },
+    { value: 'firstname', label: 'First Name' },
+    { value: 'lastname', label: 'Last Name' },
+    { value: 'numberofshares', label: 'Number of Shares' },
+    { value: 'recorddate', label: 'Record Date' },
 ];
 
 const typeOptions = [
@@ -110,12 +113,9 @@ const ApiStepDataSchema: React.FC<ApiStepDataSchemaProps> = ({ value, onChange, 
                         </Typography>
                         <TextField
                             fullWidth
-                            placeholder="eg. domain.com"
+                            placeholder="/api/shareholders"
                             value={value.endpoint || ''}
                             onChange={e => onChange({ ...value, endpoint: e.target.value })}
-                            InputProps={{
-                                startAdornment: <InputAdornment position="start">http://</InputAdornment>,
-                            }}
                         />
                     </Grid>
                 </Grid>
@@ -127,7 +127,7 @@ const ApiStepDataSchema: React.FC<ApiStepDataSchemaProps> = ({ value, onChange, 
                         Data Fields
                     </Typography>
                     <Typography variant="body2" color="#AEB0B4" mb={2}>
-                        Duis consectetur labore qui ullamco. Nisi sunt do culpa magna nisi.
+                        Data fields are the fields that will be used to map the data from the API response to the data schema.
                     </Typography>
                 </Box>
                 <Box mt={1} mb={2} mx={0} sx={{ borderBottom: '1px solid #E6E7E8' }} />

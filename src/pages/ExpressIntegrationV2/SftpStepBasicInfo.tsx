@@ -4,10 +4,14 @@ import { useState } from 'react';
 const environments = ['Development', 'Staging', 'Production'];
 const timeZones = ['Eastern Time Zone (UTC-5)', 'Central Time Zone (UTC-6)', 'Pacific Time Zone (UTC-8)'];
 
-const SftpStepBasicInfo = ({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) => {
+const SftpStepBasicInfo = ({ onNext, onBack }: { onNext: (data: any) => void; onBack?: () => void }) => {
   const [integrationName, setIntegrationName] = useState('');
   const [environment, setEnvironment] = useState(environments[0]);
   const [timeZone, setTimeZone] = useState(timeZones[0]);
+
+  const handleNext = () => {
+    onNext({ integrationName, environment, timeZone });
+  };
 
   return (
     <>
@@ -74,7 +78,7 @@ const SftpStepBasicInfo = ({ onNext, onBack }: { onNext: () => void; onBack?: ()
       </Paper>
       <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
         <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
-        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={onNext} disabled={!integrationName}>
+        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleNext} disabled={!integrationName}>
           Save & Continue
         </Button>
       </Box>

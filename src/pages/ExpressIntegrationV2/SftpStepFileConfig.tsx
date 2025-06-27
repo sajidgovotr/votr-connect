@@ -11,12 +11,16 @@ const fileTypes = [
   { value: 'XLSX', label: 'XLSX', icon: <GridOnIcon fontSize="small" /> },
 ];
 
-const SftpStepFileConfig = ({ onNext, onBack }: { onNext: () => void; onBack: () => void }) => {
+const SftpStepFileConfig = ({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => void }) => {
   const [fileType, setFileType] = useState(fileTypes[0].value);
   const [fileNamePattern, setFileNamePattern] = useState('');
   const [maxFileSize, setMaxFileSize] = useState(30);
   const [fileSizeUnit, setFileSizeUnit] = useState('Mb');
   const [hasHeader, setHasHeader] = useState(true);
+
+  const handleNext = () => {
+    onNext({ fileType, fileNamePattern, maxFileSize, fileSizeUnit, hasHeader });
+  };
 
   return (
     <>
@@ -163,7 +167,7 @@ const SftpStepFileConfig = ({ onNext, onBack }: { onNext: () => void; onBack: ()
       </Paper>
       <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
         <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
-        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={onNext}>
+        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleNext}>
           Save & Continue
         </Button>
       </Box>

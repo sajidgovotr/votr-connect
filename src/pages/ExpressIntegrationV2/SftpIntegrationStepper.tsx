@@ -15,8 +15,17 @@ const steps = [
   'Transfer Settings',
 ];
 
-const SftpIntegrationStepper = ({ onBackToMethods }: { onBackToMethods?: () => void }) => {
+interface SftpIntegrationStepperProps {
+  onBackToMethods?: () => void;
+  integrationMethodId?: string | null;
+  productId?: string;
+}
+
+const SftpIntegrationStepper = ({ onBackToMethods, integrationMethodId, productId }: SftpIntegrationStepperProps) => {
   const [activeStep, setActiveStep] = useState(0);
+  const [basicInfo, setBasicInfo] = useState<any>(null);
+  const [fileConfig, setFileConfig] = useState<any>(null);
+  const [dataSchema, setDataSchema] = useState<any>(null);
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
@@ -40,10 +49,10 @@ const SftpIntegrationStepper = ({ onBackToMethods }: { onBackToMethods?: () => v
       <StepBar steps={steps} activeStep={activeStep} />
       {/* 4. Step Content */}
       <Box mt={4}>
-        {activeStep === 0 && <SftpStepBasicInfo onNext={handleNext} onBack={handleBackToMethods} />}
-        {activeStep === 1 && <SftpStepFileConfig onNext={handleNext} onBack={handleBack} />}
-        {activeStep === 2 && <SftpStepDataSchema onNext={handleNext} onBack={handleBack} />}
-        {activeStep === 3 && <SftpStepTransferSettings onBack={handleBack} />}
+        {activeStep === 0 && <SftpStepBasicInfo onNext={(data: any) => { setBasicInfo(data); handleNext(); }} onBack={handleBackToMethods} />}
+        {activeStep === 1 && <SftpStepFileConfig onNext={(data: any) => { setFileConfig(data); handleNext(); }} onBack={handleBack} />}
+        {activeStep === 2 && <SftpStepDataSchema onNext={(data: any) => { setDataSchema(data); handleNext(); }} onBack={handleBack} />}
+        {activeStep === 3 && <SftpStepTransferSettings onBack={handleBack} basicInfo={basicInfo} fileConfig={fileConfig} dataSchema={dataSchema} integrationMethodId={integrationMethodId} productId={productId} />}
       </Box>
     </Box>
   );

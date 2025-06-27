@@ -10,6 +10,11 @@ import ApiStepDataSchema from './ApiStepDataSchema';
 import { Typography, Paper } from '@mui/material';
 import EditIcon from '@/assets/svgs/edit-gray-pencil.svg';
 import reviewHeaderSvg from '@/assets/svgs/review-header.svg';
+import { useCreateIntegrationWithDetailsMutation } from '@/services/express-integration';
+import useMessage from '@/hooks/useMessage';
+import { brokerId, userId } from '@/constants/static';
+import { EnvironmentEnum } from '@/types/environment';
+import { useNavigate } from 'react-router';
 
 const steps = [
     'Basic Info',
@@ -44,8 +49,50 @@ const defaultSchema = {
     ],
 };
 
-const ReviewStep = ({ basicInfo, auth, schema, onBack, onEditStep }: any) => {
+const ReviewStep = ({ basicInfo, auth, schema, integrationMethodId, productId, onBack, onEditStep }: any) => {
     const theme = useTheme();
+    const [createIntegrationWithDetails, { isLoading }] = useCreateIntegrationWithDetailsMutation();
+    const { showSnackbar } = useMessage();
+    const navigate = useNavigate();
+
+    const handleFinish = async () => {
+        const payload = {
+            productId: productId ?? '',
+            brokerId: brokerId,
+            integrationMethodId: integrationMethodId ?? '',
+            environment: basicInfo?.environment === 'Development' ? EnvironmentEnum.DEVELOPMENT : basicInfo?.environment === 'Staging' ? EnvironmentEnum.STAGING : EnvironmentEnum.PRODUCTION,
+            name: basicInfo?.integrationName,
+            createdBy: userId,
+            configs: [
+                ...(basicInfo?.baseUrl ? [{ configKey: 'baseUrl', configValue: `https://${basicInfo.baseUrl}` }] : []),
+                ...(basicInfo?.httpMethod ? [{ configKey: 'httpMethod', configValue: basicInfo.httpMethod }] : []),
+                ...(basicInfo?.dataFormat ? [{ configKey: 'dataFormat', configValue: basicInfo.dataFormat }] : []),
+                ...(schema?.schemaName ? [{ configKey: 'schemaName', configValue: schema.schemaName }] : []),
+                ...(schema?.endpoint || basicInfo?.baseUrl ? [{ configKey: 'endpoint', configValue: schema?.endpoint || basicInfo?.baseUrl }] : []),
+                ...(schema?.fields ? [{ configKey: 'dataFields', configValue: JSON.stringify(schema.fields) }] : []),
+            ],
+            auths: [
+                ...(auth?.authMethod ? [{ authKey: 'authMethod', authValue: auth.authMethod }] : []),
+                ...(auth?.apiKey ? [{ authKey: 'apiKey', authValue: auth.apiKey }] : []),
+                ...(auth?.bearerToken ? [{ authKey: 'bearerToken', authValue: auth.bearerToken }] : []),
+                ...(auth?.username ? [{ authKey: 'username', authValue: auth.username }] : []),
+                ...(auth?.password ? [{ authKey: 'password', authValue: auth.password }] : []),
+                ...(auth?.oauthClientId ? [{ authKey: 'oauthClientId', authValue: auth.oauthClientId }] : []),
+                ...(auth?.oauthClientSecret ? [{ authKey: 'oauthClientSecret', authValue: auth.oauthClientSecret }] : []),
+                ...(auth?.oauthTokenUrl ? [{ authKey: 'oauthTokenUrl', authValue: auth.oauthTokenUrl }] : []),
+            ],
+        };
+        try {
+            await createIntegrationWithDetails(payload).unwrap();
+            showSnackbar('Success', 'Integration saved successfully', 'success', 2000);
+            setTimeout(() => {
+                navigate('/integrations');
+            }, 500);
+        } catch (error) {
+            showSnackbar('Error', 'Failed to save integration', 'error', 5000);
+        }
+    };
+
     return (
         <>
             {/* Header Banner */}
@@ -112,13 +159,19 @@ const ReviewStep = ({ basicInfo, auth, schema, onBack, onEditStep }: any) => {
             {/* Buttons */}
             <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
                 <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
-                <Button variant="contained" sx={{ minWidth: 1 / 2 }}>Finish</Button>
+                <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleFinish} disabled={isLoading}>Finish</Button>
             </Box>
         </>
     );
 };
 
-const ApiIntegrationStepper = ({ onBackToMethods }: { onBackToMethods?: () => void }) => {
+interface ApiIntegrationStepperProps {
+    onBackToMethods?: () => void;
+    integrationMethodId?: string | null;
+    productId?: string;
+}
+
+const ApiIntegrationStepper = ({ onBackToMethods, integrationMethodId, productId }: ApiIntegrationStepperProps) => {
     const [activeStep, setActiveStep] = useState(0);
     const [basicInfo, setBasicInfo] = useState(defaultBasicInfo);
     const [auth, setAuth] = useState(defaultAuth);
@@ -182,6 +235,8 @@ const ApiIntegrationStepper = ({ onBackToMethods }: { onBackToMethods?: () => vo
                         basicInfo={basicInfo}
                         auth={auth}
                         schema={schema}
+                        integrationMethodId={integrationMethodId}
+                        productId={productId}
                         onBack={() => {
                             setShowReview(false);
                             setActiveStep(steps.length - 1);

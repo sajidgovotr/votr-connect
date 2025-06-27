@@ -4,9 +4,9 @@ import { FaUserFriends, FaExchangeAlt, FaFileAlt } from 'react-icons/fa';
 import useExpressIntegrationLandingStyles from './ExpressIntegrationLanding.style';
 import { useNavigate } from "react-router";
 
-
 const products = [
   {
+    id: "48f36b4e-e9fe-4428-92fe-adf939f5a384",
     key: 'srm',
     icon: <FaUserFriends color="#6366F1" size={48} />,
     image: '/images/SRM.png',
@@ -15,6 +15,7 @@ const products = [
     disabled: false,
   },
   {
+    id: "65f6166d-0a0a-4a4b-8a6d-5fe3e776adff",
     key: 'proxy',
     icon: <FaExchangeAlt color="#6366F1" size={48} />,
     image: '/images/Proxy.png',
@@ -52,7 +53,7 @@ const ExpressIntegrationLanding = () => {
               title={product.title}
               description={product.description}
               onClick={() => {
-                navigate('/express-integration/integration-methods');
+                navigate('/express-integration/integration-methods', { state: { productId: product.id } });
               }}
               disabled={product.disabled}
             />

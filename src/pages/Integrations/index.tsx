@@ -10,7 +10,9 @@ import IntegrationDetails from "@/components/Modal/IntegrationDetails";
 const Integrations = () => {
     const [pullingDataId, setPullingDataId] = useState<string | null>(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-    const { data: integrationsResponse, isLoading, isError, error } = useGetAllIntegrationsWithDetailsQuery();
+    const { data: integrationsResponse, isLoading, isError, error } = useGetAllIntegrationsWithDetailsQuery(undefined, {
+        refetchOnMountOrArgChange: true,
+    });
     const { isLoading: isPullingData, isError: isPullError, error: pullError, isSuccess: isPullSuccess } = usePullDataFromIntegrationQuery(
         pullingDataId || '',
         {
