@@ -29,7 +29,6 @@ import GraphQLIntegration from '../pages/IntegrationCatalog/GraphQLIntegration';
 import FileUploadIntegration from '../pages/IntegrationCatalog/FileUploadIntegration';
 import AuditLogs from "@/pages/AuditLogs";
 import AuditLogDetails from "@/pages/AuditLogs/AuditLogDetails";
-
 import ConfiguredProducts from "@/pages/ConfiguredProducts";
 import Integrations from "@/pages/Integrations";
 import OnBoarding from "@/pages/OnBoarding/Welcom";
@@ -78,7 +77,7 @@ const Routes = () => {
           element: <ExpressIntegrationLanding />
         },
         {
-          path: "integration-methods",
+          path: ":productId/integration-methods",
           element: <SrmIntegrationMethodPage />
         }
       ]

@@ -15,6 +15,7 @@ export interface AvatarProps {
 
 export interface BreadcrumbsProp {
     data: { name: string; active: boolean; url: string }[];
+    onItemClick?: (item: { name: string; active: boolean; url: string }, idx: number) => void;
 }
 
 

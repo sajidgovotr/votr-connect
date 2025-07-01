@@ -1,6 +1,6 @@
 import { Box, Grid, Typography, Chip, Paper } from '@mui/material';
 import { FaCloudDownloadAlt } from 'react-icons/fa';
-import { useNavigate, useLocation } from 'react-router';
+import { useParams } from 'react-router';
 import NavigationCard from '@/components/NavigationCard/NavigationCard';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import summaryBanner from '../../../public/images/SRM_Background.png';
@@ -8,53 +8,78 @@ import { CloudUpload } from '@mui/icons-material';
 import SftpIntegrationStepper from './SftpIntegrationStepper';
 import ApiIntegrationStepper from './ApiIntegrationStepper';
 import { useState } from 'react';
-
-const integrationMethods = [
-  {
-    id: "87dd9dba-3d6f-4c32-97cb-e87dcaca8941",
-    key: 'api',
-    icon: <FaCloudDownloadAlt color="#6366F1" size={40} />,
-    title: 'Automated API Integration (Pull Mode)',
-    description: 'VOTR automatically retrieves daily shareholder position data from your API',
-    badgeText: 'Recommended',
-  },
-  {
-    id: "a719efa0-b1fe-4064-8ce6-0ef2d79854ca",
-    key: 'sftp',
-    icon: <CloudUpload />,
-    title: 'SFTP File Transfer',
-    description: 'Securely upload daily shareholder position files to the VOTR Connect SFTP server',
-    badgeText: null,
-  },
-];
+import { useGetProductsQuery, useGetIntegrationMethodsQuery } from '@/services/express-integration';
 
 const SrmIntegrationMethodPage = () => {
   const [showSftpStepper, setShowSftpStepper] = useState(false);
   const [showApiStepper, setShowApiStepper] = useState(false);
   const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const productId = location.state?.productId;
+  const { productId } = useParams();
+  const { data, isLoading, error } = useGetProductsQuery();
+  const products = data?.data || [];
+  const selectedProduct = products.find(p => p.id === productId);
+  const { data: integrationMethodsData, isLoading: methodsLoading, error: methodsError } = useGetIntegrationMethodsQuery();
+  const integrationMethods = integrationMethodsData?.data || [];
+  const selectedMethod = integrationMethods.find((m: any) => m.id === selectedMethodId);
 
-  const handleSelect = (key: string) => {
-    const method = integrationMethods.find((m) => m.key === key);
-    if (key === 'sftp') {
-      setSelectedMethodId(method?.id || null);
+  const handleSelect = (method: any) => {
+    setSelectedMethodId(method.id);
+    if (method.code === 'file-upload') {
       setShowSftpStepper(true);
-    } else if (key === 'api') {
-      setSelectedMethodId(method?.id || null);
+    } else if (method.code === 'rest-api') {
       setShowApiStepper(true);
-    } else {
-      navigate(`/express-integration/srm/${key}`);
     }
   };
 
+  const getMethodIcon = (code: string) => {
+    if (code === 'rest-api') return <FaCloudDownloadAlt color="#6366F1" size={40} />;
+    if (code === 'file-upload') return <CloudUpload />;
+    return <FaCloudDownloadAlt color="#6366F1" size={40} />; // fallback
+  };
+
+  const breadcrumbs = (
+    <Breadcrumbs
+      data={[
+        { name: 'Express Integration', url: '/express-integration', active: false },
+        { name: selectedProduct?.name || 'Product', url: '', active: false },
+        { name: selectedMethod?.methodName || 'Integration Method', url: '', active: true },
+      ]}
+      onItemClick={(_, idx) => {
+        if (idx === 1) {
+          setSelectedMethodId(null);
+          setShowSftpStepper(false);
+          setShowApiStepper(false);
+        }
+      }}
+    />
+  );
+
   if (showSftpStepper) {
-    return <SftpIntegrationStepper onBackToMethods={() => setShowSftpStepper(false)} integrationMethodId={selectedMethodId} productId={productId} />;
+    return <>
+      <Box maxWidth="md" mx="auto" width={1} mt={6}>
+        {breadcrumbs}
+      </Box>
+      <SftpIntegrationStepper
+        onBackToMethods={() => setShowSftpStepper(false)}
+        integrationMethodId={selectedMethodId}
+        primaryHeading={selectedProduct?.name || ''}
+        primarySubheading={selectedProduct?.description || ''}
+      />
+    </>;
   }
 
   if (showApiStepper) {
-    return <ApiIntegrationStepper onBackToMethods={() => setShowApiStepper(false)} integrationMethodId={selectedMethodId} productId={productId} />;
+    return <>
+      <Box maxWidth="md" mx="auto" width={1} mt={6}>
+        {breadcrumbs}
+      </Box>
+      <ApiIntegrationStepper
+        onBackToMethods={() => setShowApiStepper(false)}
+        integrationMethodId={selectedMethodId}
+        primaryHeading={selectedProduct?.name || ''}
+        primarySubheading={selectedProduct?.description || ''}
+      />;
+    </>
   }
 
   return (
@@ -65,7 +90,7 @@ const SrmIntegrationMethodPage = () => {
           <Breadcrumbs
             data={[
               { name: 'Express Integration', url: '/express-integration', active: false },
-              { name: 'Shareholder Relationship Management (SRM)', url: '', active: true },
+              { name: selectedProduct?.name || '', url: '', active: true },
             ]}
           />
         </Box>
@@ -103,17 +128,15 @@ const SrmIntegrationMethodPage = () => {
 
             {/* Title */}
             <Typography variant="h5" fontWeight={600}>
-              Shareholder Relationship Management (SRM)
+              {selectedProduct?.name}
             </Typography>
 
             {/* Description */}
             <Typography variant="body1" maxWidth={700}>
-              Manage and optimize your shareholder relationships with our comprehensive SRM solution.
+              {selectedProduct?.description}
             </Typography>
           </Box>
         </Paper>
-
-
 
         {/* Integration Methods */}
         <Typography variant="subtitle1" fontWeight={500} mb={2} style={{ color: '#030712', fontSize: '20px' }}>
@@ -121,8 +144,8 @@ const SrmIntegrationMethodPage = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          {integrationMethods.map((method) => (
-            <Grid item xs={12} md={12} key={method.key}>
+          {integrationMethods.map((method: any) => (
+            <Grid item xs={12} md={12} key={method.id}>
               <Box
                 sx={{
                   p: 3,
@@ -138,15 +161,15 @@ const SrmIntegrationMethodPage = () => {
                 }}
               >
                 <NavigationCard
-                  icon={method.icon}
+                  icon={getMethodIcon(method.code)}
                   title={
                     <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
                       <Typography variant="h6" style={{ color: '#030712' }}>
-                        {method.title}
+                        {method.methodName}
                       </Typography>
-                      {method.badgeText && (
+                      {method.status === 'Recommended' && (
                         <Chip
-                          label={method.badgeText}
+                          label={method.status}
                           size="small"
                           sx={{
                             backgroundColor: '#DCFCE7',
@@ -157,12 +180,17 @@ const SrmIntegrationMethodPage = () => {
                           }}
                         />
                       )}
+                      {method.status === 'ComingSoon' && (
+                        <Chip
+                          label={'Coming Soon'}
+                          size="small"
+                          sx={{ backgroundColor: '#FEE2E2', color: '#991B1B', fontWeight: 500, borderRadius: '6px', height: 24 }}
+                        />
+                      )}
                     </Box>
                   }
-
-                  subtitle={method.description
-                  }
-                  onClick={() => handleSelect(method.key)}
+                  subtitle={method.description}
+                  onClick={() => handleSelect(method)}
                 />
               </Box>
             </Grid>

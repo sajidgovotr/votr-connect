@@ -7,7 +7,7 @@ import { useCreateIntegrationWithDetailsMutation } from '@/services/express-inte
 import useMessage from '@/hooks/useMessage';
 import { EnvironmentEnum } from '@/types/environment';
 import { brokerId, userId } from '@/constants/static';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 
 const protocols = ['FTP/SFTP'];
 const types = ['SFTP'];
@@ -19,10 +19,10 @@ interface SftpStepTransferSettingsProps {
   fileConfig: any;
   dataSchema: any;
   integrationMethodId?: string | null;
-  productId?: string;
 }
 
-const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, integrationMethodId, productId }: SftpStepTransferSettingsProps) => {
+const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, integrationMethodId }: SftpStepTransferSettingsProps) => {
+  const { productId } = useParams();
   const [protocol, setProtocol] = useState(protocols[0]);
   const [type, setType] = useState(types[0]);
   const [host, setHost] = useState('');

@@ -5,7 +5,7 @@ import { BreadcrumbsProp } from "@/types/proptype";
 
 
 
-const Breadcrumbs = ({ data }: BreadcrumbsProp) => {
+const Breadcrumbs = ({ data, onItemClick }: BreadcrumbsProp) => {
     const navigate = useNavigate();
     return (
         <MUIBreadcrumbs separator={<BreadcrumbSeperator />} aria-label="breadcrumb">
@@ -17,14 +17,18 @@ const Breadcrumbs = ({ data }: BreadcrumbsProp) => {
             >
                 <HomeIcon />
             </Box>
-            {data?.map((item) => {
+            {data?.map((item, idx) => {
                 return (
                     <Box
                         key={item.name}
                         className={`${item.active ? "cursor-default" : "cursor-pointer"}`}
                         onClick={() => {
                             if (!item.active) {
-                                navigate(item.url);
+                                if (onItemClick) {
+                                    onItemClick(item, idx);
+                                } else {
+                                    navigate(item.url);
+                                }
                             }
                         }}
                     >

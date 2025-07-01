@@ -3,13 +3,17 @@ import performanceSvg from '@/assets/svgs/performance.svg';
 import apiIconSvg from '@/assets/svgs/api-icon.svg';
 
 interface SrmHeaderBannerProps {
-  heading?: string;
-  subheading?: string;
+  primaryHeading: string;
+  primarySubheading: string;
+  secondaryHeading?: string;
+  secondarySubheading?: string;
 }
 
 const SrmHeaderBanner = ({
-  heading,
-  subheading,
+  primaryHeading,
+  primarySubheading,
+  secondaryHeading,
+  secondarySubheading,
 }: SrmHeaderBannerProps) => {
   return (
     <Paper
@@ -28,9 +32,9 @@ const SrmHeaderBanner = ({
           <img src={performanceSvg} alt="Performance" width={122} height={93} />
         </Box>
         <Box>
-          <Typography variant="h4">Shareholder Relationship Management (SRM)</Typography>
+          <Typography variant="h4">{primaryHeading}</Typography>
           <Typography variant="body1" color='text.primary'>
-            Manage and optimize your shareholder relationships with our comprehensive SRM solution.
+            {primarySubheading}
           </Typography>
         </Box>
       </Paper>
@@ -39,14 +43,14 @@ const SrmHeaderBanner = ({
           <img src={apiIconSvg} alt="API Icon" width={44} height={45} />
         </Box>
         <Box>
-          {heading && (
+          {secondaryHeading && (
             <Typography variant="h5">
-              {heading}
+              {secondaryHeading}
             </Typography>
           )}
-          {subheading && (
+          {secondarySubheading && (
             <Typography variant="body2" maxWidth={700}>
-              {subheading}
+              {secondarySubheading}
             </Typography>
           )}
         </Box>

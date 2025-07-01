@@ -53,7 +53,7 @@ const ExpressIntegrationLanding = () => {
               title={product.title}
               description={product.description}
               onClick={() => {
-                navigate('/express-integration/integration-methods', { state: { productId: product.id } });
+                navigate(`/express-integration/${product.id}/integration-methods`);
               }}
               disabled={product.disabled}
             />
