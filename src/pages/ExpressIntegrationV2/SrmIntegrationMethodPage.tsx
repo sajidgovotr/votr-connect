@@ -41,16 +41,18 @@ const SrmIntegrationMethodPage = () => {
     <Breadcrumbs
       data={[
         { name: 'Express Integration', url: '/express-integration', active: false },
-        { name: selectedProduct?.name || 'Product', url: '', active: false },
+        { 
+          name: selectedProduct?.name || 'Product', 
+          url: '', 
+          active: false,
+          onItemClick: () => {
+            setSelectedMethodId(null);
+            setShowSftpStepper(false);
+            setShowApiStepper(false);
+          }
+        },
         { name: selectedMethod?.methodName || 'Integration Method', url: '', active: true },
       ]}
-      onItemClick={(_, idx) => {
-        if (idx === 1) {
-          setSelectedMethodId(null);
-          setShowSftpStepper(false);
-          setShowApiStepper(false);
-        }
-      }}
     />
   );
 

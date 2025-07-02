@@ -1,41 +1,66 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography, CircularProgress, Alert } from '@mui/material';
 import ProductCard from '@/components/ProductSelection/ProductCard';
 import { FaUserFriends, FaExchangeAlt, FaFileAlt } from 'react-icons/fa';
 import useExpressIntegrationLandingStyles from './ExpressIntegrationLanding.style';
 import { useNavigate } from "react-router";
+import { useGetProductsQuery } from '@/services/express-integration';
 
-const products = [
-  {
-    id: "48f36b4e-e9fe-4428-92fe-adf939f5a384",
-    key: 'srm',
-    icon: <FaUserFriends color="#6366F1" size={48} />,
+// Utility function to map product names to images and icons
+const getProductAssets = (productName: string) => {
+  const name = productName.toLowerCase();
+  
+  if (name.includes('srm') || name.includes('shareholder')) {
+    return {
+      image: '/images/SRM.png',
+      icon: <FaUserFriends color="#6366F1" size={48} />
+    };
+  }
+  
+  if (name.includes('proxy')) {
+    return {
+      image: '/images/Proxy.png',
+      icon: <FaExchangeAlt color="#6366F1" size={48} />
+    };
+  }
+  
+  if (name.includes('post-sale') || name.includes('post sale')) {
+    return {
+      image: '/images/PostSale.png',
+      icon: <FaFileAlt color="#6366F1" size={48} />
+    };
+  }
+  
+  // Default fallback
+  return {
     image: '/images/SRM.png',
-    title: 'Shareholder Relationship Management (SRM)',
-    description: 'Manage and optimize your shareholder relationships with our comprehensive SRM solution.',
-    disabled: false,
-  },
-  {
-    id: "65f6166d-0a0a-4a4b-8a6d-5fe3e776adff",
-    key: 'proxy',
-    icon: <FaExchangeAlt color="#6366F1" size={48} />,
-    image: '/images/Proxy.png',
-    title: 'Proxy Integration',
-    description: 'Secure and efficient proxy integration for seamless data exchange and API management.',
-    disabled: false,
-  },
-  {
-    key: 'post-sale',
-    icon: <FaFileAlt color="#6366F1" size={48} />,
-    image: '/images/PostSale.png',
-    title: 'Post Sale',
-    description: 'Aute est ex incididunt cillum pariatur fugiat non aliqua enim consectetur ipsum. Enim cupidatat ipsum id.',
-    disabled: true,
-  },
-];
+    icon: <FaUserFriends color="#6366F1" size={48} />
+  };
+};
 
 const ExpressIntegrationLanding = () => {
   const classes = useExpressIntegrationLandingStyles();
   const navigate = useNavigate();
+  const { data: productsResponse, isLoading, error } = useGetProductsQuery();
+
+  if (isLoading) {
+    return (
+      <Box className={classes.container} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className={classes.container}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Error loading products. Please try again later.
+        </Alert>
+      </Box>
+    );
+  }
+
+  const products = productsResponse?.data || [];
 
   return (
     <Box className={classes.container}>
@@ -46,19 +71,22 @@ const ExpressIntegrationLanding = () => {
         Choose the product you want to integrate with your system
       </Typography>
       <Grid container spacing={3} justifyContent="center">
-        {products.map((product) => (
-          <Grid item xs={12} sm={6} md={4} key={product.key} sx={{ display: 'flex', justifyContent: 'center' }}>
-            <ProductCard
-              image={product.image}
-              title={product.title}
-              description={product.description}
-              onClick={() => {
-                navigate(`/express-integration/${product.id}/integration-methods`);
-              }}
-              disabled={product.disabled}
-            />
-          </Grid>
-        ))}
+        {products.map((product) => {
+          const assets = getProductAssets(product.name);
+          return (
+            <Grid item xs={12} sm={6} md={4} key={product.id} sx={{ display: 'flex', justifyContent: 'center' }}>
+              <ProductCard
+                image={assets.image}
+                title={product.name}
+                description={product.description}
+                onClick={() => {
+                  navigate(`/express-integration/${product.id}/integration-methods`);
+                }}
+                disabled={false}
+              />
+            </Grid>
+          );
+        })}
       </Grid>
     </Box>
   );
