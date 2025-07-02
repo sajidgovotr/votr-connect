@@ -6,7 +6,7 @@ import EditIcon from '@/assets/svgs/edit-gray-pencil.svg';
 import reviewHeaderSvg from '@/assets/svgs/review-header.svg';
 import { useCreateIntegrationWithDetailsMutation } from '@/services/express-integration';
 import useMessage from '@/hooks/useMessage';
-import { brokerId, userId } from '@/constants/static';
+import { storageService } from '@/utils/storage';
 import { EnvironmentEnum } from '@/types/environment';
 import { useNavigate } from 'react-router';
 
@@ -21,15 +21,16 @@ const ApiStepReview = ({ basicInfo, auth, schema, integrationMethodId, productId
     const [createIntegrationWithDetails, { isLoading }] = useCreateIntegrationWithDetailsMutation();
     const { showSnackbar } = useMessage();
     const navigate = useNavigate();
+    const userDetails = storageService.getUserDetails();
 
     const handleFinish = async () => {
         const payload = {
             productId: productId ?? '',
-            brokerId: brokerId,
+            brokerId: userDetails?.brokerId ?? '',
             integrationMethodId: integrationMethodId ?? '',
             environment: basicInfo?.environment === 'Development' ? EnvironmentEnum.DEVELOPMENT : basicInfo?.environment === 'Staging' ? EnvironmentEnum.STAGING : EnvironmentEnum.PRODUCTION,
             name: basicInfo?.integrationName,
-            createdBy: userId,
+            createdBy: userDetails?.userId ?? '',
             configs: [
                 ...(basicInfo?.baseUrl ? [{ configKey: 'baseUrl', configValue: `https://${basicInfo.baseUrl}` }] : []),
                 ...(basicInfo?.httpMethod ? [{ configKey: 'httpMethod', configValue: basicInfo.httpMethod }] : []),

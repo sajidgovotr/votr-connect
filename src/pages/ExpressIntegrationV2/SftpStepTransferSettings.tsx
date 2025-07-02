@@ -6,7 +6,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useCreateIntegrationWithDetailsMutation } from '@/services/express-integration';
 import useMessage from '@/hooks/useMessage';
 import { EnvironmentEnum } from '@/types/environment';
-import { brokerId, userId } from '@/constants/static';
+import { storageService } from '@/utils/storage';
 import { useNavigate, useParams } from 'react-router';
 
 const protocols = ['FTP/SFTP'];
@@ -23,6 +23,7 @@ interface SftpStepTransferSettingsProps {
 
 const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, integrationMethodId }: SftpStepTransferSettingsProps) => {
   const { productId } = useParams();
+  const userDetails = storageService.getUserDetails();
   const [protocol, setProtocol] = useState(protocols[0]);
   const [type, setType] = useState(types[0]);
   const [host, setHost] = useState('');
@@ -40,11 +41,11 @@ const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, i
     // Build the payload from all step data
     const payload = {
       productId: productId ?? '',
-      brokerId: brokerId,
+      brokerId: userDetails?.brokerId ?? '',
       integrationMethodId: integrationMethodId ?? "",
       environment: basicInfo?.environment === 'Development' ? EnvironmentEnum.DEVELOPMENT : basicInfo?.environment === 'Staging' ? EnvironmentEnum.STAGING : EnvironmentEnum.PRODUCTION,
       name: basicInfo?.integrationName,
-      createdBy: userId,
+      createdBy: userDetails?.userId ?? '',
       configs: [
         ...(protocol ? [{ configKey: 'protocol', configValue: protocol }] : []),
         ...(type ? [{ configKey: 'type', configValue: type }] : []),

@@ -36,6 +36,3 @@ export const sampleDataSets = [
         ]
     }
 ];
-
-export const brokerId = "dc7ab335-126e-4585-86ae-e16302e4374f";
-export const userId = "a194f744-dcd9-4a14-82fd-574313e76877";
