@@ -17,7 +17,7 @@ const Breadcrumbs = ({ data }: BreadcrumbsProp) => {
             >
                 <HomeIcon />
             </Box>
-            {data?.map((item, idx) => {
+            {data?.map((item) => {
                 return (
                     <Box
                         key={item.name}

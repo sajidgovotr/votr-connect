@@ -41,6 +41,7 @@ import EmailTemplate from "@/pages/EmailTempalate";
 import ContactsPage from "@/pages/Contacts";
 import ExpressIntegrationLanding from "@/pages/ExpressIntegrationV2/ExpressIntegrationLanding";
 import SrmIntegrationMethodPage from "@/pages/ExpressIntegrationV2/SrmIntegrationMethodPage";
+import ShareholdersPage from '@/pages/Shareholders/ShareholdersPage';
 
 
 const Routes = () => {
@@ -286,6 +287,16 @@ const Routes = () => {
     //     }
     //   ]
     // },
+    {
+      path: "/shareholders",
+      element: <PrivateRoute navLink="/shareholders" component={AppLayout} />,
+      children: [
+        {
+          path: "",
+          element: <ShareholdersPage />
+        }
+      ]
+    },
     { path: "404", element: <NotFound /> },
     {
       path: "*",

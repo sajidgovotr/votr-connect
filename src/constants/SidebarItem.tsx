@@ -3,7 +3,7 @@ import {
     HelpCenterIcon,
     SettingsIcon,
 } from "@/assets/images/sidebar/svg-icons";
-import { IntegrationInstructions, Code, Window } from "@mui/icons-material";
+import { IntegrationInstructions, Code, Window, GroupOutlined } from "@mui/icons-material";
 
 const UserItems = {
     home: [
@@ -24,6 +24,12 @@ const UserItems = {
             icon: <Window sx={{ color: "#5263FF" }} />,
             iconInactive: <Window sx={{ color: "#8C8E9C" }} />,
             title: "Integrations"
+        },
+        {
+            href: '/shareholders',
+            icon: <GroupOutlined sx={{ color: "#5263FF" }} />,
+            iconInactive: <GroupOutlined sx={{ color: "#8C8E9C" }} />,
+            title: "Shareholders"
         },
         // {
         //     href: '/account-management',
