@@ -15,10 +15,10 @@ const SrmIntegrationMethodPage = () => {
   const [showApiStepper, setShowApiStepper] = useState(false);
   const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
   const { productId } = useParams();
-  const { data, isLoading, error } = useGetProductsQuery();
+  const { data } = useGetProductsQuery();
   const products = data?.data || [];
   const selectedProduct = products.find(p => p.id === productId);
-  const { data: integrationMethodsData, isLoading: methodsLoading, error: methodsError } = useGetIntegrationMethodsQuery();
+  const { data: integrationMethodsData } = useGetIntegrationMethodsQuery();
   const integrationMethods = integrationMethodsData?.data || [];
   const selectedMethod = integrationMethods.find((m: any) => m.id === selectedMethodId);
 
