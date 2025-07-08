@@ -53,6 +53,31 @@ const SectionTitle = ({ title }: { title: string }) => (
     </Typography>
 );
 
+const DataFieldsTable = ({ fields }: { fields: any[] }) => (
+    <Box sx={{ mt: 2, mb: 1 }}>
+        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: 1, overflow: 'hidden', fontSize: 14 }}>
+            <Box component="thead" sx={{ background: '#F3F4F6' }}>
+                <Box component="tr">
+                    <Box component="th" sx={{ p: 1, textAlign: 'left', fontWeight: 600 }}>Mapping</Box>
+                    <Box component="th" sx={{ p: 1, textAlign: 'left', fontWeight: 600 }}>Field Name</Box>
+                    <Box component="th" sx={{ p: 1, textAlign: 'left', fontWeight: 600 }}>Type</Box>
+                    <Box component="th" sx={{ p: 1, textAlign: 'left', fontWeight: 600 }}>Required</Box>
+                </Box>
+            </Box>
+            <Box component="tbody">
+                {fields.map((f, idx) => (
+                    <Box component="tr" key={idx} sx={{ borderBottom: '1px solid #E5E7EB' }}>
+                        <Box component="td" sx={{ p: 1 }}>{f.mapping}</Box>
+                        <Box component="td" sx={{ p: 1 }}>{f.fieldName}</Box>
+                        <Box component="td" sx={{ p: 1 }}>{f.type}</Box>
+                        <Box component="td" sx={{ p: 1 }}>{f.required ? 'Yes' : 'No'}</Box>
+                    </Box>
+                ))}
+            </Box>
+        </Box>
+    </Box>
+);
+
 const IntegrationDetails = ({ open, onClose, integration }: IntegrationDetailsProps) => {
     if (!integration) return null;
 
@@ -111,58 +136,163 @@ const IntegrationDetails = ({ open, onClose, integration }: IntegrationDetailsPr
                                 <Grid item xs={12} md={6}>
                                     <DetailItem label="Integration Method" value={integration.integrationMethod?.methodName} />
                                 </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <DetailItem label="Company" value={integration.company?.name} />
-                                </Grid>
+                                {isRestIntegration && (
+                                    <>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Base URL" value={getConfigValue('baseUrl')} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="HTTP Method" value={getConfigValue('httpMethod')} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Data Format" value={getConfigValue('dataFormat')} />
+                                        </Grid>
+                                    </>
+                                )}
                             </Grid>
                         </Paper>
                     </Grid>
 
                     {/* Integration Specific Details */}
-                    <Grid item xs={12}>
-                        <SectionTitle title={isRestIntegration ? "API Configuration" : "File Configuration"} />
-                        <Paper elevation={0} sx={{ p: 3, backgroundColor: '#F9FAFB', borderRadius: 2 }}>
-                            <Grid container spacing={3}>
-                                {isRestIntegration ? (
-                                    <>
+                    {isRestIntegration && (
+                        <>
+                            <Grid item xs={12}>
+                                <SectionTitle title="Authentication" />
+                                <Paper elevation={0} sx={{ p: 3, backgroundColor: '#F9FAFB', borderRadius: 2 }}>
+                                    <Grid container spacing={3}>
                                         <Grid item xs={12} md={6}>
-                                            <DetailItem label="URL" value={getConfigValue('url')} highlight />
+                                            <DetailItem label="Authentication Method" value={getAuthValue('authMethod')} />
                                         </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <DetailItem label="Method" value={getConfigValue('method')} highlight />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <DetailItem label="Data Format" value={getConfigValue('dataFormat')} />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <DetailItem label="Resource Name" value={getConfigValue('resourceName')} />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <DetailItem label="Endpoint Path" value={getConfigValue('endpointPath')} />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Divider sx={{ my: 2 }} />
-                                            <SectionTitle title="Authentication" />
-                                            <Grid container spacing={3}>
-                                                <Grid item xs={12} md={6}>
-                                                    <DetailItem label="Authentication Type" value={getAuthValue('authenticationType')} />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <DetailItem label="API Key" value={getAuthValue('apiKey')} highlight />
-                                                </Grid>
+                                        {getAuthValue('apiKey') && (
+                                            <Grid item xs={12} md={6}>
+                                                <DetailItem label="API Key" value={getAuthValue('apiKey')} highlight />
                                             </Grid>
-                                        </Grid>
-                                    </>
-                                ) : (
-                                    <>
+                                        )}
+                                        {getAuthValue('bearerToken') && (
+                                            <Grid item xs={12} md={6}>
+                                                <DetailItem label="Bearer Token" value={getAuthValue('bearerToken')} />
+                                            </Grid>
+                                        )}
+                                        {getAuthValue('username') && (
+                                            <Grid item xs={12} md={6}>
+                                                <DetailItem label="Username" value={getAuthValue('username')} />
+                                            </Grid>
+                                        )}
+                                        {getAuthValue('password') && (
+                                            <Grid item xs={12} md={6}>
+                                                <DetailItem label="Password" value={getAuthValue('password')} />
+                                            </Grid>
+                                        )}
+                                        {getAuthValue('oauthClientId') && (
+                                            <Grid item xs={12} md={6}>
+                                                <DetailItem label="OAuth Client ID" value={getAuthValue('oauthClientId')} />
+                                            </Grid>
+                                        )}
+                                        {getAuthValue('oauthClientSecret') && (
+                                            <Grid item xs={12} md={6}>
+                                                <DetailItem label="OAuth Client Secret" value={getAuthValue('oauthClientSecret')} />
+                                            </Grid>
+                                        )}
+                                        {getAuthValue('oauthTokenUrl') && (
+                                            <Grid item xs={12} md={6}>
+                                                <DetailItem label="OAuth Token URL" value={getAuthValue('oauthTokenUrl')} />
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <SectionTitle title="Data Schema Configuration" />
+                                <Paper elevation={0} sx={{ p: 3, backgroundColor: '#F9FAFB', borderRadius: 2 }}>
+                                    <Grid container spacing={3}>
+                                        {(getConfigValue('schemaName') || getConfigValue('endpoint')) && (
+                                            <>
+                                                {getConfigValue('schemaName') && (
+                                                    <Grid item xs={12} md={6}>
+                                                        <DetailItem label="Schema Name" value={getConfigValue('schemaName')} />
+                                                    </Grid>
+                                                )}
+                                                {getConfigValue('endpoint') && (
+                                                    <Grid item xs={12} md={6}>
+                                                        <DetailItem label="End Point" value={getConfigValue('endpoint')} />
+                                                    </Grid>
+                                                )}
+                                            </>
+                                        )}
+                                    </Grid>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <SectionTitle title="Data Fields" />
+                                <Paper elevation={0} sx={{ p: 3, backgroundColor: '#F9FAFB', borderRadius: 2 }}>
+                                    {getConfigValue('dataFields') && (() => {
+                                        const fields = JSON.parse(getConfigValue('dataFields'));
+                                        if (Array.isArray(fields) && fields.length > 0 && typeof fields[0] === 'object') {
+                                            return <Grid item xs={12}><DataFieldsTable fields={fields} /></Grid>;
+                                        }
+                                        return <Grid item xs={12}><DetailItem label="Data Fields" value={fields} /></Grid>;
+                                    })()}
+                                </Paper>
+                            </Grid>
+                        </>
+                    )}
+                    {!isRestIntegration && (
+                        <>
+                            <Grid item xs={12}>
+                                <SectionTitle title="File Configuration" />
+                                <Paper elevation={0} sx={{ p: 3, backgroundColor: '#F9FAFB', borderRadius: 2 }}>
+                                    <Grid container spacing={3}>
                                         <Grid item xs={12} md={6}>
-                                            <DetailItem label="File Format" value={getConfigValue('fileFormat')} highlight />
+                                            <DetailItem label="File Type" value={getConfigValue('fileType')} highlight />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
                                             <DetailItem label="File Name Pattern" value={getConfigValue('fileNamePattern')} highlight />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
-                                            <DetailItem label="Transfer Frequency" value={getConfigValue('transferFrequency')} />
+                                            <DetailItem label="Max File Size" value={(() => {
+                                                const size = getConfigValue('maxFileSize');
+                                                const unit = getConfigValue('fileSizeUnit');
+                                                return size ? `${size} ${unit || ''}`.trim() : null;
+                                            })()} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="File Contains Header Row" value={getConfigValue('hasHeader') === 'true' ? 'Yes' : 'No'} />
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <SectionTitle title="Data Fields" />
+                                <Paper elevation={0} sx={{ p: 3, backgroundColor: '#F9FAFB', borderRadius: 2 }}>
+                                    <Grid container spacing={3}>
+                                        {getConfigValue('dataFields') && (() => {
+                                            const fields = JSON.parse(getConfigValue('dataFields'));
+                                            if (Array.isArray(fields) && fields.length > 0 && typeof fields[0] === 'object') {
+                                                return <Grid item xs={12}><DataFieldsTable fields={fields} /></Grid>;
+                                            }
+                                            return <Grid item xs={12}><DetailItem label="Data Fields" value={fields} /></Grid>;
+                                        })()}
+                                    </Grid>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <SectionTitle title="Transfer Settings" />
+                                <Paper elevation={0} sx={{ p: 3, backgroundColor: '#F9FAFB', borderRadius: 2 }}>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Transfer Protocol" value={getConfigValue('protocol')} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Transfer Type" value={getConfigValue('type')} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Host" value={getConfigValue('host')} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Port" value={getConfigValue('port')} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Schedule" value={getConfigValue('schedule')} />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
                                             <DetailItem label="Time of Day" value={getConfigValue('timeOfDay')} />
@@ -170,71 +300,27 @@ const IntegrationDetails = ({ open, onClose, integration }: IntegrationDetailsPr
                                         <Grid item xs={12} md={6}>
                                             <DetailItem label="Time Zone" value={getConfigValue('timeZone')} />
                                         </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <DetailItem label="Header Row Included" value={getConfigValue('isHeaderRowIncluded')} />
-                                        </Grid>
-                                        {getConfigValue('type') === 'ftp' ? (
-                                            <>
-                                                <Grid item xs={12} md={6}>
-                                                    <DetailItem label="Host" value={getConfigValue('host')} />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <DetailItem label="Port" value={getConfigValue('port')} />
-                                                </Grid>
-                                                <Grid item xs={12}>
-                                                    <Divider sx={{ my: 2 }} />
-                                                    <SectionTitle title="FTP Authentication" />
-                                                    <Grid container spacing={3}>
-                                                        <Grid item xs={12} md={6}>
-                                                            <DetailItem label="Username" value={getAuthValue('username')} />
-                                                        </Grid>
-                                                        {getAuthValue('type') === 'password' ? (
-                                                            <Grid item xs={12} md={6}>
-                                                                <DetailItem label="Password" value={getAuthValue('password')} highlight />
-                                                            </Grid>
-                                                        ) : (
-                                                            <>
-                                                                <Grid item xs={12} md={6}>
-                                                                    <DetailItem label="SSH Key" value={getAuthValue('sshKey')} highlight />
-                                                                </Grid>
-                                                                <Grid item xs={12} md={6}>
-                                                                    <DetailItem label="Passphrase" value={getAuthValue('passphrase')} highlight />
-                                                                </Grid>
-                                                            </>
-                                                        )}
-                                                    </Grid>
-                                                </Grid>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Grid item xs={12} md={6}>
-                                                    <DetailItem label="Region" value={getConfigValue('region')} />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <DetailItem label="Bucket Name" value={getConfigValue('bucketName')} />
-                                                </Grid>
-                                                <Grid item xs={12}>
-                                                    <Divider sx={{ my: 2 }} />
-                                                    <SectionTitle title="S3 Authentication" />
-                                                    <Grid container spacing={3}>
-                                                        <Grid item xs={12} md={6}>
-                                                            <DetailItem label="ARN" value={getAuthValue('ARN')} />
-                                                        </Grid>
-                                                        <Grid item xs={12} md={6}>
-                                                            <DetailItem label="Access Key" value={getAuthValue('accessKey')} highlight />
-                                                        </Grid>
-                                                        <Grid item xs={12} md={6}>
-                                                            <DetailItem label="Secret Key" value={getAuthValue('secretKey')} highlight />
-                                                        </Grid>
-                                                    </Grid>
-                                                </Grid>
-                                            </>
-                                        )}
-                                    </>
-                                )}
+                                    </Grid>
+                                </Paper>
                             </Grid>
-                        </Paper>
-                    </Grid>
+                            <Grid item xs={12}>
+                                <SectionTitle title="Authentication" />
+                                <Paper elevation={0} sx={{ p: 3, backgroundColor: '#F9FAFB', borderRadius: 2 }}>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Username" value={getAuthValue('username')} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="SSH Key" value={getAuthValue('sshKey')} />
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <DetailItem label="Passphrase" value={getAuthValue('passphrase')} />
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+                            </Grid>
+                        </>
+                    )}
 
                     {/* Metadata Section */}
                     <Grid item xs={12}>
