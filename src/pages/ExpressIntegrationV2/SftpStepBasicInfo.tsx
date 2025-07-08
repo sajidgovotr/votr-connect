@@ -4,10 +4,10 @@ import { useState } from 'react';
 const environments = ['Development', 'Staging', 'Production'];
 const timeZones = ['Eastern Time Zone (UTC-5)', 'Central Time Zone (UTC-6)', 'Pacific Time Zone (UTC-8)'];
 
-const SftpStepBasicInfo = ({ onNext, onBack }: { onNext: (data: any) => void; onBack?: () => void }) => {
-  const [integrationName, setIntegrationName] = useState('');
-  const [environment, setEnvironment] = useState(environments[0]);
-  const [timeZone, setTimeZone] = useState(timeZones[0]);
+const SftpStepBasicInfo = ({ onNext, onBack, initialValues }: { onNext: (data: any) => void; onBack?: () => void; initialValues?: any }) => {
+  const [integrationName, setIntegrationName] = useState(initialValues?.integrationName || '');
+  const [environment, setEnvironment] = useState(initialValues?.environment || environments[0]);
+  const [timeZone, setTimeZone] = useState(initialValues?.timeZone || timeZones[0]);
 
   const handleNext = () => {
     onNext({ integrationName, environment, timeZone });

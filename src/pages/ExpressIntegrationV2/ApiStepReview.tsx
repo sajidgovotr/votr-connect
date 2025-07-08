@@ -4,7 +4,7 @@ import SrmHeaderBanner from './SrmHeaderBanner';
 import StepBar from './StepBar';
 import EditIcon from '@/assets/svgs/edit-gray-pencil.svg';
 import reviewHeaderSvg from '@/assets/svgs/review-header.svg';
-import { useCreateIntegrationWithDetailsMutation } from '@/services/express-integration';
+import { useCreateIntegrationWithDetailsMutation, useUpdateIntegrationWithDetailsMutation } from '@/services/express-integration';
 import useMessage from '@/hooks/useMessage';
 import { storageService } from '@/utils/storage';
 import { EnvironmentEnum } from '@/types/environment';
@@ -16,9 +16,10 @@ const steps = [
     'Data Schema',
 ];
 
-const ApiStepReview = ({ basicInfo, auth, schema, integrationMethodId, productId, onBack, onEditStep, primaryHeading, primarySubheading }: any) => {
+const ApiStepReview = ({ basicInfo, auth, schema, integrationMethodId, productId, onBack, onEditStep, primaryHeading, primarySubheading, editMode, integrationId }: any) => {
     const theme = useTheme();
-    const [createIntegrationWithDetails, { isLoading }] = useCreateIntegrationWithDetailsMutation();
+    const [createIntegrationWithDetails, { isLoading: isCreating }] = useCreateIntegrationWithDetailsMutation();
+    const [updateIntegrationWithDetails, { isLoading: isUpdating }] = useUpdateIntegrationWithDetailsMutation();
     const { showSnackbar } = useMessage();
     const navigate = useNavigate();
     const userDetails = storageService.getUserDetails();
@@ -51,8 +52,13 @@ const ApiStepReview = ({ basicInfo, auth, schema, integrationMethodId, productId
             ],
         };
         try {
-            await createIntegrationWithDetails(payload).unwrap();
-            showSnackbar('Success', 'Integration saved successfully', 'success', 2000);
+            if (editMode && integrationId) {
+                await updateIntegrationWithDetails({ id: integrationId, data: payload }).unwrap();
+                showSnackbar('Success', 'Integration updated successfully', 'success', 2000);
+            } else {
+                await createIntegrationWithDetails(payload).unwrap();
+                showSnackbar('Success', 'Integration saved successfully', 'success', 2000);
+            }
             setTimeout(() => {
                 navigate('/integrations');
             }, 500);
@@ -132,7 +138,7 @@ const ApiStepReview = ({ basicInfo, auth, schema, integrationMethodId, productId
             {/* Buttons */}
             <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
                 <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
-                <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleFinish} disabled={isLoading}>Finish</Button>
+                <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleFinish} disabled={isCreating || isUpdating}>Finish</Button>
             </Box>
         </>
     );

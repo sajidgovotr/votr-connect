@@ -11,12 +11,12 @@ const fileTypes = [
   { value: 'XLSX', label: 'XLSX', icon: <GridOnIcon fontSize="small" /> },
 ];
 
-const SftpStepFileConfig = ({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => void }) => {
-  const [fileType, setFileType] = useState(fileTypes[0].value);
-  const [fileNamePattern, setFileNamePattern] = useState('');
-  const [maxFileSize, setMaxFileSize] = useState(30);
-  const [fileSizeUnit, setFileSizeUnit] = useState('Mb');
-  const [hasHeader, setHasHeader] = useState(true);
+const SftpStepFileConfig = ({ onNext, onBack, initialValues }: { onNext: (data: any) => void; onBack: () => void; initialValues?: any }) => {
+  const [fileType, setFileType] = useState(initialValues?.fileType || fileTypes[0].value);
+  const [fileNamePattern, setFileNamePattern] = useState(initialValues?.fileNamePattern || '');
+  const [maxFileSize, setMaxFileSize] = useState(initialValues?.maxFileSize ?? 30);
+  const [fileSizeUnit, setFileSizeUnit] = useState(initialValues?.fileSizeUnit || 'Mb');
+  const [hasHeader, setHasHeader] = useState(initialValues?.hasHeader ?? true);
 
   const handleNext = () => {
     onNext({ fileType, fileNamePattern, maxFileSize, fileSizeUnit, hasHeader });

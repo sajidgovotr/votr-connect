@@ -149,9 +149,23 @@ const expressIntegrationApi = createApi({
             },
             providesTags: ['Integration'],
         }),
+        updateIntegrationWithDetails: builder.mutation<any, { id: string; data: Partial<CreateIntegrationWithDetailsDto> }>({
+            query: ({ id, data }) => ({
+                url: `/integrations/with-details/${id}`,
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ['Integration'],
+        }),
+        getIntegrationWithDetailsById: builder.query<any, string>({
+            query: (id: string) => ({
+                url: `/integrations/${id}/with-details`,
+                method: 'GET',
+            }),
+        }),
     })
 });
 
-export const { useRestApiIntegrationMutation, useFileUploadIntegrationMutation, useGetAllIntegrationsQuery, useGetUploadedCSVFilesQuery, useGetCSVfileDataQuery, usePullDataFromIntegrationQuery, useGetProductsQuery, useGetIntegrationMethodsQuery, useCreateIntegrationWithDetailsMutation, useGetAllIntegrationsWithDetailsQuery } = expressIntegrationApi;
+export const { useRestApiIntegrationMutation, useFileUploadIntegrationMutation, useGetAllIntegrationsQuery, useGetUploadedCSVFilesQuery, useGetCSVfileDataQuery, usePullDataFromIntegrationQuery, useGetProductsQuery, useGetIntegrationMethodsQuery, useCreateIntegrationWithDetailsMutation, useGetAllIntegrationsWithDetailsQuery, useUpdateIntegrationWithDetailsMutation, useGetIntegrationWithDetailsByIdQuery } = expressIntegrationApi;
 
 export default expressIntegrationApi;
