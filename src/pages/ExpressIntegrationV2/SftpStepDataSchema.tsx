@@ -5,22 +5,22 @@ import DeleteIcon from '@mui/icons-material/Delete';
 const fieldTypes = ['String', 'Number', 'Date'];
 const mappings = ['CUSIP No.', 'Account No.', 'Email', 'First Name', 'Last Name', 'Number of Shares', 'Record Date'];
 
-const SftpStepDataSchema = ({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => void }) => {
-  const [fields, setFields] = useState([
+const SftpStepDataSchema = ({ onNext, onBack, initialValues }: { onNext: (data: any) => void; onBack: () => void; initialValues?: any }) => {
+  const [fields, setFields] = useState<Array<{ mapping: string; fieldName: string; type: string; required: boolean }>>(initialValues?.fields || [
     { mapping: 'CUSIP No.', fieldName: 'CUSIP', type: fieldTypes[0], required: false },
     { mapping: '', fieldName: '', type: '', required: false },
   ]);
 
   const handleFieldChange = (idx: number, key: string, value: any) => {
-    setFields(fields => fields.map((f, i) => i === idx ? { ...f, [key]: value } : f));
+    setFields((fields: Array<{ mapping: string; fieldName: string; type: string; required: boolean }>) => fields.map((f: { mapping: string; fieldName: string; type: string; required: boolean }, i: number) => i === idx ? { ...f, [key]: value } : f));
   };
 
   const handleAddField = () => {
-    setFields([...fields, { mapping: '', fieldName: '', type: fieldTypes[0], required: false }]);
+    setFields((fields: Array<{ mapping: string; fieldName: string; type: string; required: boolean }>) => [...fields, { mapping: '', fieldName: '', type: fieldTypes[0], required: false }]);
   };
 
   const handleDeleteField = (idx: number) => {
-    setFields(fields => fields.filter((_, i) => i !== idx));
+    setFields((fields: Array<{ mapping: string; fieldName: string; type: string; required: boolean }>) => fields.filter((_, i: number) => i !== idx));
   };
 
   const handleNext = () => {
@@ -65,7 +65,7 @@ const SftpStepDataSchema = ({ onNext, onBack }: { onNext: (data: any) => void; o
           </Grid>
           <Grid item xs={6} md={1}></Grid>
         </Grid>
-        {fields.map((field, idx) => (
+        {fields.map((field: { mapping: string; fieldName: string; type: string; required: boolean }, idx: number) => (
           <Grid container spacing={2} alignItems="center" key={idx} mb={1} px={3}>
             <Grid item xs={12} md={3}>
               <TextField

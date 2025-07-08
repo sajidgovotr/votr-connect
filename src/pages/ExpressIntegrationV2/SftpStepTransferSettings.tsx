@@ -3,7 +3,7 @@ import { useState } from 'react';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { useCreateIntegrationWithDetailsMutation } from '@/services/express-integration';
+import { useCreateIntegrationWithDetailsMutation, useUpdateIntegrationWithDetailsMutation } from '@/services/express-integration';
 import useMessage from '@/hooks/useMessage';
 import { EnvironmentEnum } from '@/types/environment';
 import { storageService } from '@/utils/storage';
@@ -19,21 +19,25 @@ interface SftpStepTransferSettingsProps {
   fileConfig: any;
   dataSchema: any;
   integrationMethodId?: string | null;
+  initialValues?: any;
+  editMode?: boolean;
+  integrationId?: string;
 }
 
-const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, integrationMethodId }: SftpStepTransferSettingsProps) => {
+const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, integrationMethodId, initialValues, editMode, integrationId }: SftpStepTransferSettingsProps) => {
   const { productId } = useParams();
   const userDetails = storageService.getUserDetails();
-  const [protocol, setProtocol] = useState(protocols[0]);
-  const [type, setType] = useState(types[0]);
-  const [host, setHost] = useState('');
-  const [port, setPort] = useState('');
-  const [userName, setUserName] = useState('');
-  const [sshKey, setSshKey] = useState('');
-  const [passphrase, setPassphrase] = useState('');
-  const [schedule, setSchedule] = useState(schedules[0]);
-  const [timeOfDay, setTimeOfDay] = useState('');
-  const [createIntegrationWithDetails, { isLoading }] = useCreateIntegrationWithDetailsMutation();
+  const [protocol, setProtocol] = useState(initialValues?.protocol || protocols[0]);
+  const [type, setType] = useState(initialValues?.type || types[0]);
+  const [host, setHost] = useState(initialValues?.host || '');
+  const [port, setPort] = useState(initialValues?.port || '');
+  const [userName, setUserName] = useState(initialValues?.userName || '');
+  const [sshKey, setSshKey] = useState(initialValues?.sshKey || '');
+  const [passphrase, setPassphrase] = useState(initialValues?.passphrase || '');
+  const [schedule, setSchedule] = useState(initialValues?.schedule || schedules[0]);
+  const [timeOfDay, setTimeOfDay] = useState(initialValues?.timeOfDay || '');
+  const [createIntegrationWithDetails, { isLoading: isCreating }] = useCreateIntegrationWithDetailsMutation();
+  const [updateIntegrationWithDetails, { isLoading: isUpdating }] = useUpdateIntegrationWithDetailsMutation();
   const { showSnackbar } = useMessage();
   const navigate = useNavigate();
 
@@ -68,8 +72,13 @@ const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, i
       ],
     };
     try {
-      await createIntegrationWithDetails(payload).unwrap();
-      showSnackbar('Success', 'Integration saved successfully', 'success', 2000);
+      if (editMode && integrationId) {
+        await updateIntegrationWithDetails({ id: integrationId, data: payload }).unwrap();
+        showSnackbar('Success', 'Integration updated successfully', 'success', 2000);
+      } else {
+        await createIntegrationWithDetails(payload).unwrap();
+        showSnackbar('Success', 'Integration saved successfully', 'success', 2000);
+      }
       setTimeout(() => {
         navigate('/integrations');
       }, 500);
@@ -227,7 +236,7 @@ const SftpStepTransferSettings = ({ onBack, basicInfo, fileConfig, dataSchema, i
       </Paper>
       <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
         <Button variant="outlined" sx={{ minWidth: 1 / 2 }} onClick={onBack}>Back</Button>
-        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleSaveAndContinue} disabled={isLoading}>
+        <Button variant="contained" sx={{ minWidth: 1 / 2 }} onClick={handleSaveAndContinue} disabled={isCreating || isUpdating}>
           Save & Continue
         </Button>
       </Box>

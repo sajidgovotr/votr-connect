@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SrmHeaderBanner from './SrmHeaderBanner';
 import StepBar from './StepBar';
 import SftpStepBasicInfo from './SftpStepBasicInfo';
@@ -19,13 +19,23 @@ interface SftpIntegrationStepperProps {
   integrationMethodId?: string | null;
   primaryHeading: string;
   primarySubheading: string;
+  initialValues?: any;
+  editMode?: boolean;
 }
 
-const SftpIntegrationStepper = ({ onBackToMethods, integrationMethodId, primaryHeading, primarySubheading }: SftpIntegrationStepperProps) => {
+const SftpIntegrationStepper = ({ onBackToMethods, integrationMethodId, primaryHeading, primarySubheading, initialValues, editMode }: SftpIntegrationStepperProps) => {
   const [activeStep, setActiveStep] = useState(0);
   const [basicInfo, setBasicInfo] = useState<any>(null);
   const [fileConfig, setFileConfig] = useState<any>(null);
   const [dataSchema, setDataSchema] = useState<any>(null);
+
+  useEffect(() => {
+    if (editMode && initialValues) {
+      setBasicInfo(initialValues.basicInfo || initialValues || null);
+      setFileConfig(initialValues.fileConfig || initialValues || null);
+      setDataSchema(initialValues.dataSchema || null);
+    }
+  }, [editMode, initialValues]);
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
@@ -46,10 +56,10 @@ const SftpIntegrationStepper = ({ onBackToMethods, integrationMethodId, primaryH
       <StepBar steps={steps} activeStep={activeStep} />
       {/* 4. Step Content */}
       <Box mt={4}>
-        {activeStep === 0 && <SftpStepBasicInfo onNext={(data: any) => { setBasicInfo(data); handleNext(); }} onBack={handleBackToMethods} />}
-        {activeStep === 1 && <SftpStepFileConfig onNext={(data: any) => { setFileConfig(data); handleNext(); }} onBack={handleBack} />}
-        {activeStep === 2 && <SftpStepDataSchema onNext={(data: any) => { setDataSchema(data); handleNext(); }} onBack={handleBack} />}
-        {activeStep === 3 && <SftpStepTransferSettings onBack={handleBack} basicInfo={basicInfo} fileConfig={fileConfig} dataSchema={dataSchema} integrationMethodId={integrationMethodId} />}
+        {activeStep === 0 && <SftpStepBasicInfo onNext={(data: any) => { setBasicInfo(data); handleNext(); }} onBack={handleBackToMethods} initialValues={initialValues?.basicInfo} />}
+        {activeStep === 1 && <SftpStepFileConfig onNext={(data: any) => { setFileConfig(data); handleNext(); }} onBack={handleBack} initialValues={fileConfig} />}
+        {activeStep === 2 && <SftpStepDataSchema onNext={(data: any) => { setDataSchema(data); handleNext(); }} onBack={handleBack} initialValues={dataSchema} />}
+        {activeStep === 3 && <SftpStepTransferSettings onBack={handleBack} basicInfo={basicInfo} fileConfig={fileConfig} dataSchema={dataSchema} integrationMethodId={integrationMethodId} initialValues={initialValues?.transferSettings} editMode={editMode} integrationId={initialValues?.id} />}
       </Box>
     </Box>
   );

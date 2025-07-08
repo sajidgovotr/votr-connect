@@ -6,6 +6,9 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { useGetAllIntegrationsWithDetailsQuery, usePullDataFromIntegrationQuery } from "@/services/express-integration";
 import { useMemo, useState, useEffect } from "react";
 import IntegrationDetails from "@/components/Modal/IntegrationDetails";
+import { useNavigate } from 'react-router';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
 
 const Integrations = () => {
     const [pullingDataId, setPullingDataId] = useState<string | null>(null);
@@ -25,6 +28,7 @@ const Integrations = () => {
     const [selectedType, setSelectedType] = useState<string>('all');
     const [search, setSearch] = useState<string>('');
     const [selectedIntegration, setSelectedIntegration] = useState<any>(null);
+    const navigate = useNavigate();
 
     const integrations = integrationsResponse?.data || [];
 
@@ -105,31 +109,29 @@ const Integrations = () => {
                         <CustomButton
                             variant="text"
                             size="small"
-                            onClick={() => setSelectedIntegration(data)}
-                            title="View Details"
-                            sx={{ p: 2 }}
+                            onClick={() => {
+                                const productId = data?.product?.id;
+                                if (productId) {
+                                    navigate(`/express-integration/${productId}/integration-methods?integrationId=${data.id}`);
+                                }
+                            }}
+                            aria-label="Edit"
+                            sx={{ py: 1 }}
+                            icon={<EditIcon fontSize="small" />}
                         />
-                        {/* {
-                            data?.integrationMethod?.code === 'file-upload' && (
-                                <Tooltip title="Start pulling data from the integration on the server">
-                                    <CustomButton
-                                        variant="text"
-                                        size="small"
-                                        title="Pull Data"
-                                        sx={{ p: 2 }}
-                                        loading={isPullingData && pullingDataId === data?.id}
-                                        onClick={() => {
-                                            setPullingDataId(data?.id);
-                                        }}
-                                    />
-                                </Tooltip>
-                            )
-                        } */}
+                        <CustomButton
+                            variant="text"
+                            size="small"
+                            onClick={() => setSelectedIntegration(data)}
+                            aria-label="View Details"
+                            sx={{ py: 1 }}
+                            icon={<VisibilityIcon fontSize="small" />}
+                        />
                     </Stack>
                 )
             }
         },
-    ], [isPullingData, pullingDataId]);
+    ], [isPullingData, pullingDataId, navigate]);
 
     const filterByType = (integration: any) => {
         if (selectedType === 'all') return true;
